@@ -1,0 +1,28 @@
+{
+  "name": "maximw/pieceofscript",
+  "description": "PieceofScript - simple language for HTTP JSON API testing scenarios",
+  "license": "MIT",
+  "preferred-install": "dist",
+  "repositories": [
+      {
+          "type": "vcs",
+          "url":  "git@github.com:maximw/yaml.git"
+      }
+  ],
+  "require": {
+    "php": "^7.1",
+    "ext-curl": "*",
+    "symfony/console": "~3.4",
+    "symfony/yaml": "dev-dev-pos",
+    "myclabs/deep-copy": "~1.8",
+    "guzzlehttp/guzzle": "~6.0",
+    "fzaninotto/faker": "~1.8"
+  },
+  "autoload": {
+    "psr-0": {
+      "PieceofScript": "src/"
+    }
+  },
+  "classmap": ["src"]
+
+}

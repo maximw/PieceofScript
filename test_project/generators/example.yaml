@@ -1,0 +1,15 @@
+User:
+  body:
+    login: "fff rep"
+    name: "good"
+    tags:
+      - "tag1"
+      - "tag2"
+
+
+BadUser($user):
+  body: $user
+  replace:
+    name: "bad"
+    pregnancy:
+      date: null

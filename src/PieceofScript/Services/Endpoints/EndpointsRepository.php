@@ -1,0 +1,203 @@
+<?php
+
+
+namespace PieceofScript\Services\Endpoints;
+
+
+use PieceofScript\Services\Config\Config;
+use PieceofScript\Services\Errors\Endpoints\EndpointDefinitionException;
+use Symfony\Component\Yaml\Yaml;
+use PieceofScript\Services\Utils\Utils;
+use PieceofScript\Services\Values\VariableName;
+
+class EndpointsRepository
+{
+    const ARGUMENT_PLACEHOLDER = 'f132d59f3587463b99e3262a8b5a7975'; //random v4 UUID
+    const DIRECTORY = 'endpoints';
+    const ROOT_FILE = 'endpoints.yaml';
+
+    /** @var Endpoint[] */
+    protected $endpoints = [];
+
+    protected $files = [];
+
+    public function __construct()
+    {
+        $rootFile = Config::get()->getEndpointsFile();
+        $directory = Config::get()->getEndpointsDir();
+        if (is_readable($rootFile)) {
+            $this->files[] = $rootFile;
+        }
+        $this->files = array_merge($this->files, Utils::fileSearchInDir($directory, '*.yaml', true));
+        $this->initEndpoints();
+    }
+
+    protected function initEndpoints()
+    {
+        foreach ($this->files as $file) {
+            $yaml = Yaml::parseFile($file);
+
+            foreach ($yaml as $endpointName => $endpointBody) {
+                $this->createEndpoint($endpointName, $endpointBody, $file);
+            }
+        }
+    }
+
+    /**
+     * @param string $endpointName
+     * @param array $endpointBody
+     * @param string $fileName
+     * @throws EndpointDefinitionException
+     */
+    protected function createEndpoint(string $endpointName, array $endpointBody, string $fileName)
+    {
+        $normalizedName = $this->normalizeName($endpointName);
+
+        if ($this->get($normalizedName) instanceof Endpoint) {
+            throw new EndpointDefinitionException('Error: Duplicate endpoint name.', $endpointName, $fileName);
+        }
+
+        if (empty($endpointBody)) {
+            throw new EndpointDefinitionException('Error: empty endpoint body.', $endpointName, $fileName);
+        }
+
+        if (empty($endpointBody['method'])) {
+            throw new EndpointDefinitionException('HTTP method is required.', $endpointName, $fileName);
+        }
+        $method = trim(strtoupper($endpointBody['method']));
+
+        if (empty($endpointBody['url'])) {
+            throw new EndpointDefinitionException('URL is required.', $endpointName, $fileName);
+        }
+        $url = trim($endpointBody['url']);
+
+        if (isset($endpointBody['format'])) {
+            $endpointBody['format'] = trim(strtolower($endpointBody['format']));
+            if (!in_array($endpointBody['format'], Endpoint::FORMATS)) {
+                throw new EndpointDefinitionException('Unknown format "' . $endpointBody['format'] . '.', $endpointName, $fileName);
+            }
+        }
+
+        $headers = $endpointBody['headers'] ?? [];
+        $cookies = $endpointBody['cookies'] ?? [];
+        $auth = $endpointBody['auth'] ?? [];
+        $query = $endpointBody['query'] ?? [];
+        $format = $endpointBody['format'] ?? Endpoint::FORMAT_NONE;
+        $data = $endpointBody['data'] ?? [];
+        $before = $endpointBody['before'] ?? [];
+        $after = $endpointBody['after'] ?? [];
+
+        if (is_string($before)) {
+            $before = explode(PHP_EOL, $before);
+        }
+        if (is_string($after)) {
+            $after = explode(PHP_EOL, $after);
+        }
+
+        $arguments = $this->extractArguments($endpointName);
+
+        $this->endpoints[$normalizedName] = new Endpoint($normalizedName, $fileName);
+        $this->endpoints[$normalizedName]
+            ->setOriginalName($endpointName)
+            ->setArguments($arguments)
+            ->setHttpMethod($method)
+            ->setUrl($url)
+            ->setHeaders($headers)
+            ->setCookies($cookies)
+            ->setAuth($auth)
+            ->setQuery($query)
+            ->setFormat($format)
+            ->setData($data)
+            ->setBefore($before)
+            ->setAfter($after);
+    }
+
+    /**
+     * Returns Endpoint wrapped by EndpointCall with given parameters when it is called
+     *
+     * @param string $endpointCallExpression
+     * @return EndpointCall
+     * @throws \Exception
+     */
+    public function getByCall(string $endpointCallExpression): EndpointCall
+    {
+        foreach ($this->endpoints as $endpointName => $endpoint) {
+            $parameters = $this->match($endpointCallExpression, $endpointName);
+            if (false !== $parameters) {
+                $endpointCall = new EndpointCall($endpoint, $parameters);
+                return $endpointCall;
+            }
+        }
+
+        throw new \Exception('Endpoint not found ' . $endpointCallExpression);
+    }
+
+    protected function get(string $normalizedName)
+    {
+        return $this->endpoints[$normalizedName] ?? null;
+    }
+
+    /**
+     * Normalize Endpoints's name
+     *
+     * @param string $endpointName
+     * @return string
+     * @throws \Exception
+     */
+    protected function normalizeName(string $endpointName): string
+    {
+        if (strpos($endpointName, self::ARGUMENT_PLACEHOLDER) !== false) {
+            throw new \Exception(self::ARGUMENT_PLACEHOLDER.' is not allowed in endpoint definition');
+        }
+        $endpointName = trim($endpointName);
+        $endpointName = preg_replace('/\s\s+/i', ' ', $endpointName);
+        $endpointName = preg_replace('/\s*(\$[a-z][a-z0-9_]*)\s*/i', self::ARGUMENT_PLACEHOLDER, $endpointName);
+        $endpointName = strtolower($endpointName);
+        return $endpointName;
+    }
+
+    /**
+     * Returns arguments names from Endpoint name
+     *
+     * @param string $endpointName
+     * @return array
+     * @throws \Exception
+     */
+    protected function extractArguments(string $endpointName): array
+    {
+        if (strpos($endpointName, self::ARGUMENT_PLACEHOLDER) !== false) {
+            throw new \Exception(self::ARGUMENT_PLACEHOLDER.' is not allowed in endpoint definition');
+        }
+        $endpointName = trim($endpointName);
+        $endpointName = preg_replace('/\s\s+/i', ' ', $endpointName);
+        preg_match_all('/\s*(\$[a-z][a-z0-9_]*)\s*/i', $endpointName, $matches);
+
+        $arguments = $matches[1] ?? [];
+        foreach ($arguments as &$argument) {
+            $argument = new VariableName($argument);
+        }
+
+        return $arguments;
+    }
+
+    /**
+     * Match Endpoint's call string and given Endpoint name
+     * Returns parameters expressions or false if not matched
+     *
+     * @param string $endpointCallExpression
+     * @param string $endpointName
+     * @return bool|array
+     */
+    protected function match(string $endpointCallExpression, string $endpointName)
+    {
+        $regexp = str_replace(self::ARGUMENT_PLACEHOLDER, '\s+(\$.+)\s*', preg_quote($endpointName));
+        $regexp = '/^' . str_replace(' ', '\s+', $regexp) . '$/i';
+        $flag = preg_match($regexp, $endpointCallExpression, $matches);
+
+        if (!$flag) {
+            return false;
+        }
+        array_shift($matches);
+        return $matches;
+    }
+}

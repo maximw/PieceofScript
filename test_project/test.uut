@@ -1,0 +1,69 @@
+//require ./globals.txt
+//include ./globals_dev.txt
+
+Testcase Create comment $bad
+	var $user = User() //Сгенерировать юзера
+	var $count = 5
+    let $bad = BadUser($user)
+let $b = Faker\imageFile()
+let $a = array(1,2,3,4,5);
+var $key = 4;
+foreach $a; $key; $val
+    let $val = $val * 2
+    if $val == 5
+    print $key; ":"; $val;
+print "val=";$val;
+run Create comment $key
+cancel
+let $a.test[-(-7 + 2) + +7].bar[22] = 3 // dlkf;dkl;lkdf;lkd;lfk;dlkf
+print "$a="; $a
+cancel
+//print 2^(3+2)*5 + size(array(1)) + size(array(size(array(5,7))*2+3*2, 4))
+//finish
+//let $a=@b//size(array(1)) + size(array(size(array(5,7))*2+3*2, 4))
+let $a[0] = -7+2
+let $a[1] = 2
+let $a[5] = 5
+//let $a["sum"][$a.1+1] = $a.0 + $a.1
+print !$a
+finish
+
+Test
+let $a = User()
+let $b = null
+let $i = 2
+run Create comment $b
+import $a
+print $i
+finish
+
+let      $a = 3
+let      ($a = 5) && @b
+print    $a
+print $b && false
+finish
+
+let $i = 0
+while $i <= 5
+    print $i
+    let $j = 0
+    if $i > 3
+        while $j < $i
+            print "-"
+            let $j = $j + 1
+    let $i = $i + 1
+
+run Create comment $i
+print "---" + $i
+print $i
+finish
+let $c = repeat(char("a", "z"), 5)
+//let $a.0 = 7
+//let $a.1 = 2
+//let $a.sum = $a.0 + $a.1
+//let $b = User()
+print $c
+//print $b
+	
+	
+	

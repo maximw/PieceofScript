@@ -1,0 +1,22 @@
+{
+    "banner": [
+        "This file is part of the PieceofScript project.",
+        "",
+        "(c) Maxim Naguchev <me@maximw.com>",
+        "",
+        "This source file is subject to the MIT license that is bundled",
+        "with this source code in the file LICENSE."
+    ],
+
+    "main": "run.php",
+	"output": "pos.phar",
+    "chmod": "0750",
+	"directories": [
+		"src",
+		"vendor"
+		],
+	"check-requirements": true,
+	"compression": "GZ"
+	
+	
+}

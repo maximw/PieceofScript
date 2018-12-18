@@ -1,0 +1,36 @@
+Стандартные генераторы
+Integer(0, 12)
+Bool
+Null
+Char(a-z,а-я)
+CharCode(0, 256)
+Date(date1, date2)
+Repeat(value, count)
+Array(value, count)
+
+Стандартные обработчики
+
+
+
+BoolOrNull:
+	@Bool 2 | @Null 1
+	
+	
+	
+	
+User:
+	login: @repeat(@char, @Integer(5, 5))
+	name: @repeat(@char, @Integer(5, 5)) @repeat(@char @Integer(5, 5))
+	children: @array(@child, @Integer(5, 5))
+	tags: 
+		- @repeat(@char, @Integer(5, 5))
+		- tag1
+		- tag2
+	pregnancy_settings: 
+		date: test 123123 @Generate(23)
+		day: @Integer(1, 31)
+		week: @Integer(1, 42)
+		
+		
+PregnancySettings:
+	
