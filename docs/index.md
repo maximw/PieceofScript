@@ -5,12 +5,17 @@ of HTTP JSON API.
 
 <ol>
  <li><a>Installation</a>
+ <li>Internal functions
+    <ul>
+    <li><a href="functions_common">Common</a>
+    <li><a href="functions_faker">Faker</a>
+    </ul>
  <li>Types
-    <ol>
-    <li> Type Array
-    <li> Type Boolean
-    <li> Type Date
-    <li> Type Null
-    <li> Type Number
-    <li> Type String
-    </ol>
+    <ul>
+    <li><a href="type_array.html">Array</a>
+    <li><a href="type_boolean.html">Boolean</a>
+    <li><a href="type_date.html">Date</a>
+    <li><a href="type_null.html">Null</a>
+    <li><a href="type_number.html">Number</a>
+    <li><a href="type_string.html">String</a>
+    </ul>

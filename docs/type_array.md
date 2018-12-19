@@ -1,16 +1,17 @@
-## Arrays
+# Arrays
 
-Arrays are very similar to [PHP Arrays](http://php.net/manual/en/language.types.array.php)
+Arrays are very similar to <a href="http://php.net/manual/en/language.types.array.php">PHP Arrays</a>
+and internally based on them.
 
-In case of non-negative integer or _/[a-z][a-z0-9\_]*/i_-string keys, dot-notation can be used to access array element:
+In case of non-negative integer or `/[a-z][a-z0-9\_]*/i`-string keys, dot-notation can be used to access array elements:
 `$array.element.10`
 
-Also the _array[key]_ syntax and mixed is possible.
+Also the array[key] syntax and mixed are possible.
 
 `$array.0.["element name"][$i + 1].one_more_key`
 
-***
-#### Conversion to other types, unary operations, using as a key to access array element
+
+### Conversion to other types, unary operations, using as a key to access array element
 
 Type | Description
 --- | ---
@@ -22,9 +23,10 @@ Type | Description
  Date | Error
  ! | If empty array True, else False
 As array key | Error
-***
-#### Operations with other types
-<code>\<Array\>**op1** **\<operation\>** \<type\>**op2**</code>
+
+
+### Operations with other types
+`<Array>op1 <operation> <type>op2`
 
 operation\type | String | Number | Boolean | Array | Null | Date
 --- | --- | --- | --- | --- | --- | --- 
