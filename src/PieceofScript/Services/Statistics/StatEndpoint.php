@@ -4,17 +4,16 @@
 namespace PieceofScript\Services\Statistics;
 
 
-class StatTestCase
+use PieceofScript\Services\Endpoints\Endpoint;
+
+class StatEndpoint
 {
-    protected $name;
+    /** @var Endpoint */
+    protected $endpoint;
 
-    protected $file;
 
-    protected $startDate;
+    protected $calls;
 
-    protected $endDate;
-
-    protected $assertions;
 
     public function __construct($name, $file)
     {

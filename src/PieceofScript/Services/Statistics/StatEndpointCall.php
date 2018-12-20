@@ -4,22 +4,33 @@
 namespace PieceofScript\Services\Statistics;
 
 
-class StatTestCase
-{
-    protected $name;
 
+class StatEndpointCall
+{
     protected $file;
+
+    protected $line;
 
     protected $startDate;
 
     protected $endDate;
 
+    /** @var array */
+    protected $request;
+
+    /** @var array */
+    protected $response;
+
+    /** @var StatAssertion[] */
     protected $assertions;
 
-    public function __construct($name, $file)
+    public function __construct(
+        string $file,
+        string $line
+    )
     {
-        $this->name = $name;
         $this->file = $file;
+        $this->line = $line;
         $this->startDate = microtime(true);
     }
 
@@ -28,7 +39,7 @@ class StatTestCase
         $this->endDate = microtime(true);
     }
 
-    public function addAssertion($code, $file, $success): self
+    public function addAssertion(string $code, string $file, int $line, bool $success): self
     {
         $assertion = new StatAssertion($code);
         $this->assertions[] = $assertion;

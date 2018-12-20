@@ -21,30 +21,21 @@ class StatAssertion
     /** @var string */
     protected $line;
 
-    /** @var string */
+    /** @var bool */
     protected $status;
 
-    /** @var array */
-    protected $request;
-
-    /** @var array */
-    protected $response;
 
     public function __construct(
         string $code,
         string $file,
         int $line,
-        string $status,
-        array $request,
-        array $response
+        bool $status
     )
     {
         $this->code = $code;
         $this->file = $file;
         $this->line = $line;
         $this->status = $status;
-        $this->request = $request;
-        $this->response = $response;
     }
 
 }

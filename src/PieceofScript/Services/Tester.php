@@ -166,7 +166,7 @@ class Tester
 
             if ($operator === self::OPERATOR_TESTCASE) {
 
-                $testcase = $this->testcases->add($expression, $this->contextStack->head()->file, $this->contextStack->head()->line);
+                $testcase = $this->testcases->add($expression, $this->contextStack->head()->getFile(), $this->contextStack->head()->getLine());
                 $flag = true;
                 while ($flag) {
                     $lineNumber = $lineNumber + 1;

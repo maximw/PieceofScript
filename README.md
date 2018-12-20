@@ -2,7 +2,7 @@
 
 Simple language for automated testing scenarios of HTTP JSON API. 
 
-Example for imagined social network API
+Example scenario for imagined social network API
 ```
 require ./globals.pos // Contains some global variables, i.e. $domain 
 include ./globals_dev.pos // Redefine global variables, if file exists
@@ -22,14 +22,14 @@ Add $banned to blacklist of $author //Call API endpoint, $banned user cannot see
 
 Create post $post by $author // Call API endpoint for creating post
 must $response.code == 201 // Check post is created
-assert $response.body.post.content == $post.content // ... and check post content does not changed 
+assert $response.body.post.content == $post.content // ... and check post content is not changed 
 var $postId = $response.body.post.id // Remember post Id 
 
-Read post $postId by $author // Call API endpoint of reading post by given User
+Read post $postId by $author // Call API endpoint of reading post by given user
 must $response.code == 200
 assert $response.body.post.content == $post.content
 
-Read post $postId by $reader // now other user read post
+Read post $postId by $reader // now other user reads post
 must $response.code == 200
 assert $response.body.post.content == $post.content
 

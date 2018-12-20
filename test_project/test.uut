@@ -2,9 +2,9 @@
 //include ./globals_dev.txt
 
 Testcase Create comment $bad
-	var $user = User() //Сгенерировать юзера
+	//var $user = User() //Сгенерировать юзера
 	var $count = 5
-    let $bad = BadUser($user)
+    //let $bad = BadUser($user)
 let $b = Faker\imageFile()
 let $a = array(1,2,3,4,5);
 var $key = 4;

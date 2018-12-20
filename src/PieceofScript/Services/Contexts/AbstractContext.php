@@ -21,21 +21,21 @@ abstract class AbstractContext
      *
      * @var string
      */
-    public $name = '';
+    protected $name = '';
 
     /**
      * Current executing file
      *
      * @var string
      */
-    public $file = '';
+    protected $file = '';
 
     /**
      * Current executing line
      *
      * @var int
      */
-    public $line;
+    protected $line;
 
 
     /** @var VariablesRepository */
