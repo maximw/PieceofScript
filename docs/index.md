@@ -6,6 +6,7 @@ of HTTP JSON API.
 <ol>
  <li><a>Installation</a>
  <li><a href="project.html">Testing project sctucture</a></li>
+ <li><a href="scenario.html">Scenaries</a></li>
  <li><a href="endpoints.html">API endpoints</a></li> 
  <li><a href="generators.html">Generators - data models</a></li> 
  <li><a href="testcases.html">Test cases</a></li> 
@@ -13,6 +14,7 @@ of HTTP JSON API.
     <ul>
     <li><a href="functions_common.html">Common</a></li>
     <li><a href="functions_faker.html">Faker</a></li>
+    <li><a href="functions_jwt.html">JWT</a></li>
     </ul>
  </li>   
  <li><a href="variables.html">Variables and Contexts</a></li> 
