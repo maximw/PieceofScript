@@ -1,12 +1,12 @@
 Dates is wrapped PHP [DateTime](http://php.net/manual/en/class.datetime.php).
 
-Date constants is strings in single quotes in one of [available formats](http://php.net/manual/en/datetime.formats.php).
+Date constants is strings in single quotes in one of <a href="http://php.net/manual/en/datetime.formats.php">available formats</a>.
 
 I.e. _'now', '2008-08-07 18:11:31', 'last day of next month'_
 
 Date have some options on configuration:
 
-default_timezone - default [timezone name](http://php.net/manual/en/timezones.php)
+default_timezone - default <a href="http://php.net/manual/en/timezones.php">timezone name</a>
 
 date_format_string - default format of Date when it is converted to String
 
@@ -27,7 +27,7 @@ Type | Description
 As array key | According to date_format_key in config
 
 #### Operations with other types
-<code>\<Date\>**op1** **\<operation\>** \<type\>**op2**</code>
+<code>\<Date\>op1 \<operation\> \<type\>op2</code>
 
 operation\type | String | Number | Boolean | Array | Null | Date
 --- | --- | --- | --- | --- | --- | --- 

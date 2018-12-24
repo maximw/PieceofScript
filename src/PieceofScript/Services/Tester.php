@@ -396,15 +396,20 @@ class Tester
         $this->contextStack->neck()->setVariable($requestVarName, $request);
         $this->contextStack->neck()->setVariable($responseVarName, new NullLiteral());
 
+        $this->statistics->addCall($endpointCall, $this->contextStack, $request, new NullLiteral());
+
         // Execute "before" section
         $this->executeLines($endpointCall->getEndpoint()->getBefore(), $endpointCall->getEndpoint()->getFile(), 0);
 
         $request = $this->contextStack->head()->getVariable($requestVarName);
 
+        $this->statistics->setRequest($request);
+
         $response = HttpClient::doRequest($request);
 
         $this->contextStack->head()->setVariable($responseVarName, $response);
         $this->contextStack->neck()->setVariable($responseVarName, $response);
+        $this->statistics->setResponse($response);
 
         // Execute "after" section
         $this->executeLines($endpointCall->getEndpoint()->getAfter(), $endpointCall->getEndpoint()->getFile(), 0);
@@ -563,6 +568,8 @@ class Tester
             Out::printWarning('Too many parameters given to ' . $testcaseCall->testcase->name, $this->contextStack);
         }
 
+        $this->statistics->endCurrentCall();
+
         // Get all references
         $references = [];
         foreach ($testcaseCall->parameters as $parameter) {
@@ -582,6 +589,10 @@ class Tester
             $testcaseCall->testcase->lineNumber
         );
         $this->contextStack->push($context);
+        $requestVarName = new VariableName('$request');
+        $responseVarName = new VariableName('$response');
+        $this->contextStack->head()->setVariable($requestVarName, new NullLiteral());
+        $this->contextStack->head()->setVariable($responseVarName, new NullLiteral());
 
         // Set all references
         for ($i = 0; $i < $argumentsCount; $i++) {

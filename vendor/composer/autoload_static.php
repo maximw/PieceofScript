@@ -30,6 +30,10 @@ class ComposerStaticInit91eaee20e052e99e31394a8192f40f91
             'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
         ),
+        'L' => 
+        array (
+            'Lcobucci\\JWT\\' => 13,
+        ),
         'G' => 
         array (
             'GuzzleHttp\\Psr7\\' => 16,
@@ -74,6 +78,10 @@ class ComposerStaticInit91eaee20e052e99e31394a8192f40f91
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
+        ),
+        'Lcobucci\\JWT\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/lcobucci/jwt/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (

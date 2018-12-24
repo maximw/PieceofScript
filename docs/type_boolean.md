@@ -16,7 +16,7 @@ As array key | Error
 
 ***
 #### Operations with other types
-<code>\<Boolean\>**op1** **\<operation\>** \<type\>**op2**</code>
+<code><Boolean>**op1** **\<operation\>** \<type\>**op2**</code>
 
 operation\type | String | Number | Boolean | Array | Null | Date
 --- | --- | --- | --- | --- | --- | --- 

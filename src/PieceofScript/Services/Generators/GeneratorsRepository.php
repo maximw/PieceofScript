@@ -6,6 +6,7 @@ namespace PieceofScript\Services\Generators;
 
 use PieceofScript\Services\Generators\Generators\FakerProvider;
 use PieceofScript\Services\Generators\Generators\InternalProvider;
+use PieceofScript\Services\Generators\Generators\JwtProvider;
 use Symfony\Component\Yaml\Yaml;
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Generators\Generators\BaseGenerator;
@@ -24,6 +25,9 @@ class GeneratorsRepository
     /** @var IGenerator[] */
     protected $generators = [];
 
+    /** @var IGeneratorProvider[]  */
+    protected $providers = [];
+
     protected $files = [];
 
     public function __construct()
@@ -34,6 +38,13 @@ class GeneratorsRepository
             $this->files[] = $rootFile;
         }
         $this->files = array_merge($this->files, Utils::fileSearchInDir($directory, '*.yaml', true));
+
+        $this->providers = [
+            new InternalProvider(),
+            new FakerProvider(),
+            new JwtProvider(),
+        ];
+
         $this->initGenerators();
     }
 
@@ -42,7 +53,7 @@ class GeneratorsRepository
      */
     protected function initGenerators()
     {
-        $this->initDefaultGenerators();
+        $this->initProviders();
         $this->initYamlGenerators();
 
     }
@@ -115,20 +126,19 @@ class GeneratorsRepository
         $this->generators[$id] = $generator;
     }
 
-    protected function initDefaultGenerators()
+    protected function initProviders()
     {
-        $provider = new InternalProvider();
+        foreach ($this->providers as $provider) {
+            $this->initProviderGenerators($provider);
+        }
+    }
+
+    protected function initProviderGenerators(IGeneratorProvider $provider)
+    {
         $generators = $provider->getGenerators();
         foreach ($generators as $generator) {
             $this->addInternalGenerator($generator);
         }
-
-        $provider = new FakerProvider();
-        $generators = $provider->getGenerators();
-        foreach ($generators as $generator) {
-            $this->addInternalGenerator($generator);
-        }
-
     }
 
     protected function addInternalGenerator(InternalGenerator $generator)

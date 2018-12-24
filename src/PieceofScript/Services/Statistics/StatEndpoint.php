@@ -11,27 +11,16 @@ class StatEndpoint
     /** @var Endpoint */
     protected $endpoint;
 
+    protected $calls = [];
 
-    protected $calls;
-
-
-    public function __construct($name, $file)
+    public function __construct(Endpoint $endpoint)
     {
-        $this->name = $name;
-        $this->file = $file;
-        $this->startDate = microtime(true);
+        $this->endpoint = $endpoint;
     }
 
-    public function end()
+    public function addCall(StatEndpointCall $statEndpointCall)
     {
-        $this->endDate = microtime(true);
-    }
-
-    public function addAssertion($code, $file, $success): self
-    {
-        $assertion = new StatAssertion($code);
-        $this->assertions[] = $assertion;
-        return $this;
+        $this->calls[] = $statEndpointCall;
     }
 
 }

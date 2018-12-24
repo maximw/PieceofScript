@@ -14,7 +14,7 @@ class FakerCountry extends FakerGenerator
 
     public function run(...$arguments): BaseLiteral
     {
-        return new StringLiteral($this->faker->country());
+        return new StringLiteral($this->faker->country);
     }
 
 }
