@@ -64,20 +64,13 @@ class EndpointsRepository
         if (empty($endpointBody['method'])) {
             throw new EndpointDefinitionException('HTTP method is required.', $endpointName, $fileName);
         }
-        $method = trim(strtoupper($endpointBody['method']));
 
         if (empty($endpointBody['url'])) {
             throw new EndpointDefinitionException('URL is required.', $endpointName, $fileName);
         }
-        $url = trim($endpointBody['url']);
 
-        if (isset($endpointBody['format'])) {
-            $endpointBody['format'] = trim(strtolower($endpointBody['format']));
-            if (!in_array($endpointBody['format'], Endpoint::FORMATS)) {
-                throw new EndpointDefinitionException('Unknown format "' . $endpointBody['format'] . '.', $endpointName, $fileName);
-            }
-        }
-
+        $method = $endpointBody['method'];
+        $url = $endpointBody['url'];
         $headers = $endpointBody['headers'] ?? [];
         $cookies = $endpointBody['cookies'] ?? [];
         $auth = $endpointBody['auth'] ?? [];

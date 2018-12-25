@@ -303,10 +303,7 @@ class Endpoint
      */
     public function setFormat($format): Endpoint
     {
-        $this->format = strtolower($format);
-        if (!in_array($this->format, self::FORMATS)) {
-            throw new \Exception('Unknown Enpdoint data format ' . $format);
-        }
+        $this->format = $format;
         return $this;
     }
 

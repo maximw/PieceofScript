@@ -127,13 +127,14 @@ class Tester
     /**
      *  Execute file
      *
-     * @param $fileName
+     * @param string $fileName
+     * @param string|null $relativeDir
      * @throws Errors\ContextStackEmptyException
      * @throws Errors\TestcaseExistsException
      * @throws Errors\TestcaseNotFoundException
      * @throws Errors\FileNotFoundError
      */
-    protected function executeFile($fileName)
+    protected function executeFile(string $fileName)
     {
         $lines = $this->files->read($fileName);
         $this->executeLines($lines, $fileName, 0);

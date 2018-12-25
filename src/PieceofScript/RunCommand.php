@@ -30,12 +30,12 @@ class RunCommand extends Command
     {
         try {
             Out::setOutput($output);
-            Config::loadFromFile($input->getOption('config'));
             $startFile = realpath($input->getArgument('scenario'));
             if (!file_exists($startFile) || !is_readable($startFile)) {
                 throw new InternalError('File is not readable ' . $input->getArgument('scenario'));
             }
-
+            chdir(dirname($startFile));
+            Config::loadFromFile($input->getOption('config'));
             $tester = new Tester($startFile, $output);
             return $tester->run();
         } catch (InternalError $e) {
