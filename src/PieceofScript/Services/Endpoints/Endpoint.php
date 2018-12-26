@@ -217,25 +217,25 @@ class Endpoint
     }
 
     /**
-     * @return array
+     * @return string|string[]
      */
-    public function getHeaders(): array
+    public function getHeaders()
     {
         return $this->headers;
     }
 
     /**
-     * @param array $headers
+     * @param string|string[] $headers
      * @return Endpoint
      */
-    public function setHeaders(array $headers): Endpoint
+    public function setHeaders($headers): Endpoint
     {
         $this->headers = $headers;
         return $this;
     }
 
     /**
-     * @return array
+     * @return string|string[]
      */
     public function getCookies(): array
     {
@@ -243,46 +243,46 @@ class Endpoint
     }
 
     /**
-     * @param array $cookies
+     * @param string|string[] $cookies
      * @return Endpoint
      */
-    public function setCookies(array $cookies): Endpoint
+    public function setCookies($cookies): Endpoint
     {
         $this->cookies = $cookies;
         return $this;
     }
 
     /**
-     * @return array
+     * @return string|string[]
      */
-    public function getAuth(): array
+    public function getAuth()
     {
         return $this->auth;
     }
 
     /**
-     * @param array $auth
+     * @param string|string[] $auth
      * @return Endpoint
      */
-    public function setAuth(array $auth): Endpoint
+    public function setAuth($auth): Endpoint
     {
         $this->auth = $auth;
         return $this;
     }
 
     /**
-     * @return array
+     * @return string|string[]
      */
-    public function getQuery(): array
+    public function getQuery()
     {
         return $this->query;
     }
 
     /**
-     * @param array $query
+     * @param string|string[] $query
      * @return Endpoint
      */
-    public function setQuery(array $query): Endpoint
+    public function setQuery($query): Endpoint
     {
         $this->query = $query;
         return $this;
@@ -326,7 +326,7 @@ class Endpoint
     }
 
     /**
-     * @return string[]
+     * @return string|string[]
      */
     public function getBefore(): array
     {
@@ -334,17 +334,17 @@ class Endpoint
     }
 
     /**
-     * @param string[] $before
+     * @param string|string[] $before
      * @return Endpoint
      */
-    public function setBefore(array $before): Endpoint
+    public function setBefore($before): Endpoint
     {
         $this->before = $before;
         return $this;
     }
 
     /**
-     * @return string[]
+     * @return string|string[]
      */
     public function getAfter(): array
     {
@@ -352,10 +352,10 @@ class Endpoint
     }
 
     /**
-     * @param string[] $after
+     * @param string|string[] $after
      * @return Endpoint
      */
-    public function setAfter(array $after): Endpoint
+    public function setAfter($after): Endpoint
     {
         $this->after = $after;
         return $this;

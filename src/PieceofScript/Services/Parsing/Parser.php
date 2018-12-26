@@ -180,6 +180,7 @@ class Parser
                             || $tokens->head()->getName() === Token::T_OPEN_PARENTHESIS
                             || $tokens->head()->getName() === Token::T_OPEN_BRACKETS
                             || $tokens->head()->getType() === Token::TYPE_OPERATION
+                            || $tokens->head()->getType() === Token::TYPE_ASSIGNMENT
                         ) {
                             if ($lexemeName === Token::T_MINUS) {
                                 $lexemeName = Token::T_NEGATIVE;
