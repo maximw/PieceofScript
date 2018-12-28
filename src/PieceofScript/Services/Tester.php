@@ -95,7 +95,7 @@ class Tester
         $this->startFile = $startFile;
 
         $this->contextStack = new ContextStack();
-        //$this->statistics = new Statistics($startFile);
+        $this->statistics = new Statistics();
         $this->files = new FilesRepository();
 
         $this->generators = new GeneratorsRepository();
@@ -394,12 +394,12 @@ class Tester
             'format' => $this->parser->evaluate($endpointCall->getEndpoint()->getFormat(), $this->contextStack),
             'data' => $this->parser->evaluate($endpointCall->getEndpoint()->getData(), $this->contextStack),
             ]);
-        $this->contextStack->head()->setVariable($requestVarName, $request);
-        $this->contextStack->head()->setVariable($responseVarName, new NullLiteral());
-        $this->contextStack->neck()->setVariable($requestVarName, $request);
-        $this->contextStack->neck()->setVariable($responseVarName, new NullLiteral());
+        $this->contextStack->head()->setVariable($requestVarName, $request, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+        $this->contextStack->head()->setVariable($responseVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+        $this->contextStack->neck()->setVariable($requestVarName, $request, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+        $this->contextStack->neck()->setVariable($responseVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
 
-        $this->statistics->addCall($endpointCall, $this->contextStack, $request, new NullLiteral());
+        $this->statistics->addCall($endpointCall, $this->contextStack, $request, new ArrayLiteral());
 
         // Execute "before" section
         $this->executeLines($endpointCall->getEndpoint()->getBefore(), $endpointCall->getEndpoint()->getFile(), 0);
@@ -408,9 +408,9 @@ class Tester
 
         $this->statistics->setRequest($request);
         Out::printRequest($request);
-        $response = HttpClient::doRequest($request);
-        $this->contextStack->head()->setVariable($responseVarName, $response);
-        $this->contextStack->neck()->setVariable($responseVarName, $response);
+        $response = HttpClient::doRequest($request, $this->contextStack, $endpointCall);
+        $this->contextStack->head()->setVariable($responseVarName, $response, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+        $this->contextStack->neck()->setVariable($responseVarName, $response, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         $this->statistics->setResponse($response);
         Out::printResponse($response);
 
@@ -423,10 +423,7 @@ class Tester
     protected function operatorAssert(string $expression)
     {
         $success = $this->parser->evaluate($expression, $this->contextStack)->toBool()->getValue();
-
-        if (!$success) {
-
-        }
+        $this->statistics->addAssertion($expression, $success, $this->contextStack);
         return $success;
     }
 
@@ -473,7 +470,7 @@ class Tester
             $this->parser->evaluate($tokens, $this->contextStack);
         }
         $this->contextStack->head()->isGlobalWritable = true;
-        $this->contextStack->head()->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
+        $this->contextStack->head()->assignmentMode = AbstractContext::ASSIGNMENT_MODE_OFF;
     }
 
     /**

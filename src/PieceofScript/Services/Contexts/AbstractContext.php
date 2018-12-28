@@ -2,6 +2,7 @@
 
 namespace PieceofScript\Services\Contexts;
 
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\VariableName;
 use PieceofScript\Services\Values\VariableReference;
@@ -100,7 +101,7 @@ abstract class AbstractContext
             return $this->getGlobalContext()->getVariable($variableName);
         }
 
-        throw new \Exception('Variable not found ' . $variableName);
+        throw new RuntimeError('Variable not found ' . $variableName);
     }
 
     public function getReference(VariableName $variableName): VariableReference

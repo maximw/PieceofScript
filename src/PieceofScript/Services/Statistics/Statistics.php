@@ -33,7 +33,7 @@ class Statistics
             $this->endCurrentCall();
         }
 
-        $newCall = new StatEndpointCall($contextStack->head()->getFile(), $contextStack->head()->getLine(), $request, $response);
+        $newCall = new StatEndpointCall($contextStack->neck()->getFile(), $contextStack->neck()->getLine(), $request, $response);
 
         $this->statEndpoints[$endPoint->getName()]->addCall($newCall);
         $this->currentEndpointCall = $newCall;

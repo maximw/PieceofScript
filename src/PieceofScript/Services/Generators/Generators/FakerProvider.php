@@ -48,6 +48,8 @@ use PieceofScript\Services\Generators\Generators\Faker\FakerText;
 use PieceofScript\Services\Generators\Generators\Faker\FakerTimestamp;
 use PieceofScript\Services\Generators\Generators\Faker\FakerTimezone;
 use PieceofScript\Services\Generators\Generators\Faker\FakerUrl;
+use PieceofScript\Services\Generators\Generators\Faker\FakerUserAgent;
+use PieceofScript\Services\Generators\Generators\Faker\FakerUuid;
 use PieceofScript\Services\Generators\Generators\Faker\FakerWords;
 use PieceofScript\Services\Generators\IGeneratorProvider;
 
@@ -108,6 +110,8 @@ class FakerProvider implements IGeneratorProvider
             new FakerTimestamp($this->faker),
             new FakerTimezone($this->faker),
             new FakerUrl($this->faker),
+            new FakerUserAgent($this->faker),
+            new FakerUuid($this->faker),
             new FakerWords($this->faker),
         ];
     }

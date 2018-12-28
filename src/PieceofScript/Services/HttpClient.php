@@ -123,10 +123,10 @@ class HttpClient
     }
 
 
-    protected static function prepareOptions(BaseLiteral $request, ContextStack $contextStack): array
+    protected static function prepareOptions(BaseLiteral $request): array
     {
         if (!$request instanceof ArrayLiteral) {
-            throw new EndpointCallError(static::$endpoint, '$request value has to be Array',  $contextStack);
+            throw new EndpointCallError(static::$endpoint, '$request value has to be Array');
         }
 
         $requestParams['method'] = self::extractMethod($request);
@@ -154,12 +154,12 @@ class HttpClient
             $options[RequestOptions::JSON] = $data;
         } elseif ($format == Endpoint::FORMAT_FROM) {
             if (!is_array($data)) {
-                throw new RuntimeError('Cannot call endpoint. Form data has to be array', $contextStack);
+                throw new EndpointCallError(self::$endpoint,'Form data has to be array');
             }
             $options[RequestOptions::FORM_PARAMS] = $data;
         } elseif ($format == Endpoint::FORMAT_MULTIPART) {
             if (!is_array($data)) {
-                throw new RuntimeError('Cannot call endpoint. Form data has to be array', $contextStack);
+                throw new EndpointCallError(self::$endpoint,'Form data has to be array');
             }
             $options[RequestOptions::MULTIPART] = self::prepareMultipartForm($data);
         }
@@ -199,8 +199,8 @@ class HttpClient
     protected static function extractCookies(ArrayLiteral $request, string $url): CookieJar
     {
         if (isset($request['cookies'])
-            && !($request['cookies'] instanceof StringLiteral)) {
-            throw new \Exception('Cannot call endpoint. $request.cookies is invalid');
+            && !($request['cookies'] instanceof ArrayLiteral)) {
+            throw new EndpointCallError(self::$endpoint, '$request.cookies is invalid');
         }
         $domain = parse_url($url, PHP_URL_HOST);
         $cookies = Utils::unwrapValueContainer($request['cookies'] ?? []);
@@ -212,10 +212,7 @@ class HttpClient
     {
         if (isset($request['auth'])) {
             if (! $request['auth'] instanceof ArrayLiteral) {
-                throw new \Exception('Cannot call endpoint. $request.auth is invalid');
-            }
-            if (count($request['auth']) < 2) {
-                throw new \Exception('Cannot call endpoint. $request.auth is invalid');
+                throw new EndpointCallError(self::$endpoint, '$request.auth is invalid');
             }
         }
         return Utils::unwrapValueContainer($request['auth'] ?? null);

@@ -5,7 +5,6 @@ namespace PieceofScript\Services\Utils;
 
 
 use PieceofScript\Services\Errors\FileNotFoundError;
-use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\BoolLiteral;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -28,7 +27,7 @@ class Utils
             $dir = pathinfo($dir, PATHINFO_DIRNAME);
             $realPath = realpath($dir);
         }
-        if (is_dir($realPath)) {
+        if (!is_dir($realPath)) {
             throw new FileNotFoundError('Cannot find directory ' . $dir);
         }
         return self::fileSearchInDir($realPath, $mask, $recursive);

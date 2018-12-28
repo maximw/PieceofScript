@@ -7,6 +7,7 @@ namespace PieceofScript\Services\Statistics;
 
 use function DeepCopy\deep_copy;
 use PieceofScript\Services\Values\ArrayLiteral;
+use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 
 class StatEndpointCall
 {
@@ -29,9 +30,9 @@ class StatEndpointCall
 
     public function __construct(
         string $file,
-        string $line,
-        ArrayLiteral $request,
-        ArrayLiteral $response
+        int $line,
+        BaseLiteral $request,
+        BaseLiteral $response
     )
     {
         $this->file = $file;

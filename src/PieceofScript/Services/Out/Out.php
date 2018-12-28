@@ -106,7 +106,6 @@ class Out
 
     public static function printRequest($request)
     {
-        $request['is_printed'] = true;
         $verbosity = OutputInterface::VERBOSITY_DEBUG;
         $request = Utils::unwrapValueContainer($request);
         static::$output->writeln('Request: "' . $request['method'] . '" failed', $verbosity);
