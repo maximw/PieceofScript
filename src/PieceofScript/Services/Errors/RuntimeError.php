@@ -6,7 +6,7 @@ namespace PieceofScript\Services\Errors;
 use PieceofScript\Services\Contexts\ContextStack;
 
 /**
- * Internal interpretation error during runnig scenario. Causes print ContextStack
+ * Internal interpretation error during running scenario. Causes print ContextStack
  *
  * Class RuntimeError
  */

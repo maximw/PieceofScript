@@ -5,7 +5,7 @@ namespace PieceofScript\Services\Endpoints;
 
 
 use PieceofScript\Services\Config\Config;
-use PieceofScript\Services\Errors\Endpoints\EndpointDefinitionException;
+use PieceofScript\Services\Errors\Endpoints\EndpointDefinitionError;
 use Symfony\Component\Yaml\Yaml;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\VariableName;
@@ -47,26 +47,26 @@ class EndpointsRepository
      * @param string $endpointName
      * @param array $endpointBody
      * @param string $fileName
-     * @throws EndpointDefinitionException
+     * @throws EndpointDefinitionError
      */
     protected function createEndpoint(string $endpointName, array $endpointBody, string $fileName)
     {
         $normalizedName = $this->normalizeName($endpointName);
 
         if ($this->get($normalizedName) instanceof Endpoint) {
-            throw new EndpointDefinitionException('Error: Duplicate endpoint name.', $endpointName, $fileName);
+            throw new EndpointDefinitionError('Error: Duplicate endpoint name.', $endpointName, $fileName);
         }
 
         if (empty($endpointBody)) {
-            throw new EndpointDefinitionException('Error: empty endpoint body.', $endpointName, $fileName);
+            throw new EndpointDefinitionError('Error: empty endpoint body.', $endpointName, $fileName);
         }
 
         if (empty($endpointBody['method'])) {
-            throw new EndpointDefinitionException('HTTP method is required.', $endpointName, $fileName);
+            throw new EndpointDefinitionError('HTTP method is required.', $endpointName, $fileName);
         }
 
         if (empty($endpointBody['url'])) {
-            throw new EndpointDefinitionException('URL is required.', $endpointName, $fileName);
+            throw new EndpointDefinitionError('URL is required.', $endpointName, $fileName);
         }
 
         $method = $endpointBody['method'];

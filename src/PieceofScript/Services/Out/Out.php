@@ -11,6 +11,7 @@ use PieceofScript\Services\Contexts\GlobalContext;
 use PieceofScript\Services\Contexts\TestcaseContext;
 use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Errors\RuntimeError;
+use PieceofScript\Services\Utils\Utils;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Out
@@ -30,7 +31,7 @@ class Out
     public static function printError(InternalError $e, ContextStack $contextStack = null)
     {
         $verbosity = OutputInterface::VERBOSITY_NORMAL;
-        static::$output->writeln('<fg=red>Error:</> ' . $e->getMessage(), $verbosity);
+        static::$output->writeln('<fg=white;bg=red>Error:</> ' . $e->getMessage(), $verbosity);
         if ($e instanceof RuntimeError && null !== $contextStack) {
             static::printContextStack($contextStack);
         }
@@ -39,7 +40,7 @@ class Out
     public static function printWarning(string $message, ContextStack $contextStack = null)
     {
         $verbosity = OutputInterface::VERBOSITY_VERY_VERBOSE;
-        static::$output->writeln('Warning: ' . $message, $verbosity);
+        static::$output->writeln('<fg=yellow>Warning:</> ' . $message, $verbosity);
         if (null !== $contextStack) {
             $context = $contextStack->head();
             static::$output->writeln('in context "' . $context->getName() . '", file "' . $context->getFile() . '" at line ' . ($context->getLine() + 1), $verbosity);
@@ -90,6 +91,58 @@ class Out
         $verbosity = OutputInterface::VERBOSITY_DEBUG;
         static::$output->writeln('Testing is cancelled', $verbosity);
     }
+
+    public static function printAssert(string $code, bool $success)
+    {
+        if ($success) {
+            $verbosity = OutputInterface::VERBOSITY_DEBUG;
+            static::$output->writeln('Assert: "' . trim($code) . '" successful', $verbosity);
+        } else {
+            $verbosity = OutputInterface::VERBOSITY_NORMAL;
+            static::$output->writeln('Assert: "' . trim($code) . '" failed', $verbosity);
+        }
+
+    }
+
+    public static function printRequest($request)
+    {
+        $request['is_printed'] = true;
+        $verbosity = OutputInterface::VERBOSITY_DEBUG;
+        $request = Utils::unwrapValueContainer($request);
+        static::$output->writeln('Request: "' . $request['method'] . '" failed', $verbosity);
+        var_dump($request);
+
+    }
+
+    public static function printResponse($response)
+    {
+        $verbosity = OutputInterface::VERBOSITY_DEBUG;
+        $response = Utils::unwrapValueContainer($response);
+        if (!$response['network']) {
+            static::$output->writeln('Network error', $verbosity);
+            return;
+        }
+
+        static::$output->writeln('Response: ' . $response['status'], $verbosity);
+        if (!empty($response['headers'])) {
+            static::$output->writeln('Headers:', $verbosity);
+            foreach ($response['headers'] as $name => $value) {
+                static::$output->writeln('    ' . $name . ': ' . $value);
+            }
+        }
+        if (!empty($response['cookies'])) {
+            static::$output->writeln('Cookies:', $verbosity);
+            foreach ($response['cookies'] as $name => $value) {
+                static::$output->writeln('    ' . $name . ': ' . $value);
+            }
+        }
+        if (!empty($response['raw'])) {
+            static::$output->writeln('Body:', $verbosity);
+            static::$output->writeln($response['raw'], $verbosity);
+        }
+        static::$output->writeln('', $verbosity);
+    }
+
 
     public static function printMustExit(ContextStack $contextStack)
     {

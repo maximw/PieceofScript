@@ -13,6 +13,9 @@ use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Endpoints\Endpoint;
 use PieceofScript\Services\Endpoints\EndpointCall;
+use PieceofScript\Services\Errors\Endpoints\EndpointCallError;
+use PieceofScript\Services\Errors\RuntimeError;
+use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -53,23 +56,20 @@ class HttpClient
     ];
 
     /** @var EndpointCall */
-    protected $endpointCall;
+    protected static $endpointCall;
 
     /** @var Endpoint */
-    protected $endpoint;
+    protected static $endpoint;
 
     /** @var ContextStack */
-    protected $contextStack;
+    protected static $contextStack;
 
-    public function __construct(EndpointCall $endpointCall, ContextStack $contextStack)
+    public static function doRequest(BaseLiteral $request, ContextStack $contextStack, EndpointCall $endpointCall): ArrayLiteral
     {
-        $this->endpointCall = $endpointCall;
-        $this->contextStack = $contextStack;
-        $this->endpoint = $endpointCall->getEndpoint();
-    }
+        static::$contextStack = $contextStack;
+        static::$endpointCall = $endpointCall;
+        static::$endpoint = $endpointCall->getEndpoint();
 
-    public static function doRequest(BaseLiteral $request): ArrayLiteral
-    {
         list($requestParams, $options) = self::prepareOptions($request);
 
         $httpClient = new Client();
@@ -104,7 +104,9 @@ class HttpClient
             if (JSON_ERROR_NONE === json_last_error()) {
                 $response['body'] = $jsonBody;
             } else {
-                //TODO output reason
+                if (static::isJsonResponse($httpResponse)) {
+                    Out::printWarning('Error parsing JSON. ' . json_last_error_msg());
+                }
             }
         } else {
             $response = Utils::wrapValueContainer([
@@ -121,10 +123,10 @@ class HttpClient
     }
 
 
-    protected static function prepareOptions(BaseLiteral $request): array
+    protected static function prepareOptions(BaseLiteral $request, ContextStack $contextStack): array
     {
         if (!$request instanceof ArrayLiteral) {
-            throw new \Exception('Cannot call endpoint. $request value has to be Array');
+            throw new EndpointCallError(static::$endpoint, '$request value has to be Array',  $contextStack);
         }
 
         $requestParams['method'] = self::extractMethod($request);
@@ -152,12 +154,12 @@ class HttpClient
             $options[RequestOptions::JSON] = $data;
         } elseif ($format == Endpoint::FORMAT_FROM) {
             if (!is_array($data)) {
-                throw new \Exception('Data has to be array');
+                throw new RuntimeError('Cannot call endpoint. Form data has to be array', $contextStack);
             }
             $options[RequestOptions::FORM_PARAMS] = $data;
         } elseif ($format == Endpoint::FORMAT_MULTIPART) {
             if (!is_array($data)) {
-                throw new \Exception('Data has to be array');
+                throw new RuntimeError('Cannot call endpoint. Form data has to be array', $contextStack);
             }
             $options[RequestOptions::MULTIPART] = self::prepareMultipartForm($data);
         }
@@ -298,5 +300,9 @@ class HttpClient
         return $multipartItems;
     }
 
+    protected static function isJsonResponse(Response $response)
+    {
+        return strtolower($response->getContentType()) === 'application/json';
+    }
 
 }

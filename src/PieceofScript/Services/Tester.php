@@ -270,14 +270,16 @@ class Tester
     {
         if ($operator === self::OPERATOR_REQUIRE) {
 
-            $this->executeFile($expression);
+            $requiredFile = $this->parser->evaluate($expression, $this->contextStack)->getValue();
+            $this->executeFile($requiredFile);
             $this->contextStack->head()
                 ->setFile($fileName)
                 ->setLine($lineNumber);
 
         } elseif ($operator === self::OPERATOR_INCLUDE) {
 
-            $files = Utils::fileSearch($expression, true);
+            $filesMask = $this->parser->evaluate($expression, $this->contextStack)->getValue();
+            $files = Utils::fileSearch($filesMask, true);
             foreach ($files as $file) {
                 try {
                     $this->executeFile($file);
@@ -405,12 +407,12 @@ class Tester
         $request = $this->contextStack->head()->getVariable($requestVarName);
 
         $this->statistics->setRequest($request);
-
+        Out::printRequest($request);
         $response = HttpClient::doRequest($request);
-
         $this->contextStack->head()->setVariable($responseVarName, $response);
         $this->contextStack->neck()->setVariable($responseVarName, $response);
         $this->statistics->setResponse($response);
+        Out::printResponse($response);
 
         // Execute "after" section
         $this->executeLines($endpointCall->getEndpoint()->getAfter(), $endpointCall->getEndpoint()->getFile(), 0);

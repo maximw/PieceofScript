@@ -6,7 +6,7 @@ namespace PieceofScript\Services\Errors\Endpoints;
 
 use PieceofScript\Services\Errors\InternalError;
 
-class EndpointDefinitionException extends InternalError
+class EndpointDefinitionError extends InternalError
 {
     public function __construct(string $message, string $endpointName, string $fileName)
     {

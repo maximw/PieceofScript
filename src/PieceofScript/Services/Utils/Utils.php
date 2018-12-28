@@ -4,6 +4,8 @@
 namespace PieceofScript\Services\Utils;
 
 
+use PieceofScript\Services\Errors\FileNotFoundError;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\BoolLiteral;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -16,14 +18,20 @@ class Utils
 {
     public static function fileSearch(string $dir, bool $recursive = true): array
     {
-        if (is_dir($dir)) {
+        $realPath = realpath($dir);
+        if (is_dir($realPath)) {
             $mask = null;
+        } elseif (is_file($realPath)) {
+            return [$realPath];
         } else {
             $mask = pathinfo($dir, PATHINFO_BASENAME);
             $dir = pathinfo($dir, PATHINFO_DIRNAME);
+            $realPath = realpath($dir);
         }
-
-        return self::fileSearchInDir($dir, $mask, $recursive);
+        if (is_dir($realPath)) {
+            throw new FileNotFoundError('Cannot find directory ' . $dir);
+        }
+        return self::fileSearchInDir($realPath, $mask, $recursive);
     }
 
     public static function fileSearchInDir(string $dir, string $mask = null, bool $recursive = true): array
@@ -35,7 +43,7 @@ class Utils
                 if (!in_array($file, ['.', '..'])) {
                     if (is_dir($dir . DIRECTORY_SEPARATOR . $file)) {
                         if ($recursive) {
-                            $files = array_merge($files, self::fileSearch($dir . DIRECTORY_SEPARATOR . $file, $mask, $recursive));
+                            $files = array_merge($files, self::fileSearchInDir($dir . DIRECTORY_SEPARATOR . $file, $mask, $recursive));
                         }
                     } else {
                         $filename = $dir . DIRECTORY_SEPARATOR . $file;
