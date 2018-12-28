@@ -536,8 +536,9 @@ class Tester
             $testcaseCall = $this->testcases->getByCall($expression);
             $this->runTestcase($testcaseCall);
         } else {
+            $testcases = $this->testcases->getWithoutArguments();
             /** @var Testcase $testcase */
-            foreach ($this->testcases as $testcase) {
+            foreach ($testcases as $testcase) {
                 if (!$testcase->hasArguments()) {
                     $testcaseCall = new TestcaseCall($testcase);
                     try {
@@ -591,8 +592,8 @@ class Tester
         $this->contextStack->push($context);
         $requestVarName = new VariableName('$request');
         $responseVarName = new VariableName('$response');
-        $this->contextStack->head()->setVariable($requestVarName, new NullLiteral());
-        $this->contextStack->head()->setVariable($responseVarName, new NullLiteral());
+        $this->contextStack->head()->setVariable($requestVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+        $this->contextStack->head()->setVariable($responseVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
 
         // Set all references
         for ($i = 0; $i < $argumentsCount; $i++) {

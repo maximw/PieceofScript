@@ -6,6 +6,7 @@ namespace PieceofScript\Services\Variables;
 use function DeepCopy\deep_copy;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Errors\Parser\ParserError;
+use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\ArrayLiteral;
@@ -28,18 +29,18 @@ class VariablesRepository
      *
      * @param VariableName $varName
      * @return string
-     * @throws \Exception
+     * @throws VariableError
      */
     public function get(VariableName $varName): BaseLiteral
     {
         if (!$this->existsWithoutPath($varName)) {
-            throw new \Exception('Variable "' . $varName->name . '" not found ');
+            throw new VariableError($varName,'variable does not exist.');
         }
 
         if ($this->variables[$varName->name] instanceof VariableReference) {
             return ($this->variables[$varName->name]->get)($varName->path);
         } else {
-            return $this->getVal($varName->path, $this->variables[$varName->name]);
+            return $this->getVal($varName->path, $this->variables[$varName->name], $varName);
         }
     }
 
@@ -48,32 +49,33 @@ class VariablesRepository
      *
      * @param array $path
      * @param mixed $value
-     * @return string
-     * @throws \Exception
+     * @param VariableName $variableName
+     * @return BaseLiteral
+     * @throws VariableError
      */
-    protected function getVal(array $path, BaseLiteral $value): BaseLiteral
+    protected function getVal(array $path, BaseLiteral $value, VariableName $variableName): BaseLiteral
     {
         if (empty($path)) {
             return $value;
         }
 
         $key = array_shift($path);
-        $key = $this->keyToScalar($key);
+        $key = $this->keyToScalar($key, $variableName);
 
         if ($value instanceof ArrayLiteral) {
             if (!$value->offsetExists($key)) {
-                throw new \Exception('Cannot extract value');
+                throw new VariableError($variableName, 'array key "' . $key . '" does not exist.');
             }
-            return $this->getVal($path, $value[$key]);
+            return $this->getVal($path, $value[$key], $variableName);
         } elseif ($value instanceof StringLiteral && (string)(int) $key === (string) $key) {
             $key = (int) $key;
             if ($key < 0 || $key >= mb_strlen($value->getValue(), 'UTF-8')) {
-                throw new \Exception('Cannot extract value');
+                throw new VariableError($variableName, 'string offset "' . $key . '" does not exist.');
             }
             return new StringLiteral(mb_substr($value->getValue(), $key, 1));
         }
 
-        throw new \Exception('Cannot extract value');
+        throw new VariableError($variableName, 'trying to get element "' . $key . '" of '. $value::TYPE_NAME);
     }
 
     /**
@@ -82,11 +84,12 @@ class VariablesRepository
      * @param VariableName $varName
      * @param BaseLiteral $value
      * @param string $assignmentMode
+     * @throws VariableError
      */
     public function set(VariableName $varName, BaseLiteral $value, string $assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE)
     {
         if (AbstractContext::ASSIGNMENT_MODE_OFF === $assignmentMode) {
-            throw new ParserError('Cannot assign value to variable "'. (string) $varName .'". Did you mean == instead of = ?');
+            throw new VariableError($varName, 'cannot assign value here. Did you mean == instead of = ?');
         }
 
         $currentValue = new NullLiteral();
@@ -99,13 +102,13 @@ class VariablesRepository
         if ($currentValue instanceof VariableReference) {
             ($currentValue->set)($varName->path, $value);
         } else {
-            $this->setVal($varName->path, $currentValue, $value);
+            $this->setVal($varName->path, $currentValue, $value, $varName);
 
             if (!isset($this->assignmentModes[$varName->name]) || $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE) {
                 $this->variables[$varName->name] = $currentValue;
                 $this->assignmentModes[$varName->name] = $assignmentMode;
             } else {
-                throw new ParserError('Cannot change constant value "' . (string) $varName . '"');
+                throw new VariableError($varName, 'cannot change constant value.');
             }
         }
     }
@@ -116,26 +119,27 @@ class VariablesRepository
      * @param array $path
      * @param BaseLiteral $currentValue
      * @param BaseLiteral $value
+     * @param VariableName $variableName
      * @return mixed
-     * @throws \Exception
+     * @throws VariableError
      */
-    protected function setVal(array $path, &$currentValue, $value)
+    protected function setVal(array $path, &$currentValue, $value, VariableName $variableName)
     {
         if (empty($path)) {
             return $currentValue = deep_copy($value);
         }
 
         $key = array_shift($path);
-        $key = $this->keyToScalar($key);
+        $key = $this->keyToScalar($key, $variableName);
 
         if ($currentValue instanceof ArrayLiteral) {
             if (!$currentValue->offsetExists($key)) {
                 $currentValue[$key] = null;
             }
-            $this->setVal($path, $currentValue->value[$key], $value);
+            $this->setVal($path, $currentValue->value[$key], $value, $variableName);
         } else {
             $currentValue = new ArrayLiteral();
-            $this->setVal($path, $currentValue->value[$key], $value);
+            $this->setVal($path, $currentValue->value[$key], $value, $variableName);
         }
     }
 
@@ -178,7 +182,7 @@ class VariablesRepository
     public function setReference(VariableName $varName, VariableReference $reference)
     {
         if (!$varName->isSimple()) {
-            throw new \Exception('Only without path');
+            throw new VariableError($varName, ' cannot make reference. Did you mean just $' . $varName->name);
         }
         $this->variables[$varName->name] = $reference;
     }
@@ -202,7 +206,7 @@ class VariablesRepository
         if ($this->variables[$varName->name] instanceof VariableReference) {
             return ($this->variables[$varName->name]->get)($varName->path, $checkPath);
         } else {
-            return $this->existsPath($varName->path, $this->variables[$varName->name]);
+            return $this->existsPath($varName->path, $this->variables[$varName->name], $varName);
         }
 
         return false;
@@ -224,22 +228,24 @@ class VariablesRepository
      *
      * @param array $path
      * @param mixed $value
+     * @param VariableName $variableName
      * @return bool
+     * @throws VariableError
      */
-    protected function existsPath(array $path, BaseLiteral $value): bool
+    protected function existsPath(array $path, BaseLiteral $value, VariableName $variableName): bool
     {
         if (empty($path)) {
             return true;
         }
 
         $key = array_shift($path);
-        $key = $this->keyToScalar($key);
+        $key = $this->keyToScalar($key, $variableName);
 
         if ($value instanceof ArrayLiteral) {
             if (!$value->offsetExists($key)) {
                 return false;
             }
-            return $this->existsPath($path, $value[$key]);
+            return $this->existsPath($path, $value[$key], $variableName);
         } elseif ($value instanceof StringLiteral && (string)(int) $key === (string) $key) {
             $key = (int) $key;
             if ($key >= 0 && $key < mb_strlen($value->getValue(), 'UTF-8')) {
@@ -249,12 +255,12 @@ class VariablesRepository
         return false;
     }
 
-    protected function keyToScalar($key)
+    protected function keyToScalar($key, VariableName $variableName)
     {
         if ($key instanceof IKeyValue) {
             $key = $key->toKey();
         } elseif (!is_scalar($key)) {
-            throw new \Exception('Array access requires scalar key value');
+            throw new VariableError($variableName, 'array access requires scalar key');
         }
         return $key;
     }

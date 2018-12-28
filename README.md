@@ -4,10 +4,10 @@ Simple language for automated testing scenarios of HTTP JSON API.
 
 Example scenario for imagined social network API
 ```
-require ./globals.pos // Contains some global variables, i.e. $domain 
-include ./globals_dev.pos // Redefine global variables, if file exists
-include ./user/*.pos // Include all .pos files in ./user
-include ./post/*.pos
+require "./globals.pos" // Contains some global variables, i.e. $domain 
+include "./globals_dev.pos" // Redefine global variables, if file exists
+include "./user/*.pos" // Include all .pos files in ./user
+include "./post/*.pos"
 
 // Generating models of Users and Post
 var $author = User()

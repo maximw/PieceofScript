@@ -40,6 +40,22 @@ class TestcasesRepository
     }
 
     /**
+     * Get all Testcases without arguments for run with empty expression
+     *
+     * @return Testcase[]
+     */
+    public function getWithoutArguments(): array
+    {
+        $testcases = [];
+        foreach ($this->testcases as $testcase) {
+            if (count($testcase->arguments) === 0) {
+                $testcases[] = $testcase;
+            }
+        }
+        return $testcases;
+    }
+
+    /**
      * Add new Testcase to repository
      *
      * @param string $testcaseName
