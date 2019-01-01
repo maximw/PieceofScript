@@ -143,12 +143,15 @@ class HttpClient
             RequestOptions::HEADERS => $headers,
             RequestOptions::COOKIES => $requestParams['cookie'],
             RequestOptions::AUTH => $auth,
-            RequestOptions::QUERY => $query,
             RequestOptions::HTTP_ERRORS => false,
             RequestOptions::CONNECT_TIMEOUT => Config::get()->getHttpConnectTimeout(),
             RequestOptions::READ_TIMEOUT => Config::get()->getHttpReadTimeout(),
             RequestOptions::ALLOW_REDIRECTS => ['max' => Config::get()->getHttpMaxRedirects()],
         ];
+
+        if (!empty($query)) {
+            $options[RequestOptions::QUERY] = $query;
+        }
 
         if ($format == Endpoint::FORMAT_JSON) {
             $options[RequestOptions::JSON] = $data;

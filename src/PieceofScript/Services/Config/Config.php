@@ -4,6 +4,7 @@
 namespace PieceofScript\Services\Config;
 
 
+use PieceofScript\Services\Errors\RuntimeError;
 use Symfony\Component\Yaml\Yaml;
 
 class Config
@@ -293,10 +294,14 @@ class Config
     }
 
 
-    public static function loadFromFile(string $filename)
+    public static function loadFromFile(string $filename, bool $requireFile)
     {
-        if (!is_readable($filename)) {
-            return;
+        if (!file_exists($filename) || !is_readable($filename)) {
+            if ($requireFile) {
+                throw new RuntimeError('Cannot find configuration file ' . $filename);
+            } else {
+                return;
+            }
         }
 
         $config = Yaml::parseFile($filename);

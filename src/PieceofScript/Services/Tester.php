@@ -8,6 +8,7 @@ use PieceofScript\Services\Errors\ControlFlow\MustException;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Values\NullLiteral;
+use PieceofScript\Services\Values\NumberLiteral;
 use Symfony\Component\Console\Output\OutputInterface;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Contexts\EndpointContext;
@@ -391,7 +392,7 @@ class Tester
             'cookies' => $this->parser->evaluate($endpointCall->getEndpoint()->getCookies(), $this->contextStack),
             'auth' => $this->parser->evaluate($endpointCall->getEndpoint()->getAuth(), $this->contextStack),
             'query' => $this->parser->evaluate($endpointCall->getEndpoint()->getQuery(), $this->contextStack),
-            'format' => $this->parser->evaluate($endpointCall->getEndpoint()->getFormat(), $this->contextStack),
+            'format' => strtolower($this->parser->evaluate($endpointCall->getEndpoint()->getFormat(), $this->contextStack)->getValue()),
             'data' => $this->parser->evaluate($endpointCall->getEndpoint()->getData(), $this->contextStack),
             ]);
         $this->contextStack->head()->setVariable($requestVarName, $request, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
@@ -424,6 +425,7 @@ class Tester
     {
         $success = $this->parser->evaluate($expression, $this->contextStack)->toBool()->getValue();
         $this->statistics->addAssertion($expression, $success, $this->contextStack);
+        Out::printAssert($expression, $success);
         return $success;
     }
 
@@ -433,7 +435,6 @@ class Tester
         if (!$success) {
             throw new MustException();
         }
-
     }
 
     /**
@@ -624,11 +625,15 @@ class Tester
 
     /**
      * @param string $expression
+     * @throws RuntimeError
      */
     protected function operatorSleep(string $expression)
     {
         $value = $this->parser->evaluate($expression, $this->contextStack);
-        usleep((int) $value);
+        if (!$value instanceof NumberLiteral) {
+            throw new RuntimeError('Sleep required Number of microseconds. ' . $value::TYPE_NAME . ' given');
+        }
+        usleep((int) $value->getValue());
     }
 
     /**
@@ -656,6 +661,15 @@ class Tester
         return [self::OPERATOR_ENDPOINT, $line, $indent];
     }
 
+    /**
+     * Get lines with indent more than given
+     *
+     * @param array $lines
+     * @param int $totalLines
+     * @param int $lineNumber
+     * @param int $indent
+     * @return array
+     */
     protected function getBlockBody(array $lines, int $totalLines, int $lineNumber, int $indent): array
     {
         $flag = true;

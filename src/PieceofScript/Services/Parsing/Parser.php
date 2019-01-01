@@ -75,7 +75,7 @@ class Parser
     /**
      * Evaluate string or array. Entry point of Parser
      *
-     * @param string|array|TokensQueue $value
+     * @param string|array|TokensQueue|BaseLiteral $value
      * @param ContextStack $contextStack
      * @return BaseLiteral
      */

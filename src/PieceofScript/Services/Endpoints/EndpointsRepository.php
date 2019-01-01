@@ -6,6 +6,7 @@ namespace PieceofScript\Services\Endpoints;
 
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\Endpoints\EndpointDefinitionError;
+use PieceofScript\Services\Values\StringLiteral;
 use Symfony\Component\Yaml\Yaml;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\VariableName;
@@ -75,7 +76,7 @@ class EndpointsRepository
         $cookies = $endpointBody['cookies'] ?? [];
         $auth = $endpointBody['auth'] ?? [];
         $query = $endpointBody['query'] ?? [];
-        $format = $endpointBody['format'] ?? Endpoint::FORMAT_NONE;
+        $format = $endpointBody['format'] ?? new StringLiteral(Endpoint::FORMAT_NONE);
         $data = $endpointBody['data'] ?? [];
         $before = $endpointBody['before'] ?? [];
         $after = $endpointBody['after'] ?? [];

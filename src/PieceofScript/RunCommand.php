@@ -22,7 +22,7 @@ class RunCommand extends Command
             ->setHelp('This command runs testing scenario')
             ->addArgument('scenario', InputArgument::REQUIRED, 'Start script file')
             ->addOption('junit-report', 'j', InputOption::VALUE_OPTIONAL, 'Reporting file in JUnit format', null)
-            ->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Configuration file', './config.yaml')
+            ->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Configuration file', '')
             ->setHelp('Run testing scenario');
     }
 
@@ -35,7 +35,11 @@ class RunCommand extends Command
                 throw new InternalError('File is not readable ' . $input->getArgument('scenario'));
             }
             chdir(dirname($startFile));
-            Config::loadFromFile($input->getOption('config'));
+            if ($input->getOption('config')) {
+                Config::loadFromFile($input->getOption('config'), true);
+            } else {
+                Config::loadFromFile('./config.yaml', false);
+            }
             $tester = new Tester($startFile, $output);
             return $tester->run();
         } catch (InternalError $e) {
