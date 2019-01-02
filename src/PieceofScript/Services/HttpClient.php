@@ -95,8 +95,8 @@ class HttpClient
                 'network' => true,
                 'code' => $httpResponse->getStatusCode(),
                 'status' => $httpResponse->getStatusCode() . ' ' . $httpResponse->getReasonPhrase(),
-                'headers' => $httpResponse->getHeaders(),
-                'cookies' => $requestParams['cookie']->toArray(),
+                'headers' => self::responseHeaders($httpResponse->getHeaders()),
+                'cookies' => self::responseCookies($requestParams['cookie']->toArray()),
                 'raw' => (string)$httpResponse->getBody()->getContents(),
                 'duration' => $duration,
             ]);
@@ -264,11 +264,11 @@ class HttpClient
             if (!empty($value['value'])) {
                 $multipartItem['contents'] = (string) $value['value'];
             } else {
+                if (!is_file($value['file'])) {
+                    throw new \Exception('Multipart form item is not a file');
+                }
                 if (!is_readable($value['file'])) {
                     throw new \Exception('Multipart form item file is not readable');
-                }
-                if (is_dir($value['file'])) {
-                    throw new \Exception('Multipart form item given file is directory');
                 }
                 $multipartItem['contents'] = fopen($value['file'], 'r');
             }
@@ -303,6 +303,30 @@ class HttpClient
     protected static function isJsonResponse(Response $response)
     {
         return strtolower($response->getContentType()) === 'application/json';
+    }
+
+    protected static function responseHeaders($responseHeaders)
+    {
+        $headers = [];
+        foreach ($responseHeaders as $name => $value)
+        {
+            if (count($value) === 1) {
+                $headers[mb_strtolower($name, 'UTF-8')] = $value[0];
+            } else {
+                $headers[mb_strtolower($name, 'UTF-8')] = $value;
+            }
+        }
+        return $headers;
+    }
+
+    protected static function responseCookies($responseCookies)
+    {
+        $cookies = [];
+        foreach ($responseCookies as $cookie)
+        {
+            $cookies[$cookie['Name']] = $cookie;
+        }
+        return $cookies;
     }
 
 }

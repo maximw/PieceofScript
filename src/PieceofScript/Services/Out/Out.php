@@ -229,14 +229,18 @@ class Out
             }
         }
         if (!empty($response['cookies'])) {
-            static::writeln('Cookies:', $verbosity, $verbosity, 1);
+            static::writeln('Cookies:', $verbosity, 1);
             foreach ($response['cookies'] as $name => $value) {
                 static::writeln($name . ': ' . $value, $verbosity, 2);
             }
         }
         if (!empty($response['raw'])) {
             static::writeln('Body:', $verbosity);
-            static::writeln($response['raw'], $verbosity, 1);
+            if (!empty($response['body'])) {
+                static::writeln(json_encode($response['body'], JSON_PRETTY_PRINT), $verbosity, 2);
+            } else {
+                static::writeln($response['raw'], $verbosity, 1);
+            }
         }
         static::writeln('', $verbosity);
     }
@@ -246,7 +250,7 @@ class Out
 
     protected static function writeln($text, int $verbosity, int $indent = 0)
     {
-        $parts = explode(PHP_EOL, $text);
+        $parts = explode("\n", $text);
         foreach ($parts as $part) {
             static::$output->writeln(str_repeat(' ', $indent * self::INDENT) . $part, $verbosity);
         }

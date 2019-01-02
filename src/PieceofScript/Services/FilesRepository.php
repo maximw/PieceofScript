@@ -25,8 +25,6 @@ class FilesRepository
         if (\array_key_exists($realFileName, $this->files)) {
             return $this->files[$realFileName];
         }
-        chdir(dirname($realFileName));
-
         $this->files[$realFileName] = file($realFileName);
         return $this->files[$realFileName];
     }
