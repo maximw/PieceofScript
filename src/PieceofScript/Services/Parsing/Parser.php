@@ -453,41 +453,19 @@ class Parser
     {
         $generator = $this->generators->get($token->getValue());
         $generator->setParser($this);
-
-        if ($generator instanceof EvaluationGenerator) {
-            $context = new GeneratorContext(
-                $generator->getName(),
-                $generator->getFileName()
-            );
-            $contextStack->push($context);
-            $generator->setContextStack($contextStack);
-
-            $generator->setAst($ast);
-            $value = $generator->run();
-            $contextStack->pop();
-            return $value;
-        }
-
-        $parameters = [];
-        while (!$ast->isEmpty() && $ast->head()->getType() !== Token::TYPE_ARGUMENTS_END) {
-            $parameters[] = $this->extractLiteral($this->executeAST($ast, $contextStack), $contextStack);
-        }
-        $ast->pop(); //Remove TYPE_ARGUMENTS_END
+        $generator->setAst($ast);
 
         $context = new GeneratorContext(
             $generator->getName(),
             $generator->getFileName()
         );
         $contextStack->push($context);
-
-        $arguments = $generator->getArguments();
-        for ($i = 0; $i < count($arguments); $i++) {
-            $context->setVariable($arguments[$i], $parameters[$i], AbstractContext::ASSIGNMENT_MODE_VARIABLE);
-        }
         $generator->setContextStack($contextStack);
 
 
-        $value = $generator->run(...$parameters);
+        $generator->init();
+        $value = $generator->run();
+        $generator->final();
 
         $contextStack->pop();
         return $value;

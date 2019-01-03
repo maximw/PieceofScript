@@ -15,26 +15,26 @@ class FakerPassword extends FakerGenerator
 {
     const NAME = 'Faker\\password';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $min = 6;
         $max = 20;
 
-        if (isset($arguments[0])) {
-            if (!$arguments[0] instanceof NumberLiteral && !$arguments[0] instanceof NullLiteral) {
-                throw new ArgumentTypeError(self::NAME, 0, NumberLiteral::TYPE_NAME, $arguments[0]::TYPE_NAME);
+        if (isset($this->arguments[0])) {
+            if (!$this->arguments[0] instanceof NumberLiteral && !$this->arguments[0] instanceof NullLiteral) {
+                throw new ArgumentTypeError(self::NAME, 0, NumberLiteral::TYPE_NAME, $this->arguments[0]::TYPE_NAME);
             }
-            if ($arguments[0] instanceof NumberLiteral) {
-                $min = $arguments[0]->getValue();
+            if ($this->arguments[0] instanceof NumberLiteral) {
+                $min = $this->arguments[0]->getValue();
             }
         }
 
-        if (isset($arguments[1])) {
-            if (!$arguments[1] instanceof NumberLiteral && !$arguments[1] instanceof NullLiteral) {
-                throw new ArgumentTypeError(self::NAME, 1, NumberLiteral::TYPE_NAME, $arguments[1]::TYPE_NAME);
+        if (isset($this->arguments[1])) {
+            if (!$this->arguments[1] instanceof NumberLiteral && !$this->arguments[1] instanceof NullLiteral) {
+                throw new ArgumentTypeError(self::NAME, 1, NumberLiteral::TYPE_NAME, $this->arguments[1]::TYPE_NAME);
             }
-            if ($arguments[1] instanceof NumberLiteral) {
-                $max = $arguments[1]->getValue();
+            if ($this->arguments[1] instanceof NumberLiteral) {
+                $max = $this->arguments[1]->getValue();
             }
         }
 

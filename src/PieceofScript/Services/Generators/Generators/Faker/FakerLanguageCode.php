@@ -12,7 +12,7 @@ class FakerLanguageCode extends FakerGenerator
 {
     const NAME = 'Faker\\languageCode';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->languageCode);
     }

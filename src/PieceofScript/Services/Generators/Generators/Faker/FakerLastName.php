@@ -12,11 +12,11 @@ class FakerLastName extends FakerGenerator
 {
     const NAME = 'Faker\\lastName';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $gender = null;
-        if (isset($arguments[0])) {
-            $gender = $arguments[0]->toString()->getValue();
+        if (isset($this->arguments[0])) {
+            $gender = $this->arguments[0]->toString()->getValue();
             if (strtolower($gender) !== 'male' && strtolower($gender) !== 'female') {
                 $gender = null;
             }

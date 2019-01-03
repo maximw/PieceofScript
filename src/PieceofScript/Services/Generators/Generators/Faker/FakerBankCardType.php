@@ -12,7 +12,7 @@ class FakerBankCardType extends FakerGenerator
 {
     const NAME = 'Faker\\bankCardType';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->creditCardType);
     }

@@ -12,7 +12,7 @@ class FakerLongitude extends FakerGenerator
 {
     const NAME = 'Faker\\longitude';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new NumberLiteral($this->faker->longitude);
     }

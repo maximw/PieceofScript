@@ -12,7 +12,7 @@ class FakerLogin extends FakerGenerator
 {
     const NAME = 'Faker\\login';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->userName);
     }

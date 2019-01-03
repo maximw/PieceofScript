@@ -17,35 +17,35 @@ class FakerDateTime extends FakerGenerator
 {
     const NAME = 'Faker\\datetime';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $min = new \DateTime(Config::get()->getCurrentTimestamp(), Config::get()->getDefaultTimezone());
         $min = $min->modify('-30 years');
         $max = new \DateTime(Config::get()->getCurrentTimestamp(), Config::get()->getDefaultTimezone());
 
-        if (isset($arguments[0])) {
-            if ($arguments[0] instanceof NumberLiteral) {
-                $min = (new \DateTime())->setTimestamp($arguments[0]->getValue());
-            } elseif ($arguments[0] instanceof DateLiteral) {
-                $min = $arguments[0]->getValue();
-            } elseif ($arguments[0] instanceof StringLiteral) {
-                $min = new \DateTime($arguments[0]->getValue(), Config::get()->getDefaultTimezone());
-            } elseif ($arguments[0] instanceof NullLiteral) {
+        if (isset($this->arguments[0])) {
+            if ($this->arguments[0] instanceof NumberLiteral) {
+                $min = (new \DateTime())->setTimestamp($this->arguments[0]->getValue());
+            } elseif ($this->arguments[0] instanceof DateLiteral) {
+                $min = $this->arguments[0]->getValue();
+            } elseif ($this->arguments[0] instanceof StringLiteral) {
+                $min = new \DateTime($this->arguments[0]->getValue(), Config::get()->getDefaultTimezone());
+            } elseif ($this->arguments[0] instanceof NullLiteral) {
             } else {
-                throw new ArgumentTypeError(self::NAME, 0, $arguments[0]::NAME);
+                throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0]::NAME);
             }
         }
 
-        if (isset($arguments[1])) {
-            if ($arguments[1] instanceof NumberLiteral) {
-                $max = (new \DateTime())->setTimestamp($arguments[1]->getValue());
-            } elseif ($arguments[1] instanceof DateLiteral) {
-                $max = $arguments[1]->getValue()->format(DATE_ISO8601);
-            } elseif ($arguments[1] instanceof StringLiteral) {
-                $max = new \DateTime($arguments[1]->getValue(), Config::get()->getDefaultTimezone());
-            } elseif ($arguments[1] instanceof NullLiteral) {
+        if (isset($this->arguments[1])) {
+            if ($this->arguments[1] instanceof NumberLiteral) {
+                $max = (new \DateTime())->setTimestamp($this->arguments[1]->getValue());
+            } elseif ($this->arguments[1] instanceof DateLiteral) {
+                $max = $this->arguments[1]->getValue()->format(DATE_ISO8601);
+            } elseif ($this->arguments[1] instanceof StringLiteral) {
+                $max = new \DateTime($this->arguments[1]->getValue(), Config::get()->getDefaultTimezone());
+            } elseif ($this->arguments[1] instanceof NullLiteral) {
             } else {
-                throw new ArgumentTypeError(self::NAME, 1, $arguments[1]::NAME);
+                throw new ArgumentTypeError(self::NAME, 1, $this->arguments[1]::NAME);
             }
         }
 

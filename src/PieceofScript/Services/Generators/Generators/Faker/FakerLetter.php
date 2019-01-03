@@ -12,7 +12,7 @@ class FakerLetter extends FakerGenerator
 {
     const NAME = 'Faker\\letter';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->randomLetter);
     }

@@ -4,17 +4,17 @@
 namespace PieceofScript\Services\Generators\Generators\Internal;
 
 
-use PieceofScript\Services\Generators\Generators\InternalGenerator;
+use PieceofScript\Services\Generators\Generators\ParametrizedGenerator;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 
-class ArrayGenerator extends InternalGenerator
+class ArrayGenerator extends ParametrizedGenerator
 {
     const NAME = 'array';
 
-    public function run(...$params): BaseLiteral
+    public function run(): BaseLiteral
     {
-        $array = new ArrayLiteral($params);
+        $array = new ArrayLiteral($this->arguments);
         return $array;
     }
 

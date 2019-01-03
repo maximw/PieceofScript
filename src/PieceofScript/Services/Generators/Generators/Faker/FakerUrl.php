@@ -12,7 +12,7 @@ class FakerUrl extends FakerGenerator
 {
     const NAME = 'Faker\\url';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->url);
     }

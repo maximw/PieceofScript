@@ -12,7 +12,7 @@ class FakerColorCss extends FakerGenerator
 {
     const NAME = 'Faker\\colorCss';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->rgbCssColor);
     }

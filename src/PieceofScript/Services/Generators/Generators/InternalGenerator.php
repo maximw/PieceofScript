@@ -11,7 +11,6 @@ abstract class InternalGenerator extends BaseGenerator
     public function __construct()
     {
         $this->setName(static::NAME);
-        $this->setArguments([]);
         $this->setFileName('Internal');
     }
 }

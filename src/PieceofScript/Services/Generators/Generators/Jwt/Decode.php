@@ -7,12 +7,12 @@ namespace PieceofScript\Services\Generators\Generators\Jwt;
 use Lcobucci\JWT\Parser;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
-use PieceofScript\Services\Generators\Generators\InternalGenerator;
+use PieceofScript\Services\Generators\Generators\ParametrizedGenerator;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\StringLiteral;
 
-class Decode extends InternalGenerator
+class Decode extends ParametrizedGenerator
 {
     const NAME = 'jwt\\decode';
 

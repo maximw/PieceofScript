@@ -4,9 +4,9 @@
 namespace PieceofScript\Services\Generators\Generators\Internal;
 
 
-use PieceofScript\Services\Errors\GeneratorInternalException;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
-use PieceofScript\Services\Generators\Generators\InternalGenerator;
+use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
+use PieceofScript\Services\Generators\Generators\ParametrizedGenerator;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NumberLiteral;
@@ -14,27 +14,27 @@ use PieceofScript\Services\Values\NumberLiteral;
 /**
  * Return piece of Array
  */
-class Slice extends InternalGenerator
+class Slice extends ParametrizedGenerator
 {
     const NAME = 'slice';
 
-    public function run(...$params): BaseLiteral
+    public function run(): BaseLiteral
     {
-        if (count($params) < 3) {
-            throw new ArgumentsCountError(self::NAME, count($params), 3);
+        if (count($this->arguments) < 3) {
+            throw new ArgumentsCountError(self::NAME, count($this->arguments), 3);
         }
 
-        $array = $params[0];
-        $offset = $params[1];
-        $length = $params[2];
+        $array = $this->arguments[0];
+        $offset = $this->arguments[1];
+        $length = $this->arguments[2];
         if (! $array instanceof ArrayLiteral) {
-            throw new GeneratorInternalException('Requred array');
+            throw new ArgumentTypeError(self::NAME, 0, $array::TYPE_NAME, ArrayLiteral::TYPE_NAME);
         }
         if (! $offset instanceof NumberLiteral) {
-            throw new GeneratorInternalException('Requred number');
+            throw new ArgumentTypeError(self::NAME, 1, $offset::TYPE_NAME, NumberLiteral::TYPE_NAME);
         }
         if (! $length instanceof NumberLiteral) {
-            throw new GeneratorInternalException('Requred number');
+            throw new ArgumentTypeError(self::NAME, 2, $length::TYPE_NAME, NumberLiteral::TYPE_NAME);
         }
 
 

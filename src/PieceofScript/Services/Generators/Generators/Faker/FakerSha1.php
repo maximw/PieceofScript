@@ -12,7 +12,7 @@ class FakerSha1 extends FakerGenerator
 {
     const NAME = 'Faker\\sha1';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->sha1);
     }

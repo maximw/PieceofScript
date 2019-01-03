@@ -12,7 +12,7 @@ class FakerCurrencyCode extends FakerGenerator
 {
     const NAME = 'Faker\\currencyCode';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->currencyCode);
     }

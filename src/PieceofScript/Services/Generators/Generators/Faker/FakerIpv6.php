@@ -12,7 +12,7 @@ class FakerIpv6 extends FakerGenerator
 {
     const NAME = 'Faker\\ipv6';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->ipv6);
     }

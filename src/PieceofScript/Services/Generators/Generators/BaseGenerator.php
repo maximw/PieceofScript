@@ -3,11 +3,12 @@
 namespace PieceofScript\Services\Generators\Generators;
 
 use PieceofScript\Services\Contexts\ContextStack;
-use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Generators\IGenerator;
 use PieceofScript\Services\Parsing\Parser;
+use PieceofScript\Services\Parsing\Token;
+use PieceofScript\Services\Parsing\TokensStack;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
-use PieceofScript\Services\Values\VariableName;
+
 
 
 abstract class BaseGenerator implements IGenerator
@@ -17,17 +18,6 @@ abstract class BaseGenerator implements IGenerator
      * @var string
      */
     protected $name;
-
-    /**
-     * @var VariableName[]
-     */
-    protected $arguments = [];
-
-    /**
-     * If arguments lazy generator evaluates arguments expressions internally
-     * @var bool
-     */
-    protected $lazyArguments = false;
 
     /**
      * File where generator was defined
@@ -42,20 +32,56 @@ abstract class BaseGenerator implements IGenerator
     /** @var Parser */
     protected $parser;
 
-    public function __construct($name, $arguments = [], $fileName = null)
+    /** @var TokensStack */
+    protected $ast;
+
+    /**
+     * Was all arguments from AST was extracted end skipped, include TYPE_ARGUMENTS_END token
+     *
+     * @var bool
+     */
+    protected $argumentsSkipped = false;
+
+    public function __construct($name, $fileName = null)
     {
         $this->setName($name);
-        $this->setArguments($arguments);
         $this->setFileName($fileName);
     }
 
-    /**
-     * @param BaseLiteral[] ...$arguments
-     * @return BaseLiteral
-     */
-    public function run(...$arguments): BaseLiteral
+    public function init()
     {
-        throw new RuntimeError('Generator "' . $this->getName() . '" have to implement method run()');
+        $this->argumentsSkipped = false;
+    }
+
+    public function final()
+    {
+        if (!$this->argumentsSkipped) {
+            $this->skipRestArgument();
+        }
+    }
+
+    protected function hasNextArgument(): bool
+    {
+        return !$this->ast->isEmpty() && $this->ast->head()->getType() !== Token::TYPE_ARGUMENTS_END;
+    }
+
+    protected function getNextArgument(): BaseLiteral
+    {
+        return $this->parser->extractLiteral($this->parser->executeAST($this->ast, $this->contextStack), $this->contextStack);
+    }
+
+    protected function skipNextArgument()
+    {
+       $this->parser->skipAST($this->ast, $this->contextStack);
+    }
+
+    protected function skipRestArgument()
+    {
+        while($this->hasNextArgument()) {
+            $this->parser->skipAST($this->ast, $this->contextStack);
+        }
+        $this->ast->pop(); //Remove TYPE_ARGUMENTS_END
+        $this->argumentsSkipped = true;
     }
 
     /**
@@ -77,49 +103,11 @@ abstract class BaseGenerator implements IGenerator
     }
 
     /**
-     * @return array
-     */
-    public function getArguments(): array
-    {
-        return $this->arguments;
-    }
-
-
-    /**
-     * @return bool
-     */
-    public function isLazyArguments(): bool
-    {
-        return $this->lazyArguments;
-    }
-
-    /**
-     * @param bool $lazyArguments
-     * @return BaseGenerator
-     */
-    public function setLazyArguments(bool $lazyArguments): BaseGenerator
-    {
-        $this->lazyArguments = $lazyArguments;
-        return $this;
-    }
-
-
-    /**
-     * @param array $arguments
-     * @return BaseGenerator
-     */
-    public function setArguments(array $arguments): BaseGenerator
-    {
-        $this->arguments = $arguments;
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getFileName(): string
     {
-        return $this->fileName ?? 'internal';
+        return $this->fileName ?? 'Internal';
     }
 
     /**
@@ -151,4 +139,13 @@ abstract class BaseGenerator implements IGenerator
         $this->parser = $parser;
         return $this;
     }
+
+    /**
+     * @param TokensStack $ast
+     */
+    public function setAst(TokensStack $ast)
+    {
+        $this->ast = $ast;
+    }
+
 }

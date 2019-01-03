@@ -12,7 +12,7 @@ use PieceofScript\Services\Generators\Generators\JwtProvider;
 use Symfony\Component\Yaml\Yaml;
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Generators\Generators\BaseGenerator;
-use PieceofScript\Services\Generators\Generators\InternalGenerator;
+use PieceofScript\Services\Generators\Generators\ParametrizedGenerator;
 use PieceofScript\Services\Generators\Generators\YamlGenerator;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\VariableName;
@@ -145,7 +145,7 @@ class GeneratorsRepository
         }
     }
 
-    protected function addInternalGenerator(InternalGenerator $generator)
+    protected function addInternalGenerator(ParametrizedGenerator $generator)
     {
         if (empty($generator::NAME)) {
             throw new InternalError('Internal generator has empty name ' . get_class($generator));

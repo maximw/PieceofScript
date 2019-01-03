@@ -12,7 +12,7 @@ class FakerCity extends FakerGenerator
 {
     const NAME = 'Faker\\city';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->city());
     }

@@ -12,7 +12,7 @@ class FakerBankCardExpiration extends FakerGenerator
 {
     const NAME = 'Faker\\BankCardExpiration';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->creditCardExpirationDateString);
     }

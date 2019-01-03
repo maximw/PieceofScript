@@ -14,15 +14,15 @@ class FakerIban extends FakerGenerator
 {
     const NAME = 'Faker\\BankCardExpiration';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $country = null;
-        if (isset($arguments[0])) {
-            if (!$arguments[0] instanceof StringLiteral && !$arguments[0] instanceof NullLiteral) {
-                throw new ArgumentTypeError(self::NAME, 0, $arguments[0]::TYPE_NAME, StringLiteral::TYPE_NAME);
+        if (isset($this->arguments[0])) {
+            if (!$this->arguments[0] instanceof StringLiteral && !$this->arguments[0] instanceof NullLiteral) {
+                throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0]::TYPE_NAME, StringLiteral::TYPE_NAME);
             }
-            if ($arguments[0] instanceof StringLiteral) {
-                $country = $arguments[0]->getValue();
+            if ($this->arguments[0] instanceof StringLiteral) {
+                $country = $this->arguments[0]->getValue();
             }
         }
 

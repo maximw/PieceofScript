@@ -12,7 +12,7 @@ class FakerSwiftBicNumber extends FakerGenerator
 {
     const NAME = 'Faker\\swiftBicNumber';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->swiftBicNumber);
     }

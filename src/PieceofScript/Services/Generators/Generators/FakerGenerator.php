@@ -6,7 +6,7 @@ namespace PieceofScript\Services\Generators\Generators;
 
 use Faker\Generator;
 
-abstract class FakerGenerator extends InternalGenerator
+abstract class FakerGenerator extends ParametrizedGenerator
 {
     /** @var Generator */
     protected $faker;

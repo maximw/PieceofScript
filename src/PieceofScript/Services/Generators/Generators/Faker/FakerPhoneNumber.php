@@ -12,10 +12,10 @@ class FakerPhoneNumber extends FakerGenerator
 {
     const NAME = 'Faker\\phoneNumber';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $phone = $this->faker->phoneNumber();
-        if (isset($arguments[0]) && $arguments[0]->toBoll()->getValue) {
+        if (isset($arguments[0]) && $this->arguments[0]->toBoll()->getValue) {
             $phone = $this->faker->e164PhoneNumber();
         }
 

@@ -16,23 +16,23 @@ class FakerFile extends FakerGenerator
 {
     const NAME = 'Faker\\file';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
-        if (count($arguments) < 1) {
+        if (count($this->arguments) < 1) {
             throw new ArgumentsCountError(self::NAME, 0, 1);
         }
-        if (!$arguments[0] instanceof StringLiteral) {
-            throw new ArgumentTypeError(self::NAME, 0, StringLiteral::TYPE_NAME, $arguments[0]::TYPE_NAME);
+        if (!$this->arguments[0] instanceof StringLiteral) {
+            throw new ArgumentTypeError(self::NAME, 0, StringLiteral::TYPE_NAME, $this->arguments[0]::TYPE_NAME);
         }
 
-        if (!is_dir($arguments[0]) || !is_readable($arguments[0])) {
-            throw new GeneratorInternalException(self::NAME . ' argument is not readable directory "' . $arguments[0] . '"');
+        if (!is_dir($this->arguments[0]) || !is_readable($this->arguments[0])) {
+            throw new GeneratorInternalException(self::NAME . ' argument is not readable directory "' . $this->arguments[0] . '"');
         }
-        if (realpath(Config::get()->getCacheDir()) == realpath($arguments[0])) {
-            throw new GeneratorInternalException(self::NAME . ' can not use directory configurated as cache_dir "' . $arguments[0] . '"');
+        if (realpath(Config::get()->getCacheDir()) == realpath($this->arguments[0])) {
+            throw new GeneratorInternalException(self::NAME . ' can not use directory configurated as cache_dir "' . $this->arguments[0] . '"');
         }
         try {
-            $result = new StringLiteral($this->faker->file($arguments[0], Config::get()->getCacheDir()));
+            $result = new StringLiteral($this->faker->file($this->arguments[0], Config::get()->getCacheDir()));
         } catch (\InvalidArgumentException $e) {
             throw new GeneratorInternalException(self::NAME . ': ' . $e->getMessage());
         }

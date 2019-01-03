@@ -13,13 +13,13 @@ class FakerAsciify extends FakerGenerator
 {
     const NAME = 'Faker\\asciify';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
-        if (count($arguments) < 1) {
+        if (count($this->arguments) < 1) {
             throw new ArgumentsCountError(self::NAME, 0, 1);
         }
 
-        return new StringLiteral($this->faker->asciify($arguments[0]->toString()->getValue()));
+        return new StringLiteral($this->faker->asciify($this->arguments[0]->toString()->getValue()));
     }
 
 }

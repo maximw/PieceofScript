@@ -12,7 +12,7 @@ class FakerDomain extends FakerGenerator
 {
     const NAME = 'Faker\\domain';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->domainName);
     }

@@ -12,7 +12,7 @@ class FakerUuid extends FakerGenerator
 {
     const NAME = 'Faker\\uuid';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->uuid);
     }

@@ -12,7 +12,7 @@ class FakerFileExtension extends FakerGenerator
 {
     const NAME = 'Faker\\fileExtension';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->fileExtension);
     }

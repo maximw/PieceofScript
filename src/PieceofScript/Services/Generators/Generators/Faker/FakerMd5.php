@@ -12,7 +12,7 @@ class FakerMd5 extends FakerGenerator
 {
     const NAME = 'Faker\\md5';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->md5);
     }

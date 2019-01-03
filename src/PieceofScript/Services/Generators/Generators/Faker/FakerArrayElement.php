@@ -14,22 +14,22 @@ class FakerArrayElement extends FakerGenerator
 {
     const NAME = 'Faker\\arrayElement';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
-        if (count($arguments) < 1) {
+        if (count($this->arguments) < 1) {
             throw new ArgumentsCountError(self::NAME, 0, 1);
         }
 
-        if (!$arguments[0] instanceof ArrayLiteral) {
-            throw new ArgumentTypeError(self::NAME, 0, ArrayLiteral::TYPE_NAME, $arguments[0]::TYPE_NAME);
+        if (!$this->arguments[0] instanceof ArrayLiteral) {
+            throw new ArgumentTypeError(self::NAME, 0, ArrayLiteral::TYPE_NAME, $this->arguments[0]::TYPE_NAME);
         }
 
         $count = 1;
-        if (isset($arguments[1])) {
-            $count = (int) $arguments[1]->toNumber()->getValue();
+        if (isset($this->arguments[1])) {
+            $count = (int) $this->arguments[1]->toNumber()->getValue();
         }
 
-        return $this->faker->randomElement($arguments[0]->getValue(), $count);
+        return $this->faker->randomElement($this->arguments[0]->getValue(), $count);
     }
 
 }

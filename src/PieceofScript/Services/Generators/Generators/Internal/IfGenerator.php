@@ -4,19 +4,18 @@
 namespace PieceofScript\Services\Generators\Generators\Internal;
 
 
-
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
-use PieceofScript\Services\Generators\Generators\EvaluationGenerator;
+use PieceofScript\Services\Generators\Generators\InternalGenerator;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NullLiteral;
 
-class IfGenerator extends EvaluationGenerator
+class IfGenerator extends InternalGenerator
 {
     const NAME = 'if';
 
     protected $lazyArguments = true;
 
-    public function run(...$params): BaseLiteral
+    public function run(): BaseLiteral
     {
         if (!$this->hasNextArgument()) {
             throw new ArgumentsCountError(self::NAME, 0, 2);
@@ -40,8 +39,6 @@ class IfGenerator extends EvaluationGenerator
                 $result = new NullLiteral();
             }
         }
-
-        $this->skipAllArguments();
         return $result;
     }
 

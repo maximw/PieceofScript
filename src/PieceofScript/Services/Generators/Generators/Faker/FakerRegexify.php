@@ -13,13 +13,13 @@ class FakerRegexify extends FakerGenerator
 {
     const NAME = 'Faker\\regexify';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
-        if (count($arguments) < 1) {
+        if (count($this->arguments) < 1) {
             throw new ArgumentsCountError(self::NAME, 0, 1);
         }
 
-        return new StringLiteral($this->faker->regexify($arguments[0]->toString()->getValue()));
+        return new StringLiteral($this->faker->regexify($this->arguments[0]->toString()->getValue()));
     }
 
 }

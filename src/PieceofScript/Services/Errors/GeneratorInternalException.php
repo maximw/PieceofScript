@@ -4,7 +4,7 @@
 namespace PieceofScript\Services\Errors;
 
 
-class GeneratorInternalException extends \Exception
+class GeneratorInternalException extends RuntimeError
 {
 
 }

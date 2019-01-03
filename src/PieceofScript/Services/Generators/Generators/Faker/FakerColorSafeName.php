@@ -12,7 +12,7 @@ class FakerColorSafeName extends FakerGenerator
 {
     const NAME = 'Faker\\colorSafeName';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->safeColorName);
     }

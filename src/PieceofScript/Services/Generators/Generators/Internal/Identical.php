@@ -5,7 +5,7 @@ namespace PieceofScript\Services\Generators\Generators\Internal;
 
 
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
-use PieceofScript\Services\Generators\Generators\InternalGenerator;
+use PieceofScript\Services\Generators\Generators\ParametrizedGenerator;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\BoolLiteral;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -14,17 +14,17 @@ use PieceofScript\Services\Values\Hierarchy\IScalarValue;
 /**
  * Check if arguments Identical
  */
-class Identical extends InternalGenerator
+class Identical extends ParametrizedGenerator
 {
     const NAME = 'identical';
 
-    public function run(...$params): BaseLiteral
+    public function run(): BaseLiteral
     {
-        if (count($params) < 2) {
-            throw new ArgumentsCountError(self::NAME, count($params), 2);
+        if (count($this->arguments) < 2) {
+            throw new ArgumentsCountError(self::NAME, count($this->arguments), 2);
         }
 
-        return new BoolLiteral($this->isSimilar($params[0], $params[1]));
+        return new BoolLiteral($this->isSimilar($this->arguments[0], $this->arguments[1]));
     }
 
     protected function isSimilar(BaseLiteral $param1, BaseLiteral $param2): bool

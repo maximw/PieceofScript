@@ -12,16 +12,16 @@ class FakerInteger extends FakerGenerator
 {
     const NAME = 'Faker\\integer';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $min = 0;
-        if (isset($arguments[0])) {
-            $min = $arguments[0]->toNumber()->getValue();
+        if (isset($this->arguments[0])) {
+            $min = $this->arguments[0]->toNumber()->getValue();
         }
 
         $max = PHP_INT_MAX;
-        if (isset($arguments[1])) {
-            $max = $arguments[1]->toNumber()->getValue();
+        if (isset($this->arguments[1])) {
+            $max = $this->arguments[1]->toNumber()->getValue();
         }
 
         return new NumberLiteral($this->faker->numberBetween($min, $max));

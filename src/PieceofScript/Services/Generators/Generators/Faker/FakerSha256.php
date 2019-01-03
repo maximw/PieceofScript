@@ -12,7 +12,7 @@ class FakerSha256 extends FakerGenerator
 {
     const NAME = 'Faker\\sha256';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->sha256);
     }

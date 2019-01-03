@@ -17,19 +17,19 @@ class FakerTimestamp extends FakerGenerator
 {
     const NAME = 'Faker\\timestamp';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $max = new \DateTime(Config::get()->getCurrentTimestamp(), Config::get()->getDefaultTimezone());
-        if (isset($arguments[0])) {
-            if ($arguments[0] instanceof NumberLiteral) {
-                $max = (new \DateTime())->setTimestamp($arguments[0]->getValue());
-            } elseif ($arguments[0] instanceof DateLiteral) {
-                $max = $arguments[0]->getValue();
-            } elseif ($arguments[0] instanceof StringLiteral) {
-                $max = new \DateTime($arguments[0]->getValue(), Config::get()->getDefaultTimezone());
-            } elseif ($arguments[0] instanceof NullLiteral) {
+        if (isset($this->arguments[0])) {
+            if ($this->arguments[0] instanceof NumberLiteral) {
+                $max = (new \DateTime())->setTimestamp($this->arguments[0]->getValue());
+            } elseif ($this->arguments[0] instanceof DateLiteral) {
+                $max = $this->arguments[0]->getValue();
+            } elseif ($this->arguments[0] instanceof StringLiteral) {
+                $max = new \DateTime($this->arguments[0]->getValue(), Config::get()->getDefaultTimezone());
+            } elseif ($this->arguments[0] instanceof NullLiteral) {
             } else {
-                throw new ArgumentTypeError(self::NAME, 0, $arguments[0]::NAME);
+                throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0]::NAME);
             }
         }
 

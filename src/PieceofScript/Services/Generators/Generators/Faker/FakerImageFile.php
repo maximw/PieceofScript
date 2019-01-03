@@ -13,36 +13,36 @@ class FakerImageFile extends FakerGenerator
 {
     const NAME = 'Faker\\imageFile';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $width = 640;
-        if (isset($arguments[0])) {
-            $width = $arguments[0]->toNumber()->getValue();
+        if (isset($this->arguments[0])) {
+            $width = $this->arguments[0]->toNumber()->getValue();
         }
 
         $height = 480;
-        if (isset($arguments[1])) {
-            $height = $arguments[1]->toNumber()->getValue();
+        if (isset($this->arguments[1])) {
+            $height = $this->arguments[1]->toNumber()->getValue();
         }
 
         $category = null;
-        if (isset($arguments[2])) {
-            $category = $arguments[2]->toString()->getValue();
+        if (isset($this->arguments[2])) {
+            $category = $this->arguments[2]->toString()->getValue();
         }
 
         $fullPath = null;
-        if (isset($arguments[3])) {
-            $fullPath = $arguments[2]->toBool()->getValue();
+        if (isset($this->arguments[3])) {
+            $fullPath = $this->arguments[2]->toBool()->getValue();
         }
 
         $randomize = null;
-        if (isset($arguments[4])) {
-            $randomize = $arguments[4]->toBool()->getValue();
+        if (isset($this->arguments[4])) {
+            $randomize = $this->arguments[4]->toBool()->getValue();
         }
 
         $word = null;
-        if (isset($arguments[5])) {
-            $word = $arguments[5]->toString()->getValue();
+        if (isset($this->arguments[5])) {
+            $word = $this->arguments[5]->toString()->getValue();
         }
 
         return new StringLiteral($this->faker->image(Config::get()->getCacheDir(), $width, $height, $category, $fullPath, $randomize, $word));

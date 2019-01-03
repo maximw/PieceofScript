@@ -12,7 +12,7 @@ class FakerColorHex extends FakerGenerator
 {
     const NAME = 'Faker\\colorHex';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         return new StringLiteral($this->faker->hexColor);
     }

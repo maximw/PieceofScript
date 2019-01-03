@@ -12,15 +12,15 @@ class FakerHtml extends FakerGenerator
 {
     const NAME = 'Faker\\html';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $maxDepth = 2;
-        if (isset($arguments[0])) {
-            $maxDepth = $arguments[0]->toNumber()->getValue();
+        if (isset($this->arguments[0])) {
+            $maxDepth = $this->arguments[0]->toNumber()->getValue();
         }
         $maxWidth = 3;
-        if (isset($arguments[1])) {
-            $maxWidth = $arguments[0]->toNumber()->getValue();
+        if (isset($this->arguments[1])) {
+            $maxWidth = $this->arguments[0]->toNumber()->getValue();
         }
         return new StringLiteral($this->faker->randomHtml($maxDepth, $maxWidth));
     }

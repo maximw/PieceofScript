@@ -12,11 +12,11 @@ class FakerText extends FakerGenerator
 {
     const NAME = 'Faker\\text';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
         $count = 200;
-        if (isset($arguments[0])) {
-            $count = $arguments[0]->toNumber()->getValue();
+        if (isset($this->arguments[0])) {
+            $count = $this->arguments[0]->toNumber()->getValue();
         }
 
         return new StringLiteral($this->faker->text($count));
