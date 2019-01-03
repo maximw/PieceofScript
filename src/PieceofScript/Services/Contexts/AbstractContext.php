@@ -110,7 +110,7 @@ abstract class AbstractContext
             return $this->variables->getReference($variableName);
         }
 
-        if (!$this->isGlobal()) {
+        if (!$this instanceof GlobalContext) {
             return $this->getGlobalContext()->getReference($variableName);
         }
 

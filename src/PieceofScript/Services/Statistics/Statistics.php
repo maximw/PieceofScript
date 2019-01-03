@@ -17,8 +17,12 @@ class Statistics
     /** @var StatEndpointCall */
     protected $currentEndpointCall;
 
-    public function __construct()
+    /** @var int  */
+    protected $totalEndpoints = 0;
+
+    public function __construct(int $totalEndpoints = 0)
     {
+        $this->totalEndpoints = $totalEndpoints;
     }
 
     public function addCall(EndpointCall $call, ContextStack $contextStack, ArrayLiteral $request, ArrayLiteral $response)
@@ -74,4 +78,80 @@ class Statistics
         }
 
     }
+
+    public function getStatistics()
+    {
+        return $this->statEndpoints;
+    }
+
+    public function printStatistics()
+    {
+        Out::printStatistics('Statistics:');
+
+        $count['endpoints']['total'] = 0;
+        $count['endpoints']['success'] = 0;
+        $count['endpoints']['fail'] = 0;
+        $count['calls']['total'] = 0;
+        $count['calls']['success'] = 0;
+        $count['calls']['fail'] = 0;        
+        $count['assertions']['total'] = 0;
+        $count['assertions']['success'] = 0;
+        $count['assertions']['fail'] = 0;
+        foreach ($this->statEndpoints as $endpointName => $endpointCalls) {
+            $count['endpoints']['total']++;
+            $successEndpoint = null;
+            foreach ($endpointCalls->getCalls() as $call) {
+                $successEndpoint = $successEndpoint === null ? true : ($successEndpoint && true);
+                $count['calls']['total']++;
+                $successCall = null;
+                foreach ($call->getAssertions() as $assertion) {
+                    $successCall = $successCall === null ? true : ($successCall && true);
+                    $count['assertions']['total']++;
+                    if ($assertion->getStatus()) {
+                        $count['assertions']['success']++;
+                    } else {
+                        $count['assertions']['fail']++;
+                        $successEndpoint = false;
+                        $successCall = false;
+                    }
+                }
+                if ($successCall) {
+                    $count['calls']['success']++;
+                } else {
+                    $count['calls']['fail']++;
+                }
+            }
+            if ($successEndpoint) {
+                $count['endpoints']['success']++;
+            } else {
+                $count['endpoints']['fail']++;
+            }
+        }
+
+        Out::printStatistics('Endpoints: ', 1);
+        Out::printStatistics('total: '. $this->totalEndpoints, 2);
+        Out::printStatistics('tested: '. $count['endpoints']['total'] . $this->formatPercent($count['endpoints']['total'], $this->totalEndpoints), 2);
+        Out::printStatistics('success: '. $count['endpoints']['success'] . $this->formatPercent($count['endpoints']['success'], $this->totalEndpoints), 2);
+        Out::printStatistics('fail: '. $count['endpoints']['fail'] . $this->formatPercent($count['endpoints']['fail'], $this->totalEndpoints), 2);
+
+        Out::printStatistics('Endpoint calls: ', 1);
+        Out::printStatistics('total: '. $count['calls']['total'], 2);
+        Out::printStatistics('success: '. $count['calls']['success'] . $this->formatPercent($count['calls']['success'], $count['calls']['total']), 2);
+        Out::printStatistics('fail: '. $count['calls']['fail'] . $this->formatPercent($count['calls']['fail'], $count['calls']['total']), 2);
+
+        Out::printStatistics('Assertions: ', 1);
+        Out::printStatistics('total: '. $count['assertions']['total'], 2);
+        Out::printStatistics('success: '. $count['assertions']['success'], 2);
+        Out::printStatistics('fail: '. $count['assertions']['fail'], 2);
+    }
+
+    protected function formatPercent(int $count, int $total)
+    {
+        $percent = 0;
+        if ($total != 0) {
+            $percent = $count / $total * 100;
+        }
+        return ' (' . round($percent, 1) . '%)';
+    }
+
 }

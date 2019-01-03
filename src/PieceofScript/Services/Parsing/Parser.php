@@ -6,6 +6,9 @@ namespace PieceofScript\Services\Parsing;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Contexts\GeneratorContext;
+use PieceofScript\Services\Errors\InternalError;
+use PieceofScript\Services\Errors\RuntimeError;
+use PieceofScript\Services\Generators\Generators\EvaluationGenerator;
 use PieceofScript\Services\Generators\GeneratorsRepository;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -22,7 +25,7 @@ class Parser
 {
 
     protected $lexemes = [
-        '~^([a-z][a-z0-9\\\\]*)(?=\s*\()~iu' => Token::T_GENERATOR_NAME,
+        '~^([a-z][a-z0-9\\\\_]*)(?=\s*\()~iu' => Token::T_GENERATOR_NAME,
         '~^\\$[a-z][a-z0-9_]*~iu' => Token::T_VARIABLE,
         '~^\\@[a-z][a-z0-9_]*~iu' => Token::T_VARIABLE_TYPE,
         '~^\.(([a-z][a-z0-9_]*)|([0-9]+))~iu' => Token::T_ARRAY_KEY,
@@ -159,10 +162,11 @@ class Parser
         $tokens = new TokensQueue();
         $offset = 0;
         $matches = null;
-        while (mb_strlen($expression, 'UTF-8')) {
+        $expressionCopy = $expression;
+        while (mb_strlen($expressionCopy, 'UTF-8')) {
             $anyMatch = false;
             foreach ($this->lexemes as $regex => $lexemeName) {
-                if (preg_match($regex, $expression, $matches)) {
+                if (preg_match($regex, $expressionCopy, $matches)) {
                     $value = $matches[0];
                     $len = mb_strlen($value, 'UTF-8');
 
@@ -194,14 +198,14 @@ class Parser
                         $tokens->add($token);
                     }
 
-                    $expression = mb_substr($expression, $len, null, 'UTF-8');
+                    $expressionCopy = mb_substr($expressionCopy, $len, null, 'UTF-8');
                     $anyMatch = true;
                     $offset += $len;
                     break;
                 }
             }
             if (!$anyMatch) {
-                throw new \Exception(sprintf('Cannot parse expression at offset %s: %s', $offset, substr($expression, 0, 16) . '...'));
+                throw new RuntimeError(sprintf('Cannot parse expression at offset %s: %s', $offset, $expression));
             }
         }
 
@@ -284,7 +288,7 @@ class Parser
     }
 
 
-    protected function executeAST(TokensStack $ast, ContextStack $contextStack): Operand
+    public function executeAST(TokensStack $ast, ContextStack $contextStack): Operand
     {
         if ($ast->isEmpty()) {
             throw new \Exception('AST is empty');
@@ -311,7 +315,7 @@ class Parser
      * @param TokensStack $ast
      * @throws \Exception
      */
-    protected function skipAST(TokensStack $ast)
+    public function skipAST(TokensStack $ast)
     {
         if ($ast->isEmpty()) {
             throw new \Exception('AST is empty');
@@ -447,13 +451,29 @@ class Parser
 
     protected function executeGenerator(Token $token, TokensStack $ast, ContextStack $contextStack): BaseLiteral
     {
+        $generator = $this->generators->get($token->getValue());
+        $generator->setParser($this);
+
+        if ($generator instanceof EvaluationGenerator) {
+            $context = new GeneratorContext(
+                $generator->getName(),
+                $generator->getFileName()
+            );
+            $contextStack->push($context);
+            $generator->setContextStack($contextStack);
+
+            $generator->setAst($ast);
+            $value = $generator->run();
+            $contextStack->pop();
+            return $value;
+        }
+
         $parameters = [];
         while (!$ast->isEmpty() && $ast->head()->getType() !== Token::TYPE_ARGUMENTS_END) {
             $parameters[] = $this->extractLiteral($this->executeAST($ast, $contextStack), $contextStack);
         }
         $ast->pop(); //Remove TYPE_ARGUMENTS_END
 
-        $generator = $this->generators->get($token->getValue());
         $context = new GeneratorContext(
             $generator->getName(),
             $generator->getFileName()
@@ -462,10 +482,10 @@ class Parser
 
         $arguments = $generator->getArguments();
         for ($i = 0; $i < count($arguments); $i++) {
-            $context->setVariable($arguments[$i], $parameters[$i]);
+            $context->setVariable($arguments[$i], $parameters[$i], AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         }
         $generator->setContextStack($contextStack);
-        $generator->setParser($this);
+
 
         $value = $generator->run(...$parameters);
 
@@ -533,7 +553,7 @@ class Parser
      * @return BaseLiteral
      * @throws \Exception
      */
-    protected function extractLiteral(Operand $operand, ContextStack $contextStack): BaseLiteral
+    public function extractLiteral(Operand $operand, ContextStack $contextStack): BaseLiteral
     {
         if ($operand instanceof BaseLiteral) {
             return $operand;

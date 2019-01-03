@@ -49,6 +49,18 @@ class Out
         }
     }
 
+    public static function printDebug(string $message)
+    {
+        $verbosity = OutputInterface::VERBOSITY_VERY_VERBOSE;
+        static::writeln($message, $verbosity);
+    }
+
+    public static function printStatistics(string $message, int $indent = 0)
+    {
+        $verbosity = OutputInterface::VERBOSITY_NORMAL;
+        static::writeln($message, $verbosity, $indent);
+    }
+
     public static function printContextStack(ContextStack $contextStack)
     {
         $verbosity = OutputInterface::VERBOSITY_NORMAL;
@@ -75,7 +87,7 @@ class Out
     {
         $verbosity = OutputInterface::VERBOSITY_VERBOSE;
         foreach ($values as $value) {
-            static::write('<fg=blue>'.$value.'</>',  $verbosity);
+            static::write('<fg=yellow>'.$value.'</>',  $verbosity);
         }
 
         static::writeln('', $verbosity);

@@ -38,4 +38,38 @@ class StatAssertion
         $this->status = $status;
     }
 
+    /**
+     * @return string
+     */
+    public function getCode(): string
+    {
+        return $this->code;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFile(): string
+    {
+        return $this->file;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLine(): string
+    {
+        return $this->line;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getStatus(): bool
+    {
+        return $this->status;
+    }
+
+
+
 }

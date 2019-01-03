@@ -40,7 +40,7 @@ class RunCommand extends Command
             } else {
                 Config::loadFromFile('./config.yaml', false);
             }
-            $tester = new Tester($startFile, $output);
+            $tester = new Tester($startFile, $input->getOption('junit-report', null));
             return $tester->run();
         } catch (InternalError $e) {
             Out::printError($e);

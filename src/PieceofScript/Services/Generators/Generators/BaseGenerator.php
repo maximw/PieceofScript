@@ -3,6 +3,7 @@
 namespace PieceofScript\Services\Generators\Generators;
 
 use PieceofScript\Services\Contexts\ContextStack;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Generators\IGenerator;
 use PieceofScript\Services\Parsing\Parser;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -21,6 +22,12 @@ abstract class BaseGenerator implements IGenerator
      * @var VariableName[]
      */
     protected $arguments = [];
+
+    /**
+     * If arguments lazy generator evaluates arguments expressions internally
+     * @var bool
+     */
+    protected $lazyArguments = false;
 
     /**
      * File where generator was defined
@@ -48,7 +55,7 @@ abstract class BaseGenerator implements IGenerator
      */
     public function run(...$arguments): BaseLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement run()');
+        throw new RuntimeError('Generator "' . $this->getName() . '" have to implement method run()');
     }
 
     /**
@@ -76,6 +83,26 @@ abstract class BaseGenerator implements IGenerator
     {
         return $this->arguments;
     }
+
+
+    /**
+     * @return bool
+     */
+    public function isLazyArguments(): bool
+    {
+        return $this->lazyArguments;
+    }
+
+    /**
+     * @param bool $lazyArguments
+     * @return BaseGenerator
+     */
+    public function setLazyArguments(bool $lazyArguments): BaseGenerator
+    {
+        $this->lazyArguments = $lazyArguments;
+        return $this;
+    }
+
 
     /**
      * @param array $arguments

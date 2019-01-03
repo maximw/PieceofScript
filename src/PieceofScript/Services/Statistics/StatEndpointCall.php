@@ -26,7 +26,7 @@ class StatEndpointCall
     protected $response;
 
     /** @var StatAssertion[] */
-    protected $assertions;
+    protected $assertions = [];
 
     public function __construct(
         string $file,
@@ -64,4 +64,11 @@ class StatEndpointCall
         return $this;
     }
 
+    /**
+     * @return StatAssertion[]
+     */
+    public function getAssertions(): array
+    {
+        return $this->assertions;
+    }
 }

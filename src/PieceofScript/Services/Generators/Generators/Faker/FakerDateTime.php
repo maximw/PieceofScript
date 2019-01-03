@@ -38,18 +38,22 @@ class FakerDateTime extends FakerGenerator
 
         if (isset($arguments[1])) {
             if ($arguments[1] instanceof NumberLiteral) {
-                $max = (new \DateTime())->setTimestamp($arguments[0]->getValue());
+                $max = (new \DateTime())->setTimestamp($arguments[1]->getValue());
             } elseif ($arguments[1] instanceof DateLiteral) {
-                $max = $arguments[1]->getValue();
+                $max = $arguments[1]->getValue()->format(DATE_ISO8601);
             } elseif ($arguments[1] instanceof StringLiteral) {
                 $max = new \DateTime($arguments[1]->getValue(), Config::get()->getDefaultTimezone());
-            } elseif ($arguments[0] instanceof NullLiteral) {
+            } elseif ($arguments[1] instanceof NullLiteral) {
             } else {
                 throw new ArgumentTypeError(self::NAME, 1, $arguments[1]::NAME);
             }
         }
 
-        return new DateLiteral($this->faker->dateTimeBetween($min, $max, Config::get()->getDefaultTimezone())->format(DATE_ISO8601));
+        return new DateLiteral($this->faker->dateTimeBetween(
+            $min->format(DATE_ISO8601),
+            $max->format(DATE_ISO8601),
+            Config::get()->getDefaultTimezone()->getName())->format(DATE_ISO8601)
+        );
     }
 
 }

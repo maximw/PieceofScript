@@ -126,6 +126,11 @@ class EndpointsRepository
         throw new \Exception('Endpoint not found ' . $endpointCallExpression);
     }
 
+    public function getCount(): int
+    {
+        return count($this->endpoints);
+    }
+
     protected function get(string $normalizedName)
     {
         return $this->endpoints[$normalizedName] ?? null;

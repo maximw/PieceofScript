@@ -16,7 +16,7 @@ class Choice extends InternalGenerator
     public function run(...$params): BaseLiteral
     {
         if (count($params) < 2) {
-            throw new ArgumentsCountError(self::NAME, 0, 1);
+            throw new ArgumentsCountError(self::NAME, 0, 2);
         }
 
         if (count($params) % 2 == 1) {

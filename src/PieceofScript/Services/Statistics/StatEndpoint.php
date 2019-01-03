@@ -11,6 +11,7 @@ class StatEndpoint
     /** @var Endpoint */
     protected $endpoint;
 
+    /** @var StatEndpointCall[]  */
     protected $calls = [];
 
     public function __construct(Endpoint $endpoint)
@@ -21,6 +22,14 @@ class StatEndpoint
     public function addCall(StatEndpointCall $statEndpointCall)
     {
         $this->calls[] = $statEndpointCall;
+    }
+
+    /**
+     * @return StatEndpointCall[]
+     */
+    public function getCalls(): array
+    {
+        return $this->calls;
     }
 
 }

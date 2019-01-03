@@ -5,6 +5,7 @@ namespace PieceofScript\Services\Generators\Generators;
 
 use PieceofScript\Services\Generators\Generators\Internal\Append;
 use PieceofScript\Services\Generators\Generators\Internal\Choice;
+use PieceofScript\Services\Generators\Generators\Internal\DateFormat;
 use PieceofScript\Services\Generators\Generators\Internal\IfGenerator;
 use PieceofScript\Services\Generators\Generators\Internal\Prepend;
 use PieceofScript\Services\Generators\IGeneratorProvider;
@@ -37,6 +38,7 @@ class InternalProvider implements IGeneratorProvider
             new Append(),
             new ArrayGenerator(),
             new Choice(),
+            new DateFormat(),
             new Identical(),
             new IfGenerator(),
             new Max(),

@@ -6,10 +6,10 @@ use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Errors\ControlFlow\CancelException;
 use PieceofScript\Services\Errors\ControlFlow\MustException;
 use PieceofScript\Services\Errors\RuntimeError;
+use PieceofScript\Services\Out\JunitReport;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Values\NullLiteral;
 use PieceofScript\Services\Values\NumberLiteral;
-use Symfony\Component\Console\Output\OutputInterface;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Contexts\EndpointContext;
 use PieceofScript\Services\Contexts\GlobalContext;
@@ -91,12 +91,14 @@ class Tester
     /** @var ContextStack */
     protected $contextStack;
 
-    public function __construct(string $startFile)
+    /** @var JunitReport|null */
+    protected $junitReport;
+
+    public function __construct(string $startFile, string $reportFile = null)
     {
         $this->startFile = $startFile;
 
         $this->contextStack = new ContextStack();
-        $this->statistics = new Statistics();
         $this->files = new FilesRepository();
 
         $this->generators = new GeneratorsRepository();
@@ -104,7 +106,14 @@ class Tester
         $this->testcases = new TestcasesRepository();
 
         $this->parser = new Parser($this->generators);
-
+        $this->statistics = new Statistics($this->endpoints->getCount());
+        if (null !== $reportFile) {
+            $this->junitReport = new JunitReport(
+                $reportFile,
+                $this->statistics,
+                $startFile
+            );
+        }
     }
 
     public function run()
@@ -114,6 +123,10 @@ class Tester
             $this->contextStack->push($context);
 
             $this->executeFile($this->startFile);
+            $this->statistics->printStatistics();
+            if ($this->junitReport instanceof JunitReport) {
+                $this->junitReport->generate();
+            }
         } catch (CancelException $e) {
             Out::printCancel();
         } catch (MustException $e) {
@@ -122,6 +135,12 @@ class Tester
             Out::printError($e, $this->contextStack);
             return 1;
         }
+
+        $this->statistics->printStatistics();
+        if ($this->junitReport instanceof JunitReport) {
+            $this->junitReport->generate();
+        }
+
         return 0;
     }
 
@@ -138,6 +157,7 @@ class Tester
     protected function executeFile(string $fileName)
     {
         $lines = $this->files->read($fileName);
+        Out::printDebug('Start executing ' . $fileName);
         $this->executeLines($lines, $fileName, 0);
     }
 
@@ -517,7 +537,7 @@ class Tester
 
             if ($this->contextStack->global()->hasVariable($variableName)) {
                 $value = $this->contextStack->global()->getVariable($variableName);
-                $this->contextStack->head()->setVariable($variableName, $value);
+                $this->contextStack->head()->setVariable($variableName, $value, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
             } else {
                 throw new \Exception('Cannot import variable ' . (string) $variableName . ', it does not exist');
             }

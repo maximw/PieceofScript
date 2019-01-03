@@ -4,6 +4,8 @@
 namespace PieceofScript\Services\Generators;
 
 
+use PieceofScript\Services\Errors\InternalError;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Generators\Generators\FakerProvider;
 use PieceofScript\Services\Generators\Generators\InternalProvider;
 use PieceofScript\Services\Generators\Generators\JwtProvider;
@@ -99,10 +101,12 @@ class GeneratorsRepository
             $arguments = explode(',', $arguments);
             foreach ($arguments as &$argument) {
                 $argument = trim($argument);
-                if (!preg_match('/^\$[a-z][a-z0-9_]*$/i', $argument)) {
-                    throw new \Exception('Bad argument name in generator definition ' . $generatorDefinition .  ' in ' . $fileName);
+                if (!empty($argument)) {
+                    if (!preg_match('/^\$[a-z][a-z0-9_]*$/i', $argument)) {
+                        throw new \Exception('Bad argument name in generator definition ' . $generatorDefinition . ' in ' . $fileName);
+                    }
+                    $generatorArguments[] = new VariableName($argument);
                 }
-                $generatorArguments[] = new VariableName($argument);
             }
 
         }
@@ -144,12 +148,12 @@ class GeneratorsRepository
     protected function addInternalGenerator(InternalGenerator $generator)
     {
         if (empty($generator::NAME)) {
-            throw new \Exception('Internal generator has empty name ' . get_class($generator));
+            throw new InternalError('Internal generator has empty name ' . get_class($generator));
         }
 
         $name = $this->getGeneratorId($generator->getName());
         if (array_key_exists($name, $this->generators)) {
-            throw new \Exception('Generator already exists ' .  get_class($generator));
+            throw new InternalError('Generator already exists ' .  get_class($generator));
         }
 
         $this->generators[$name] = $generator;
@@ -159,7 +163,7 @@ class GeneratorsRepository
     {
         $generatorName = $this->getGeneratorId($generatorName);
         if (!$this->exists($generatorName)) {
-            throw new \Exception('Generator does not exists "' . $generatorName . '"');
+            throw new RuntimeError('Generator does not exist "' . $generatorName . '"');
         }
         return $this->generators[$generatorName];
     }
