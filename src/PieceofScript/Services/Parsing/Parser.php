@@ -64,11 +64,16 @@ class Parser
     /** @var GeneratorsRepository */
     protected $generators;
 
+    /** @var ContextStack */
+    protected $contextStack;
+
     public function __construct(
-        GeneratorsRepository $generators
+        GeneratorsRepository $generators,
+        ContextStack $contextStack
     )
     {
         $this->generators = $generators;
+        $this->contextStack = $contextStack;
     }
 
 

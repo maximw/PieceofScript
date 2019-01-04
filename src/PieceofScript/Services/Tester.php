@@ -105,7 +105,7 @@ class Tester
         $this->endpoints = new EndpointsRepository();
         $this->testcases = new TestcasesRepository();
 
-        $this->parser = new Parser($this->generators);
+        $this->parser = new Parser($this->generators, $this->contextStack);
         $this->statistics = new Statistics($this->endpoints->getCount());
         if (null !== $reportFile) {
             $this->junitReport = new JunitReport(
@@ -527,7 +527,7 @@ class Tester
         $splitTokens = $this->parser->tokenizeSplitBy($expression, Token::T_SEMICOLON);
 
         foreach ($splitTokens as $tokens) {
-            $variableName = $this->parser->extractOperand($tokens);
+            $variableName = $this->parser->extractOperand($tokens, $this->contextStack);
             if (!$variableName instanceof VariableName) {
                 throw new \Exception('Error parsing import variable');
             }
