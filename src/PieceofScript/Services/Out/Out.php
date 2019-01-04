@@ -247,7 +247,7 @@ class Out
             }
         }
         if (!empty($response['raw'])) {
-            static::writeln('Body:', $verbosity);
+            static::writeln('Body:', $verbosity, 1);
             if (!empty($response['body'])) {
                 static::writeln(json_encode($response['body'], JSON_PRETTY_PRINT), $verbosity, 2);
             } else {

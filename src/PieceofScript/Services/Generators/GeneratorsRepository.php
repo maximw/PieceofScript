@@ -7,6 +7,7 @@ namespace PieceofScript\Services\Generators;
 use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Generators\Generators\FakerProvider;
+use PieceofScript\Services\Generators\Generators\InternalGenerator;
 use PieceofScript\Services\Generators\Generators\InternalProvider;
 use PieceofScript\Services\Generators\Generators\JwtProvider;
 use Symfony\Component\Yaml\Yaml;
@@ -145,7 +146,7 @@ class GeneratorsRepository
         }
     }
 
-    protected function addInternalGenerator(ParametrizedGenerator $generator)
+    protected function addInternalGenerator(InternalGenerator $generator)
     {
         if (empty($generator::NAME)) {
             throw new InternalError('Internal generator has empty name ' . get_class($generator));

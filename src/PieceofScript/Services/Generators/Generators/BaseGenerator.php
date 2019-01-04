@@ -56,7 +56,7 @@ abstract class BaseGenerator implements IGenerator
     public function final()
     {
         if (!$this->argumentsSkipped) {
-            $this->skipRestArgument();
+            $this->skipRestArguments();
         }
     }
 
@@ -72,13 +72,13 @@ abstract class BaseGenerator implements IGenerator
 
     protected function skipNextArgument()
     {
-       $this->parser->skipAST($this->ast, $this->contextStack);
+       $this->parser->skipAST($this->ast);
     }
 
-    protected function skipRestArgument()
+    protected function skipRestArguments()
     {
         while($this->hasNextArgument()) {
-            $this->parser->skipAST($this->ast, $this->contextStack);
+            $this->parser->skipAST($this->ast);
         }
         $this->ast->pop(); //Remove TYPE_ARGUMENTS_END
         $this->argumentsSkipped = true;

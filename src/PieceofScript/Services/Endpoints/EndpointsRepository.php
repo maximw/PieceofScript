@@ -82,10 +82,10 @@ class EndpointsRepository
         $after = $endpointBody['after'] ?? [];
 
         if (is_string($before)) {
-            $before = explode(PHP_EOL, $before);
+            $before = explode("\n", $before);
         }
         if (is_string($after)) {
-            $after = explode(PHP_EOL, $after);
+            $after = explode("\n", $after);
         }
 
         $arguments = $this->extractArguments($endpointName);

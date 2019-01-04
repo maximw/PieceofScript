@@ -6,9 +6,7 @@ namespace PieceofScript\Services\Parsing;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Contexts\GeneratorContext;
-use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Errors\RuntimeError;
-use PieceofScript\Services\Generators\Generators\EvaluationGenerator;
 use PieceofScript\Services\Generators\GeneratorsRepository;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -324,9 +322,7 @@ class Parser
         $token = $ast->pop();
 
         if ($token->getType() === Token::TYPE_VALUE) {
-
             return;
-
         } elseif ($token->getType() === Token::TYPE_OPERATION) {
 
             if ($token->getArgumentsCount() > 0) {
@@ -343,14 +339,20 @@ class Parser
             }
             $ast->pop(); //Remove TYPE_ARGUMENTS_END
 
-        } elseif ($token->getType() === Token::TYPE_ARRAY_KEY) {
+        } elseif ($token->getType() === Token::TYPE_VARIABLE) {
 
-            $this->skipAST($ast);
+            while (!$ast->isEmpty() && ($ast->head()->getName() === Token::T_ARRAY_KEY || $ast->head()->getName() === Token::T_ARRAY_SUB_AST)) {
+                $ast->pop();
+            }
 
         } elseif ($token->getType() === Token::TYPE_ASSIGNMENT) {
 
             $this->skipAST($ast);
             $this->skipAST($ast);
+
+        } elseif ($token->getType() == Token::TYPE_ARGUMENTS_END) {
+
+            return $this->skipAST($ast);
 
         }
 
@@ -515,7 +517,7 @@ class Parser
         }
 
         if ($contextStack->head()->isGlobalWritable) {
-            $contextStack->head()->setVariableGlobal($variable, $value);
+            $contextStack->head()->setVariableOrGlobal($variable, $value);
         } else {
             $contextStack->head()->setVariable($variable, $value);
         }

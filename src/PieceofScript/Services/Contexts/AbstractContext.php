@@ -137,7 +137,7 @@ abstract class AbstractContext
      * @param BaseLiteral $value
      * @param string|null $assignmentMode
      */
-    public function setVariableGlobal(VariableName $variableName, BaseLiteral $value, string $assignmentMode = null)
+    public function setVariableOrGlobal(VariableName $variableName, BaseLiteral $value, string $assignmentMode = null)
     {
         if (null === $assignmentMode) { //Do not use current $assignmentMode if it is given (for Global Context)
             $assignmentMode = $this->assignmentMode;

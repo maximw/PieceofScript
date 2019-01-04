@@ -13,8 +13,6 @@ class IfGenerator extends InternalGenerator
 {
     const NAME = 'if';
 
-    protected $lazyArguments = true;
-
     public function run(): BaseLiteral
     {
         if (!$this->hasNextArgument()) {

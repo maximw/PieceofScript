@@ -29,7 +29,7 @@ class FakerFile extends FakerGenerator
             throw new GeneratorInternalException(self::NAME . ' argument is not readable directory "' . $this->arguments[0] . '"');
         }
         if (realpath(Config::get()->getCacheDir()) == realpath($this->arguments[0])) {
-            throw new GeneratorInternalException(self::NAME . ' can not use directory configurated as cache_dir "' . $this->arguments[0] . '"');
+            throw new GeneratorInternalException(self::NAME . ' can not use directory configured as cache_dir "' . $this->arguments[0] . '"');
         }
         try {
             $result = new StringLiteral($this->faker->file($this->arguments[0], Config::get()->getCacheDir()));
