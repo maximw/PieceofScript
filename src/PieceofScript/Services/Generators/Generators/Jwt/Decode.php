@@ -5,6 +5,7 @@ namespace PieceofScript\Services\Generators\Generators\Jwt;
 
 
 use Lcobucci\JWT\Parser;
+use Lcobucci\JWT\Token;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
 use PieceofScript\Services\Generators\Generators\ParametrizedGenerator;
@@ -16,22 +17,31 @@ class Decode extends ParametrizedGenerator
 {
     const NAME = 'jwt\\decode';
 
-    public function run(...$arguments): BaseLiteral
+    public function run(): BaseLiteral
     {
-        if (count($arguments) !== 1) {
-            throw new ArgumentsCountError(self::NAME, count($arguments), 1);
+        if (count($this->arguments) !== 1) {
+            throw new ArgumentsCountError(self::NAME, count($this->arguments), 1);
         }
-        if (!$arguments[0] instanceof StringLiteral) {
-            throw new ArgumentTypeError(self::NAME, $arguments[0]::TYPE_NAME, StringLiteral::TYPE_NAME);
+        if (!$this->arguments[0] instanceof StringLiteral) {
+            throw new ArgumentTypeError(self::NAME, $this->arguments[0]::TYPE_NAME, StringLiteral::TYPE_NAME);
         }
 
-        $token = (new Parser())->parse((string) $arguments[0]->getValue());
+        $token = (new Parser())->parse((string) $this->arguments[0]->getValue());
         $result = [
             'headers' => $token->getHeaders(),
-            'claims' => $token->getClaims()
+            'claims' => $this->claimsToArray($token),
         ];
 
         return Utils::wrapValueContainer($result);
     }
 
+    protected function claimsToArray(Token $token)
+    {
+        $result = [];
+        foreach ($token->getClaims() as $claim => $value)
+        {
+            $result[$claim] = $value->getValue();
+        }
+        return $result;
+    }
 }

@@ -69,13 +69,13 @@ class YamlGenerator extends BaseGenerator
 
     public function run(): BaseLiteral
     {
-        $body = $this->parser->evaluate($this->body, $this->contextStack);
+        $body = $this->parser->evaluate($this->body, $this->contextStack->head());
         if (null !== $this->replace) {
-            $replace = $this->parser->evaluate($this->replace, $this->contextStack);
+            $replace = $this->parser->evaluate($this->replace, $this->contextStack->head());
             $this->replaceFields($body, $replace);
         }
         if (null !== $this->remove) {
-            $remove = $this->parser->evaluate($this->remove, $this->contextStack);
+            $remove = $this->parser->evaluate($this->remove, $this->contextStack->head());
             $this->removeFields($body, $remove);
         }
 

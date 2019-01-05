@@ -4,7 +4,9 @@
 namespace PieceofScript\Services\Utils;
 
 
+use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\FileNotFoundError;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\BoolLiteral;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -100,6 +102,26 @@ class Utils
             return $array;
         }
         throw new \Exception('Unhandled value type' . gettype($value));
+    }
+
+    public static function getConfigDateTime(): \DateTime
+    {
+        return (new \DateTime())
+            ->setTimestamp(Config::get()->getCurrentTimestamp())
+            ->setTimezone(Config::get()->getDefaultTimezone());
+    }
+
+    public static function getRelativeDateTime(): \DateTime
+    {
+        if (!isset($_SERVER['REQUEST_TIME'])) {
+            throw new RuntimeError('Script start time is not defined. $_SERVER["REQUEST_TIME"] is not set.');
+        }
+
+        $offset = (int) $_SERVER['REQUEST_TIME'] - time();
+        return (new \DateTime())
+            ->setTimestamp(Config::get()->getCurrentTimestamp())
+            ->modify($offset . ' seconds')
+            ->setTimezone(Config::get()->getDefaultTimezone());
     }
 
 }

@@ -7,6 +7,7 @@ namespace PieceofScript\Services\Generators\Generators\Faker;
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
 use PieceofScript\Services\Generators\Generators\FakerGenerator;
+use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\DateLiteral;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NullLiteral;
@@ -19,9 +20,9 @@ class FakerDateTime extends FakerGenerator
 
     public function run(): BaseLiteral
     {
-        $min = new \DateTime(Config::get()->getCurrentTimestamp(), Config::get()->getDefaultTimezone());
+        $min = Utils::getRelativeDateTime();
         $min = $min->modify('-30 years');
-        $max = new \DateTime(Config::get()->getCurrentTimestamp(), Config::get()->getDefaultTimezone());
+        $max = Utils::getRelativeDateTime();
 
         if (isset($this->arguments[0])) {
             if ($this->arguments[0] instanceof NumberLiteral) {

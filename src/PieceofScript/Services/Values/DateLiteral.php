@@ -6,6 +6,7 @@ namespace PieceofScript\Services\Values;
 
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\TypeErrors\IncompatibleTypesOperationException;
+use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\Hierarchy\IScalarValue;
 
@@ -19,7 +20,8 @@ class DateLiteral extends BaseLiteral implements IScalarValue
     public function __construct($value = 'now')
     {
         try {
-            $this->value = new \DateTimeImmutable((string) $value, Config::get()->getDefaultTimezone());
+            $now = Utils::getRelativeDateTime();
+            $this->value = $now->modify((string) $value);
         } catch (\Exception $e) {
             throw new \Exception('Cannot parse ' . $value . ' to Date');
         }

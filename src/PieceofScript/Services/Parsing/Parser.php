@@ -81,22 +81,24 @@ class Parser
     /**
      * Evaluate string or array. Entry point of Parser
      *
-     * @param string|array|TokensQueue|BaseLiteral $value
-     * @param ContextStack $contextStack
+     * @param string|array|TokensQueue|TokensStack|BaseLiteral $value
+     * @param AbstractContext $context
      * @return BaseLiteral
      */
-    public function evaluate($value, ContextStack $contextStack): BaseLiteral
+    public function evaluate($value, AbstractContext $context): BaseLiteral
     {
         if (is_string($value)) {
             $tokens = $this->tokenize($value);
             $ast =  $this->buildAST($tokens);
-            return $this->extractLiteral($this->executeAST($ast, $contextStack), $contextStack);
+            return $this->extractLiteral($this->executeAST($ast, $context), $context);
         } elseif ($value instanceof TokensQueue) {
             $ast = $this->buildAST($value);
-            return $this->extractLiteral($this->executeAST($ast, $contextStack), $contextStack);
+            return $this->extractLiteral($this->executeAST($ast, $context), $context);
+        } elseif ($value instanceof TokensStack) {
+            return $this->extractLiteral($this->executeAST($value, $context), $context);
         } elseif (is_array($value)) {
             foreach ($value as $key => $val) {
-                $value[$key] = $this->extractLiteral($this->evaluate($val, $contextStack), $contextStack);
+                $value[$key] = $this->extractLiteral($this->evaluate($val, $context), $context);
             }
         }
         return Utils::wrapValueContainer($value);
@@ -134,11 +136,11 @@ class Parser
      * Extract operand from given expression
      *
      * @param string|TokensQueue $expression
-     * @param ContextStack $contextStack
+     * @param AbstractContext $context
      * @return BaseLiteral
      * @throws \Exception
      */
-    public function extractOperand($expression, ContextStack $contextStack): Operand
+    public function extractOperand($expression, AbstractContext $context): Operand
     {
         if (!$expression instanceof TokensQueue) {
             $expression = $this->tokenize($expression);
@@ -150,7 +152,58 @@ class Parser
             throw new \Exception('Error parsing expression ' . $expression);
         }
 
-        return $this->executeAST($ast, $contextStack);
+        return $this->executeAST($ast, $context);
+    }
+
+
+    /**
+     * Do not execute part of AST
+     * @param TokensStack $ast
+     * @throws \Exception
+     */
+    public function skipAST(TokensStack $ast)
+    {
+        if ($ast->isEmpty()) {
+            throw new \Exception('AST is empty');
+        }
+
+        $token = $ast->pop();
+
+        if ($token->getType() === Token::TYPE_VALUE) {
+            return;
+        } elseif ($token->getType() === Token::TYPE_OPERATION) {
+
+            if ($token->getArgumentsCount() > 0) {
+                $this->skipAST($ast);
+            }
+            if ($token->getArgumentsCount() > 1) {
+                $this->skipAST($ast);
+            }
+
+        } elseif ($token->getType() === Token::TYPE_FUNCTION) {
+
+            while (!$ast->isEmpty() && $ast->head()->getType() !== Token::TYPE_ARGUMENTS_END) {
+                $this->skipAST($ast);
+            }
+            $ast->pop(); //Remove TYPE_ARGUMENTS_END
+
+        } elseif ($token->getType() === Token::TYPE_VARIABLE) {
+
+            while (!$ast->isEmpty() && ($ast->head()->getName() === Token::T_ARRAY_KEY || $ast->head()->getName() === Token::T_ARRAY_SUB_AST)) {
+                $ast->pop();
+            }
+
+        } elseif ($token->getType() === Token::TYPE_ASSIGNMENT) {
+
+            $this->skipAST($ast);
+            $this->skipAST($ast);
+
+        } elseif ($token->getType() == Token::TYPE_ARGUMENTS_END) {
+
+            return $this->skipAST($ast);
+
+        }
+
     }
 
     /**
@@ -186,6 +239,7 @@ class Parser
                         if ($tokens->isEmpty()
                             || $tokens->head()->getName() === Token::T_OPEN_PARENTHESIS
                             || $tokens->head()->getName() === Token::T_OPEN_BRACKETS
+                            || $tokens->head()->getName() === Token::T_COMMA
                             || $tokens->head()->getType() === Token::TYPE_OPERATION
                             || $tokens->head()->getType() === Token::TYPE_ASSIGNMENT
                         ) {
@@ -291,87 +345,37 @@ class Parser
     }
 
 
-    public function executeAST(TokensStack $ast, ContextStack $contextStack): Operand
+    protected function executeAST(TokensStack $ast, AbstractContext $context): Operand
     {
         if ($ast->isEmpty()) {
             throw new \Exception('AST is empty');
         }
         $token = $ast->pop();
         if ($token->getType() === Token::TYPE_VALUE) {
-            return $this->getOperand($token, $contextStack);
+            return $this->getOperand($token, $context);
         } elseif ($token->getType() === Token::TYPE_OPERATION) {
-            return $this->executeOperation($token, $ast, $contextStack);
+            return $this->executeOperation($token, $ast, $context);
         } elseif ($token->getType() === Token::TYPE_FUNCTION) {
-            return $this->executeGenerator($token, $ast, $contextStack);
+            return $this->executeGenerator($token, $ast, $context);
         } elseif ($token->getType() === Token::TYPE_VARIABLE) {
-            return $this->getVariableName($token, $ast, $contextStack);
+            return $this->getVariableName($token, $ast, $context);
         } elseif ($token->getType() === Token::TYPE_ASSIGNMENT) {
-            return $this->executeAssignment($token, $ast, $contextStack);
+            return $this->executeAssignment($token, $ast, $context);
         } elseif ($token->getType() == Token::TYPE_ARGUMENTS_END) {
-            return $this->executeAST($ast, $contextStack);
+            return $this->executeAST($ast, $context);
         }
         throw new \Exception('Evaluating error');
-    }
-
-    /**
-     * Do not execute part of AST
-     * @param TokensStack $ast
-     * @throws \Exception
-     */
-    public function skipAST(TokensStack $ast)
-    {
-        if ($ast->isEmpty()) {
-            throw new \Exception('AST is empty');
-        }
-
-        $token = $ast->pop();
-
-        if ($token->getType() === Token::TYPE_VALUE) {
-            return;
-        } elseif ($token->getType() === Token::TYPE_OPERATION) {
-
-            if ($token->getArgumentsCount() > 0) {
-                $this->skipAST($ast);
-            }
-            if ($token->getArgumentsCount() > 1) {
-                $this->skipAST($ast);
-            }
-
-        } elseif ($token->getType() === Token::TYPE_FUNCTION) {
-
-            while (!$ast->isEmpty() && $ast->head()->getType() !== Token::TYPE_ARGUMENTS_END) {
-                $this->skipAST($ast);
-            }
-            $ast->pop(); //Remove TYPE_ARGUMENTS_END
-
-        } elseif ($token->getType() === Token::TYPE_VARIABLE) {
-
-            while (!$ast->isEmpty() && ($ast->head()->getName() === Token::T_ARRAY_KEY || $ast->head()->getName() === Token::T_ARRAY_SUB_AST)) {
-                $ast->pop();
-            }
-
-        } elseif ($token->getType() === Token::TYPE_ASSIGNMENT) {
-
-            $this->skipAST($ast);
-            $this->skipAST($ast);
-
-        } elseif ($token->getType() == Token::TYPE_ARGUMENTS_END) {
-
-            return $this->skipAST($ast);
-
-        }
-
     }
 
     /**
      * Get one operand - VariableName or Literal
      *
      * @param Token $token
-     * @param ContextStack $contextStack
+     * @param AbstractContext $context
      * @return BaseLiteral
      * @throws \Exception
      */
-    protected function getOperand(Token $token, ContextStack $contextStack): Operand
+    protected function getOperand(Token $token, AbstractContext $context): Operand
     {
         if ($token->getName() === Token::T_NULL) {
 
@@ -398,10 +402,17 @@ class Parser
         throw new \Exception('Cannot get value of unknown token type');
     }
 
-    protected function executeOperation(Token $operation, TokensStack $ast, ContextStack $contextStack): BaseLiteral
+    /**
+     * @param Token $operation
+     * @param TokensStack $ast
+     * @param AbstractContext $context
+     * @return BaseLiteral
+     * @throws \Exception
+     */
+    protected function executeOperation(Token $operation, TokensStack $ast, AbstractContext $context): BaseLiteral
     {
         if ($operation->getArgumentsCount() > 0) {
-            $operand1 = $this->extractLiteral($this->executeAST($ast, $contextStack), $contextStack);
+            $operand1 = $this->extractLiteral($this->executeAST($ast, $context), $context);
         }
 
         if ($operand1->toBool()->getValue() && $operation->getName() === Token::T_OR) {
@@ -414,7 +425,7 @@ class Parser
         }
 
         if ($operation->getArgumentsCount() > 1) {
-            $operand2 = $this->extractLiteral($this->executeAST($ast, $contextStack), $contextStack);
+            $operand2 = $this->extractLiteral($this->executeAST($ast, $context), $context);
         }
 
         if ($operation->getName() === Token::T_EQUALS) {
@@ -456,7 +467,15 @@ class Parser
         throw new \Exception('Unknown operation ' . $operation->getValue());
     }
 
-    protected function executeGenerator(Token $token, TokensStack $ast, ContextStack $contextStack): BaseLiteral
+    /**
+     * @param Token $token
+     * @param TokensStack $ast
+     * @param AbstractContext $context
+     * @return BaseLiteral
+     * @throws RuntimeError
+     * @throws \PieceofScript\Services\Errors\ContextStackEmptyException
+     */
+    protected function executeGenerator(Token $token, TokensStack $ast, AbstractContext $context): BaseLiteral
     {
         $generator = $this->generators->get($token->getValue());
         $generator->setParser($this);
@@ -466,19 +485,26 @@ class Parser
             $generator->getName(),
             $generator->getFileName()
         );
-        $contextStack->push($context);
-        $generator->setContextStack($contextStack);
+        $this->contextStack->push($context);
+        $generator->setContextStack($this->contextStack);
 
 
         $generator->init();
         $value = $generator->run();
         $generator->final();
 
-        $contextStack->pop();
+        $this->contextStack->pop();
         return $value;
     }
 
-    protected function getVariableName(Token $token, TokensStack $ast, ContextStack $contextStack): VariableName
+    /**
+     * @param Token $token
+     * @param TokensStack $ast
+     * @param AbstractContext $context
+     * @return VariableName
+     * @throws \Exception
+     */
+    protected function getVariableName(Token $token, TokensStack $ast, AbstractContext $context): VariableName
     {
         $variableName = new VariableName($token->getValue());
 
@@ -488,7 +514,7 @@ class Parser
             if ($keyToken->getName() === Token::T_ARRAY_KEY) {
                 $key = $this->arrayKeyToLiteral($keyToken);
             } elseif ($keyToken->getName() === Token::T_ARRAY_SUB_AST) {
-                $key = $this->executeAST($keyToken->getValue(), $contextStack);
+                $key = $this->executeAST($keyToken->getValue(), $context);
             }
             if (!$key instanceof IKeyValue) {
                 throw new \Exception('Cannot use ' . $key::TYPE_NAME . ' as array key');
@@ -504,27 +530,27 @@ class Parser
      *
      * @param Token $operationEquals
      * @param TokensStack $ast
-     * @param ContextStack $contextStack
+     * @param AbstractContext $context
      * @return BaseLiteral
      * @throws \PieceofScript\Services\Errors\ContextStackEmptyException
      */
-    protected function executeAssignment(Token $operationEquals, TokensStack $ast, ContextStack $contextStack): BaseLiteral
+    protected function executeAssignment(Token $operationEquals, TokensStack $ast, AbstractContext $context): BaseLiteral
     {
-        if ($contextStack->head()->assignmentMode === AbstractContext::ASSIGNMENT_MODE_OFF) {
+        if ($context->assignmentMode === AbstractContext::ASSIGNMENT_MODE_OFF) {
             throw new \Exception('Cannot assign value here, did you mean == instead of = ?');
         }
 
-        $variable = $this->executeAST($ast, $contextStack);
-        $value = $this->extractLiteral($this->executeAST($ast, $contextStack), $contextStack);
+        $variable = $this->executeAST($ast, $context);
+        $value = $this->extractLiteral($this->executeAST($ast, $context), $context);
 
         if (!$variable instanceof VariableName) {
             throw new \Exception('Cannot assign value to value, did you mean == instead of = ?');
         }
 
-        if ($contextStack->head()->isGlobalWritable) {
-            $contextStack->head()->setVariableOrGlobal($variable, $value);
+        if ($context->isGlobalWritable) {
+            $context->setVariableOrGlobal($variable, $value);
         } else {
-            $contextStack->head()->setVariable($variable, $value);
+            $context->setVariable($variable, $value);
         }
 
         return $value;
@@ -534,11 +560,11 @@ class Parser
      * Get Literal from Operand, if Operand is VariableName - try to get variable value from variables repository
      *
      * @param Operand $operand
-     * @param ContextStack $contextStack
+     * @param AbstractContext $context
      * @return BaseLiteral
      * @throws \Exception
      */
-    public function extractLiteral(Operand $operand, ContextStack $contextStack): BaseLiteral
+    protected function extractLiteral(Operand $operand, AbstractContext $context): BaseLiteral
     {
         if ($operand instanceof BaseLiteral) {
             return $operand;
@@ -547,19 +573,19 @@ class Parser
         if ($operand instanceof VariableName) {
             if ($operand->mode === VariableName::MODE_VALUE ) {
 
-                return $contextStack->head()->getVariable($operand);
+                return $context->getVariable($operand);
 
             } elseif ($operand->mode === VariableName::MODE_TYPE) {
 
-                if ($contextStack->head()->hasVariable($operand)) {
-                    if ($contextStack->head()->hasVariable($operand, true)) {
-                        $value = $contextStack->head()->getVariable($operand);
+                if ($context->hasVariable($operand)) {
+                    if ($context->hasVariable($operand, true)) {
+                        $value = $context->getVariable($operand);
                         return new StringLiteral($value::TYPE_NAME);
                     }
                     return new BoolLiteral(false);
                 }
-                if ($contextStack->global()->hasVariable($operand, true)) {
-                    $value = $contextStack->global()->getVariable($operand);
+                if ($context->getGlobalContext()->hasVariable($operand, true)) {
+                    $value = $context->getGlobalContext()->getVariable($operand);
                     return new StringLiteral($value::TYPE_NAME);
                 }
                 return new BoolLiteral(false);

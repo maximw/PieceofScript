@@ -141,8 +141,8 @@ class Statistics
 
         Out::printStatistics('Assertions: ', 1);
         Out::printStatistics('total: '. $count['assertions']['total'], 2);
-        Out::printStatistics('success: '. $count['assertions']['success'], 2);
-        Out::printStatistics('fail: '. $count['assertions']['fail'], 2);
+        Out::printStatistics('success: '. $count['assertions']['success'] . $this->formatPercent($count['assertions']['success'], $count['assertions']['total']), 2);
+        Out::printStatistics('fail: '. $count['assertions']['fail'] . $this->formatPercent($count['assertions']['fail'], $count['assertions']['total']), 2);
     }
 
     protected function formatPercent(int $count, int $total)

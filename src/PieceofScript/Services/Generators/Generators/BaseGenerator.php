@@ -67,7 +67,7 @@ abstract class BaseGenerator implements IGenerator
 
     protected function getNextArgument(): BaseLiteral
     {
-        return $this->parser->extractLiteral($this->parser->executeAST($this->ast, $this->contextStack), $this->contextStack);
+        return $this->parser->evaluate($this->ast, $this->contextStack->neck());
     }
 
     protected function skipNextArgument()

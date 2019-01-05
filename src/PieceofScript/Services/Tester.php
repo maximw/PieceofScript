@@ -123,10 +123,6 @@ class Tester
             $this->contextStack->push($context);
 
             $this->executeFile($this->startFile);
-            $this->statistics->printStatistics();
-            if ($this->junitReport instanceof JunitReport) {
-                $this->junitReport->generate();
-            }
         } catch (CancelException $e) {
             Out::printCancel();
         } catch (MustException $e) {
@@ -208,10 +204,10 @@ class Tester
 
                 $blockBody = $this->getBlockBody($lines, $totalLines, $lineNumber, $indent);
 
-                $flag = $this->parser->evaluate($expression, $this->contextStack)->toBool()->getValue();
+                $flag = $this->parser->evaluate($expression, $this->contextStack->head())->toBool()->getValue();
                 while ($flag) {
                     $this->executeLines($blockBody, $currentFile, $lineNumber + 1 + $offsetLineNumber);
-                    $flag = $this->parser->evaluate($expression, $this->contextStack)->toBool()->getValue();
+                    $flag = $this->parser->evaluate($expression, $this->contextStack->head())->toBool()->getValue();
                 }
                 $lineNumber = $lineNumber + count($blockBody);
 
@@ -223,13 +219,13 @@ class Tester
                 if (count($splitTokens) !== 2 && count($splitTokens) !== 3) {
                     throw new \Exception('Error parsing foreach');
                 }
-                $array = $this->parser->evaluate($splitTokens[0], $this->contextStack);
+                $array = $this->parser->evaluate($splitTokens[0], $this->contextStack->head());
                 if (!$array instanceof ArrayLiteral) {
                     throw new \Exception('Cannot iterate over ' . $array::TYPE_NAME);
                 }
                 $withKey = count($splitTokens) === 3;
 
-                $valueName = $this->parser->extractOperand($withKey ? $splitTokens[2] : $splitTokens[1], $this->contextStack);
+                $valueName = $this->parser->extractOperand($withKey ? $splitTokens[2] : $splitTokens[1], $this->contextStack->head());
                 if (!$valueName instanceof VariableName) {
                     throw new \Exception('Error parsing foreach');
                 }
@@ -237,7 +233,7 @@ class Tester
                     throw new \Exception('Error parsing foreach');
                 }
                 if ($withKey) {
-                    $keyName = $this->parser->extractOperand($splitTokens[1], $this->contextStack);
+                    $keyName = $this->parser->extractOperand($splitTokens[1], $this->contextStack->head());
                     if (!$keyName instanceof VariableName) {
                         throw new \Exception('Error parsing foreach');
                     }
@@ -259,7 +255,7 @@ class Tester
 
                 $blockBody = $this->getBlockBody($lines, $totalLines, $lineNumber, $indent);
 
-                $flag = $this->parser->evaluate($expression, $this->contextStack)->toBool()->getValue();
+                $flag = $this->parser->evaluate($expression, $this->contextStack->head())->toBool()->getValue();
                 if ($flag) {
                     $this->executeLines($blockBody, $currentFile, $lineNumber + 1 + $offsetLineNumber);
                 }
@@ -291,7 +287,7 @@ class Tester
     {
         if ($operator === self::OPERATOR_REQUIRE) {
 
-            $requiredFile = $this->parser->evaluate($expression, $this->contextStack)->getValue();
+            $requiredFile = $this->parser->evaluate($expression, $this->contextStack->head())->getValue();
             $this->executeFile($requiredFile);
             $this->contextStack->head()
                 ->setFile($fileName)
@@ -299,13 +295,13 @@ class Tester
 
         } elseif ($operator === self::OPERATOR_INCLUDE) {
 
-            $filesMask = $this->parser->evaluate($expression, $this->contextStack)->getValue();
+            $filesMask = $this->parser->evaluate($expression, $this->contextStack->head())->getValue();
             $files = Utils::fileSearch($filesMask, true);
             foreach ($files as $file) {
                 try {
                     $this->executeFile($file);
                 } catch (FileNotFoundError $e) {
-                    Out::printWarning($e->getMessage(), $this->contextStack);
+                    Out::printWarning($e->getMessage(), $this->contextStack->head());
                 }
             }
             $this->contextStack->head()
@@ -381,7 +377,7 @@ class Tester
         // Get all references
         $references = [];
         foreach ($endpointCall->getParameters() as $parameter) {
-            $variable = $this->parser->extractOperand($parameter, $this->contextStack);
+            $variable = $this->parser->extractOperand($parameter, $this->contextStack->head());
             if ($variable instanceof VariableName) {
                 $references[] = $this->contextStack->head()->getReference($variable);
             }
@@ -406,14 +402,14 @@ class Tester
         $requestVarName = new VariableName('$request');
         $responseVarName = new VariableName('$response');
         $request = Utils::wrapValueContainer([
-            'method' => $this->parser->evaluate($endpointCall->getEndpoint()->getHttpMethod(), $this->contextStack),
-            'url' => $this->parser->evaluate($endpointCall->getEndpoint()->getUrl(), $this->contextStack),
-            'headers' => $this->parser->evaluate($endpointCall->getEndpoint()->getHeaders(), $this->contextStack),
-            'cookies' => $this->parser->evaluate($endpointCall->getEndpoint()->getCookies(), $this->contextStack),
-            'auth' => $this->parser->evaluate($endpointCall->getEndpoint()->getAuth(), $this->contextStack),
-            'query' => $this->parser->evaluate($endpointCall->getEndpoint()->getQuery(), $this->contextStack),
-            'format' => strtolower($this->parser->evaluate($endpointCall->getEndpoint()->getFormat(), $this->contextStack)->getValue()),
-            'data' => $this->parser->evaluate($endpointCall->getEndpoint()->getData(), $this->contextStack),
+            'method' => $this->parser->evaluate($endpointCall->getEndpoint()->getHttpMethod(), $this->contextStack->head()),
+            'url' => $this->parser->evaluate($endpointCall->getEndpoint()->getUrl(), $this->contextStack->head()),
+            'headers' => $this->parser->evaluate($endpointCall->getEndpoint()->getHeaders(), $this->contextStack->head()),
+            'cookies' => $this->parser->evaluate($endpointCall->getEndpoint()->getCookies(), $this->contextStack->head()),
+            'auth' => $this->parser->evaluate($endpointCall->getEndpoint()->getAuth(), $this->contextStack->head()),
+            'query' => $this->parser->evaluate($endpointCall->getEndpoint()->getQuery(), $this->contextStack->head()),
+            'format' => strtolower($this->parser->evaluate($endpointCall->getEndpoint()->getFormat(), $this->contextStack->head())->getValue()),
+            'data' => $this->parser->evaluate($endpointCall->getEndpoint()->getData(), $this->contextStack->head()),
             ]);
         $this->contextStack->head()->setVariable($requestVarName, $request, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         $this->contextStack->head()->setVariable($responseVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
@@ -443,7 +439,7 @@ class Tester
 
     protected function operatorAssert(string $expression)
     {
-        $success = $this->parser->evaluate($expression, $this->contextStack)->toBool()->getValue();
+        $success = $this->parser->evaluate($expression, $this->contextStack->head())->toBool()->getValue();
         $this->statistics->addAssertion($expression, $success, $this->contextStack);
         Out::printAssert($expression, $success);
         return $success;
@@ -470,7 +466,7 @@ class Tester
         $this->contextStack->head()->isGlobalWritable = false;
         $this->contextStack->head()->assignmentMode = AbstractContext::ASSIGNMENT_MODE_CONST;
         foreach ($splitTokens as $tokens) {
-            $this->parser->evaluate($tokens, $this->contextStack);
+            $this->parser->evaluate($tokens, $this->contextStack->head());
         }
         $this->contextStack->head()->isGlobalWritable = true;
         $this->contextStack->head()->assignmentMode = AbstractContext::ASSIGNMENT_MODE_OFF;
@@ -488,7 +484,7 @@ class Tester
         $this->contextStack->head()->isGlobalWritable = false;
         $this->contextStack->head()->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
         foreach ($splitTokens as $tokens) {
-            $this->parser->evaluate($tokens, $this->contextStack);
+            $this->parser->evaluate($tokens, $this->contextStack->head());
         }
         $this->contextStack->head()->isGlobalWritable = true;
         $this->contextStack->head()->assignmentMode = AbstractContext::ASSIGNMENT_MODE_OFF;
@@ -506,7 +502,7 @@ class Tester
 
         $this->contextStack->head()->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
         foreach ($splitTokens as $tokens) {
-            $this->parser->evaluate($tokens, $this->contextStack);
+            $this->parser->evaluate($tokens, $this->contextStack->head());
         }
         $this->contextStack->head()->assignmentMode = AbstractContext::ASSIGNMENT_MODE_OFF;
     }
@@ -527,7 +523,7 @@ class Tester
         $splitTokens = $this->parser->tokenizeSplitBy($expression, Token::T_SEMICOLON);
 
         foreach ($splitTokens as $tokens) {
-            $variableName = $this->parser->extractOperand($tokens, $this->contextStack);
+            $variableName = $this->parser->extractOperand($tokens, $this->contextStack->head());
             if (!$variableName instanceof VariableName) {
                 throw new \Exception('Error parsing import variable');
             }
@@ -595,7 +591,7 @@ class Tester
         // Get all references
         $references = [];
         foreach ($testcaseCall->parameters as $parameter) {
-            $variable = $this->parser->extractOperand($parameter, $this->contextStack);
+            $variable = $this->parser->extractOperand($parameter, $this->contextStack->head());
             if ($variable instanceof VariableName) {
                 $references[] = $this->contextStack->head()->getReference($variable);
             }
@@ -637,7 +633,7 @@ class Tester
         $splitTokens = $this->parser->tokenizeSplitBy($expression, Token::T_SEMICOLON);
         $printable = [];
         foreach ($splitTokens as $tokens) {
-            $value = $this->parser->evaluate($tokens, $this->contextStack);
+            $value = $this->parser->evaluate($tokens, $this->contextStack->head());
             $printable[] = $value->toPrint();
         }
         Out::printValues($printable);
@@ -649,7 +645,7 @@ class Tester
      */
     protected function operatorSleep(string $expression)
     {
-        $value = $this->parser->evaluate($expression, $this->contextStack);
+        $value = $this->parser->evaluate($expression, $this->contextStack->head());
         if (!$value instanceof NumberLiteral) {
             throw new RuntimeError('Sleep required Number of microseconds. ' . $value::TYPE_NAME . ' given');
         }
