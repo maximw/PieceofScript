@@ -7,16 +7,14 @@
         "This source file is subject to the MIT license that is bundled",
         "with this source code in the file LICENSE."
     ],
-
     "main": "run.php",
-	"output": "pos.phar",
+	"output": "bin/pos.phar",
     "chmod": "0750",
 	"directories": [
 		"src",
 		"vendor"
 		],
-	"check-requirements": true,
-	"compression": "GZ"
-	
-	
+	"check-requirements": false,
+	"compression": "GZ",
+    "stub": true
 }
