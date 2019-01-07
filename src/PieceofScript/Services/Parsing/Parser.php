@@ -478,22 +478,15 @@ class Parser
     protected function executeGenerator(Token $token, TokensStack $ast, AbstractContext $context): BaseLiteral
     {
         $generator = $this->generators->get($token->getValue());
-        $generator->setParser($this);
-        $generator->setAst($ast);
-
-        $context = new GeneratorContext(
-            $generator->getName(),
-            $generator->getFileName()
-        );
-        $this->contextStack->push($context);
-        $generator->setContextStack($this->contextStack);
-
+        $generator->setParser($this)
+                    ->setAst($ast)
+                    ->setContext($context)
+                    ->setContextStack($this->contextStack);
 
         $generator->init();
         $value = $generator->run();
         $generator->final();
 
-        $this->contextStack->pop();
         return $value;
     }
 

@@ -162,20 +162,20 @@ class GeneratorsRepository
 
     public function get(string $generatorName): BaseGenerator
     {
-        $generatorName = $this->getGeneratorId($generatorName);
-        if (!$this->exists($generatorName)) {
+        $generatorId = $this->getGeneratorId($generatorName);
+        if (!$this->exists($generatorId)) {
             throw new RuntimeError('Generator does not exist "' . $generatorName . '"');
         }
-        return $this->generators[$generatorName];
+        return $this->generators[$generatorId];
     }
 
     public function add($generatorName, $generator)
     {
-        $generatorName = $this->getGeneratorId($generatorName);
+        $generatorId = $this->getGeneratorId($generatorName);
         if ($this->exists($generatorName)) {
-            throw new \Exception('Generator does not exists "' . $generatorName . '"');
+            throw new RuntimeError('Generator does not exists "' . $generatorName . '"');
         }
-        $this->generators[$generatorName] = $generator;
+        $this->generators[$generatorId] = $generator;
     }
 
     public function exists(string $generatorName): bool

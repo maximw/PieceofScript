@@ -302,7 +302,9 @@ class HttpClient
 
     protected static function isJsonResponse(Response $response)
     {
-        return false !== strpos(strtolower($response->getHeader('content-type')), 'json');
+        $header = $response->getHeader('content-type');
+        $header = is_array($header) ? reset($header) : $header;
+        return false !== strpos(strtolower($header), 'json');
     }
 
     protected static function responseHeaders($responseHeaders)

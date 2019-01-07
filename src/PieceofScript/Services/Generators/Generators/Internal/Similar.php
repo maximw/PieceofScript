@@ -48,6 +48,7 @@ class Similar extends ParametrizedGenerator
                 }
             }
         }
+        return true;
     }
 
 }

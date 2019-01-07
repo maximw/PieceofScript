@@ -50,6 +50,13 @@ abstract class AbstractContext
     protected $parentContext;
 
     /**
+     * Link to child Context
+     *
+     * @var AbstractContext|null
+     */
+    protected $childContext;
+
+    /**
      * Link to global Context
      *
      * @var GlobalContext|null
@@ -239,6 +246,19 @@ abstract class AbstractContext
             throw new \Exception('Non-global context requires parent context');
         }
         $this->parentContext = $context;
+        return $this;
+    }
+
+    public function getChildContext()
+    {
+        return $this->childContext;
+    }
+
+    public function setChildContext(AbstractContext $context): self
+    {
+        $this->childContext = $context;
+        $context->setParentContext($this);
+        $context->setGlobalContext($this->getGlobalContext());
         return $this;
     }
 

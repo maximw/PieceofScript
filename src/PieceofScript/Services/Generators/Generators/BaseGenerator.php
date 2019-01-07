@@ -2,6 +2,7 @@
 
 namespace PieceofScript\Services\Generators\Generators;
 
+use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Generators\IGenerator;
 use PieceofScript\Services\Parsing\Parser;
@@ -28,6 +29,9 @@ abstract class BaseGenerator implements IGenerator
 
     /** @var ContextStack */
     protected $contextStack;
+
+    /** @var AbstractContext */
+    protected $context;
 
     /** @var Parser */
     protected $parser;
@@ -67,7 +71,7 @@ abstract class BaseGenerator implements IGenerator
 
     protected function getNextArgument(): BaseLiteral
     {
-        return $this->parser->evaluate($this->ast, $this->contextStack->neck());
+        return $this->parser->evaluate($this->ast, $this->context);
     }
 
     protected function skipNextArgument()
@@ -131,6 +135,16 @@ abstract class BaseGenerator implements IGenerator
     }
 
     /**
+     * @param AbstractContext $context
+     * @return BaseGenerator
+     */
+    public function setContext(AbstractContext $context): BaseGenerator
+    {
+        $this->context = $context;
+        return $this;
+    }
+
+    /**
      * @param Parser $parser
      * @return BaseGenerator
      */
@@ -142,10 +156,12 @@ abstract class BaseGenerator implements IGenerator
 
     /**
      * @param TokensStack $ast
+     * @return BaseGenerator
      */
-    public function setAst(TokensStack $ast)
+    public function setAst(TokensStack $ast): BaseGenerator
     {
         $this->ast = $ast;
+        return $this;
     }
 
 }

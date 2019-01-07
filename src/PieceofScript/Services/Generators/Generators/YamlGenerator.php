@@ -3,6 +3,7 @@
 namespace PieceofScript\Services\Generators\Generators;
 
 use PieceofScript\Services\Contexts\AbstractContext;
+use PieceofScript\Services\Contexts\GeneratorContext;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Utils\Utils;
@@ -62,24 +63,38 @@ class YamlGenerator extends BaseGenerator
             Out::printWarning('generator ' . $this->getName() . ' requires ' . count($parameters) . ' arguments, but ' . count($arguments) . ' given', $this->contextStack);
         }
 
+        $context = new GeneratorContext(
+            $this->getName(),
+            $this->getFileName()
+        );
+        $this->contextStack->push($context);
+
         for ($i = 0; $i < count($parameters); $i++) {
-            $this->contextStack->head()->setVariable($parameters[$i], $arguments[$i], AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+            $context->setVariable($parameters[$i], $arguments[$i], AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         }
+
+        $this->setContext($context);
     }
 
     public function run(): BaseLiteral
     {
-        $body = $this->parser->evaluate($this->body, $this->contextStack->head());
+        $body = $this->parser->evaluate($this->body, $this->context);
         if (null !== $this->replace) {
-            $replace = $this->parser->evaluate($this->replace, $this->contextStack->head());
+            $replace = $this->parser->evaluate($this->replace, $this->context);
             $this->replaceFields($body, $replace);
         }
         if (null !== $this->remove) {
-            $remove = $this->parser->evaluate($this->remove, $this->contextStack->head());
+            $remove = $this->parser->evaluate($this->remove, $this->context);
             $this->removeFields($body, $remove);
         }
 
         return Utils::wrapValueContainer($body);
+    }
+
+    public function final()
+    {
+        parent::final();
+        $this->contextStack->pop();
     }
 
     /**

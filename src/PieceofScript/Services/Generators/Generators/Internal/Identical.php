@@ -59,6 +59,7 @@ class Identical extends ParametrizedGenerator
                 }
             }
         }
+        return true;
     }
 
 }
