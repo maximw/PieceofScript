@@ -7,6 +7,7 @@ use function DeepCopy\deep_copy;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Errors\Parser\ParserError;
 use PieceofScript\Services\Errors\Parser\VariableError;
+use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\ArrayLiteral;
@@ -102,13 +103,12 @@ class VariablesRepository
         if ($currentValue instanceof VariableReference) {
             ($currentValue->set)($varName->path, $value);
         } else {
-            $this->setVal($varName->path, $currentValue, $value, $varName);
-
             if (!isset($this->assignmentModes[$varName->name]) || $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE) {
+                $this->setVal($varName->path, $currentValue, $value, $varName);
                 $this->variables[$varName->name] = $currentValue;
                 $this->assignmentModes[$varName->name] = $assignmentMode;
             } else {
-                throw new VariableError($varName, 'cannot change constant value.');
+                Out::printWarning('Cannot change constant value ' . (string) $varName);
             }
         }
     }

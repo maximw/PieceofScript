@@ -6,7 +6,7 @@ of HTTP JSON API.
 <ol>
  <li><a hreg="run.md">Installation</a></li>
  <li><a hreg="run.md#run">Run</a></li>
- <li><a href="project.md">Testing project sctucture</a></li>
+ <li><a href="project.md">Testing project structure</a></li>
  <li><a href="scenario.md">Scenarios</a></li>
  <li><a href="endpoints.md">API endpoints</a></li> 
  <li><a href="generators.md">Generators - data models</a></li> 
