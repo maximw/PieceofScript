@@ -4,8 +4,9 @@ Simple language for writing scenarios for automated functional tests
 of HTTP JSON API.
 
 <ol>
- <li><a hreg="run.md">Installation</a></li>
- <li><a hreg="run.md#run">Run</a></li>
+ <li><a href="run.md">Installation</a></li>
+ <li><a href="run.md#run">Run</a></li>
+ <li><a href="run.md#config">Configuration</a></li>
  <li><a href="project.md">Testing project structure</a></li>
  <li><a href="scenario.md">Scenarios</a></li>
  <li><a href="endpoints.md">API endpoints</a></li> 
