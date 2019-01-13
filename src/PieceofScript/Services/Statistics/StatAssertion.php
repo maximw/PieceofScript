@@ -4,7 +4,10 @@
 namespace PieceofScript\Services\Statistics;
 
 
-use PieceofScript\Services\Values\ArrayLiteral;
+
+
+use PieceofScript\Services\Contexts\AbstractContext;
+use PieceofScript\Services\Variables\VariablesRepository;
 
 class StatAssertion
 {
@@ -24,18 +27,22 @@ class StatAssertion
     /** @var bool */
     protected $status;
 
+    /** @var VariablesRepository */
+    protected $variables;
 
     public function __construct(
         string $code,
         string $file,
         int $line,
-        bool $status
+        bool $status,
+        VariablesRepository $variablesDump
     )
     {
         $this->code = $code;
         $this->file = $file;
         $this->line = $line;
         $this->status = $status;
+        $this->variables = $variablesDump;
     }
 
     /**
@@ -70,6 +77,10 @@ class StatAssertion
         return $this->status;
     }
 
+    public function getVariables(): VariablesRepository
+    {
+        return $this->variables;
+    }
 
 
 }

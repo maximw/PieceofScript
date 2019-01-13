@@ -181,6 +181,14 @@ abstract class AbstractContext
         return $this->variables->exists($variableName, $checkPath);
     }
 
+    public function dumpVariables(): VariablesRepository
+    {
+        $local = $this->variables->getDump();
+        $global = $this->getGlobalContext()->variables->getDump();
+        $local->merge($global);
+        return $local;
+    }
+
     /**
      * Check if operator allowed in Context
      * @param $operator

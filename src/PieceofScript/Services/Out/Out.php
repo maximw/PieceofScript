@@ -115,7 +115,6 @@ class Out
             $verbosity = OutputInterface::VERBOSITY_NORMAL;
             static::writeln('Assert: "' . trim($code) . '" failed', $verbosity);
         }
-
     }
 
     public static function printMustExit(ContextStack $contextStack)
