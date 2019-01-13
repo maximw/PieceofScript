@@ -132,6 +132,7 @@ class Tester
             return 1;
         }
 
+        $this->statistics->prepareStatistics();
         $this->statistics->printStatistics();
         if ($this->junitReport instanceof JunitReport) {
             $this->junitReport->generate();
@@ -416,7 +417,7 @@ class Tester
         $this->contextStack->neck()->setVariable($requestVarName, $request, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         $this->contextStack->neck()->setVariable($responseVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
 
-        $this->statistics->addCall($endpointCall, $this->contextStack, $request, new ArrayLiteral());
+        $this->statistics->addCall($line, $endpointCall, $this->contextStack, $request, new ArrayLiteral());
 
         // Execute "before" section
         $this->executeLines($endpointCall->getEndpoint()->getBefore(), $endpointCall->getEndpoint()->getFile(), 0);

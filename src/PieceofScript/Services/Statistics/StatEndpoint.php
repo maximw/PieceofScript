@@ -32,4 +32,8 @@ class StatEndpoint
         return $this->calls;
     }
 
+    public function getEndpoint(): Endpoint
+    {
+        return $this->endpoint;
+    }
 }

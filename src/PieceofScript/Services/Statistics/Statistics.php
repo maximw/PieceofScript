@@ -18,14 +18,25 @@ class Statistics
     protected $currentEndpointCall;
 
     /** @var int  */
-    protected $totalEndpoints = 0;
+    public $endpointsTotal = 0;
+    public $endpointsTested = 0;
+    public $endpointsSuccess = 0;
+    public $endpointsFailed = 0;
 
-    public function __construct(int $totalEndpoints = 0)
+    public $callsTotal = 0;
+    public $callsSuccess = 0;
+    public $callsFailed = 0;
+
+    public $assertsTotal = 0;
+    public $assertsSuccess = 0;
+    public $assertsFailed = 0;
+
+    public function __construct(int $totalEndpointsCount = 0)
     {
-        $this->totalEndpoints = $totalEndpoints;
+        $this->endpointsTotal = $totalEndpointsCount;
     }
 
-    public function addCall(EndpointCall $call, ContextStack $contextStack, ArrayLiteral $request, ArrayLiteral $response)
+    public function addCall(string $code, EndpointCall $call, ContextStack $contextStack, ArrayLiteral $request, ArrayLiteral $response)
     {
         $endPoint = $call->getEndpoint();
 
@@ -37,7 +48,7 @@ class Statistics
             $this->endCurrentCall();
         }
 
-        $newCall = new StatEndpointCall($contextStack->neck()->getFile(), $contextStack->neck()->getLine(), $request, $response);
+        $newCall = new StatEndpointCall($code, $contextStack->neck()->getFile(), $contextStack->neck()->getLine(), $request, $response);
 
         $this->statEndpoints[$endPoint->getName()]->addCall($newCall);
         $this->currentEndpointCall = $newCall;
@@ -72,7 +83,16 @@ class Statistics
     )
     {
         if ($this->currentEndpointCall instanceof StatEndpointCall) {
-            $this->currentEndpointCall->addAssertion($code, $contextStack->head()->getFile(), $contextStack->head()->getLine(), $status);
+            if (!$status) {
+                $this->failuresCount++;
+            }
+            $this->currentEndpointCall->addAssertion(
+                $code,
+                $contextStack->head()->getFile(),
+                $contextStack->head()->getLine(),
+                $status,
+                $contextStack->head()->dumpVariables()
+            );
         } else {
             Out::printWarning('Skipped assertion outside of Endpoint call "' . $code . '" ', $contextStack);
         }
@@ -84,65 +104,59 @@ class Statistics
         return $this->statEndpoints;
     }
 
-    public function printStatistics()
+    public function prepareStatistics()
     {
-        Out::printStatistics('Statistics:');
-
-        $count['endpoints']['total'] = 0;
-        $count['endpoints']['success'] = 0;
-        $count['endpoints']['fail'] = 0;
-        $count['calls']['total'] = 0;
-        $count['calls']['success'] = 0;
-        $count['calls']['fail'] = 0;        
-        $count['assertions']['total'] = 0;
-        $count['assertions']['success'] = 0;
-        $count['assertions']['fail'] = 0;
         foreach ($this->statEndpoints as $endpointName => $endpointCalls) {
-            $count['endpoints']['total']++;
+            $this->endpointsTested++;
             $successEndpoint = null;
             foreach ($endpointCalls->getCalls() as $call) {
                 $successEndpoint = $successEndpoint === null ? true : ($successEndpoint && true);
-                $count['calls']['total']++;
+                $this->callsTotal++;
                 $successCall = null;
                 foreach ($call->getAssertions() as $assertion) {
                     $successCall = $successCall === null ? true : ($successCall && true);
-                    $count['assertions']['total']++;
+                    $this->assertsTotal++;
                     if ($assertion->getStatus()) {
-                        $count['assertions']['success']++;
+                        $this->assertsSuccess++;
                     } else {
-                        $count['assertions']['fail']++;
+                        $this->assertsFailed++;
                         $successEndpoint = false;
                         $successCall = false;
                     }
                 }
                 if ($successCall) {
-                    $count['calls']['success']++;
+                    $this->callsSuccess++;
                 } else {
-                    $count['calls']['fail']++;
+                    $this->callsFailed++;
                 }
             }
             if ($successEndpoint) {
-                $count['endpoints']['success']++;
+                $this->endpointsSuccess++;
             } else {
-                $count['endpoints']['fail']++;
+                $this->endpointsFailed++;
             }
         }
+    }
+
+    public function printStatistics()
+    {
+        Out::printStatistics('Statistics:');
 
         Out::printStatistics('Endpoints: ', 1);
-        Out::printStatistics('total: '. $this->totalEndpoints, 2);
-        Out::printStatistics('tested: '. $count['endpoints']['total'] . $this->formatPercent($count['endpoints']['total'], $this->totalEndpoints), 2);
-        Out::printStatistics('success: '. $count['endpoints']['success'] . $this->formatPercent($count['endpoints']['success'], $this->totalEndpoints), 2);
-        Out::printStatistics('fail: '. $count['endpoints']['fail'] . $this->formatPercent($count['endpoints']['fail'], $this->totalEndpoints), 2);
+        Out::printStatistics('total: '. $this->endpointsTotal, 2);
+        Out::printStatistics('tested: '. $this->endpointsTested . $this->formatPercent($this->endpointsTested, $this->endpointsTotal), 2);
+        Out::printStatistics('success: '. $this->endpointsSuccess . $this->formatPercent($this->endpointsSuccess, $this->endpointsTotal), 2);
+        Out::printStatistics('fail: '. $this->endpointsFailed . $this->formatPercent($this->endpointsFailed, $this->endpointsTotal), 2);
 
         Out::printStatistics('Endpoint calls: ', 1);
-        Out::printStatistics('total: '. $count['calls']['total'], 2);
-        Out::printStatistics('success: '. $count['calls']['success'] . $this->formatPercent($count['calls']['success'], $count['calls']['total']), 2);
-        Out::printStatistics('fail: '. $count['calls']['fail'] . $this->formatPercent($count['calls']['fail'], $count['calls']['total']), 2);
+        Out::printStatistics('total: '. $this->callsTotal, 2);
+        Out::printStatistics('success: '. $this->callsSuccess . $this->formatPercent($this->callsSuccess, $this->callsTotal), 2);
+        Out::printStatistics('fail: '. $this->callsFailed . $this->formatPercent($this->callsFailed, $this->callsTotal), 2);
 
         Out::printStatistics('Assertions: ', 1);
-        Out::printStatistics('total: '. $count['assertions']['total'], 2);
-        Out::printStatistics('success: '. $count['assertions']['success'] . $this->formatPercent($count['assertions']['success'], $count['assertions']['total']), 2);
-        Out::printStatistics('fail: '. $count['assertions']['fail'] . $this->formatPercent($count['assertions']['fail'], $count['assertions']['total']), 2);
+        Out::printStatistics('total: '. $this->assertsTotal, 2);
+        Out::printStatistics('success: '. $this->assertsSuccess . $this->formatPercent($this->assertsSuccess, $this->assertsTotal), 2);
+        Out::printStatistics('fail: '. $this->assertsFailed . $this->formatPercent($this->assertsFailed, $this->assertsTotal), 2);
     }
 
     protected function formatPercent(int $count, int $total)

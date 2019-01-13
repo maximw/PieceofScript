@@ -224,6 +224,41 @@ class VariablesRepository
     }
 
     /**
+     * Makes copy of repository resolving all references
+     *
+     * @return VariablesRepository
+     * @throws VariableError
+     */
+    public function getDump(): self
+    {
+        $repo = new VariablesRepository();
+        foreach ($this->variables as $key => $value) {
+            if ($value instanceof VariableReference) {
+                $value = ($value->get)([]);
+            }
+            $repo->set(new VariableName($key), deep_copy($value));
+
+        }
+        return $repo;
+    }
+
+    /**
+     * Merge other $variablesRepository to current, current has priority if variable exists
+     *
+     * @param VariablesRepository $variablesRepository
+     * @throws VariableError
+     */
+    public function merge(VariablesRepository $variablesRepository)
+    {
+        foreach ($variablesRepository->variables as $name => $value) {
+            $varName = new VariableName($name);
+            if (!$this->exists($varName)) {
+                $this->set($varName, $value);
+            }
+        }
+    }
+
+    /**
      * Checks if all fields and indexes exists in variable value
      *
      * @param array $path
