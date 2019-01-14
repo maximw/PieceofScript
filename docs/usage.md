@@ -1,7 +1,7 @@
-##PieceofScript installation and run
+## PieceofScript installation and run
 
 <a name="install"></a>
-### Donloading phar-archinve
+### Downloading phar-archive
 
 Download from repository <a href=https://github.com/maximw/PieceofScript/raw/master/bin/pos.phar>https://github.com/maximw/PieceofScript/raw/master/bin/pos.phar</a>
 
