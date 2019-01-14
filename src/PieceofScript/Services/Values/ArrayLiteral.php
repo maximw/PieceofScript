@@ -3,6 +3,7 @@
 namespace PieceofScript\Services\Values;
 
 
+use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\TypeErrors\ConversionException;
 use PieceofScript\Services\Errors\TypeErrors\IncompatibleTypesOperationException;
 use PieceofScript\Services\Utils\Utils;
@@ -46,7 +47,7 @@ class ArrayLiteral extends BaseLiteral implements \Iterator, \ArrayAccess, \Coun
     public function toPrint(): string
     {
         $value = Utils::unwrapValueContainer($this);
-        return json_encode($value);
+        return json_encode($value, JSON_PRETTY_PRINT, Config::get()->getJsonMaxDepth());
     }
 
     public function oEqual(BaseLiteral $value): BoolLiteral
