@@ -4,7 +4,9 @@
 namespace PieceofScript\Services\Errors\TypeErrors;
 
 
-class ConversionException extends \Exception
+use PieceofScript\Services\Errors\RuntimeError;
+
+class ConversionException extends RuntimeError
 {
     public function __construct(string $typeFrom, string $typeTo)
     {

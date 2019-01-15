@@ -8,6 +8,7 @@ use PieceofScript\Services\Errors\ControlFlow\MustException;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Out\JunitReport;
 use PieceofScript\Services\Out\Out;
+use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NullLiteral;
 use PieceofScript\Services\Values\NumberLiteral;
 use PieceofScript\Services\Contexts\ContextStack;
@@ -26,6 +27,7 @@ use PieceofScript\Services\Testcases\TestcasesRepository;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\VariableName;
+use PieceofScript\Services\Values\VariableReference;
 
 class Tester
 {
@@ -369,22 +371,26 @@ class Tester
         $argumentsCount = count($endpointCall->getEndpoint()->getArguments());
 
         if ($argumentsCount > $parametersCount) {
-            throw new \Exception('Not enough parameters given to ' . $endpointCall->getEndpoint()->getName());
+            throw new RuntimeError('Not enough parameters given to ' . $endpointCall->getEndpoint()->getName());
         }
         if ($argumentsCount < $parametersCount) {
             Out::printWarning('Too many parameters given to ' . $endpointCall->getEndpoint()->getName(), $this->contextStack);
         }
 
-        // Get all references
-        $references = [];
+        // Get all parameters
+        $parameters = [];
         foreach ($endpointCall->getParameters() as $parameter) {
-            $variable = $this->parser->extractOperand($parameter, $this->contextStack->head());
-            if ($variable instanceof VariableName) {
-                $references[] = $this->contextStack->head()->getReference($variable);
+            $value = $this->parser->extractOperand($parameter, $this->contextStack->head());
+            if ($value instanceof VariableName) {
+                $parameters[] = $this->contextStack->head()->getReference($value);
+            } elseif ($value instanceof BaseLiteral) {
+                $parameters[] = $value;
+            } else {
+                throw new RuntimeError('Unknown parameter "' . $parameters . '"');
             }
         }
-        if ($argumentsCount > count($references)) {
-            throw new \Exception('Not enough parameters given to ' . $endpointCall->getEndpoint()->getOriginalName());
+        if ($argumentsCount > count($parameters)) {
+            throw new RuntimeError('Not enough parameters given to ' . $endpointCall->getEndpoint()->getOriginalName());
         }
 
         // Push Endpoint Context
@@ -394,9 +400,14 @@ class Tester
         );
         $this->contextStack->push($context);
 
-        // Set all references
+        // Set all parameters
+        $arguments = $endpointCall->getEndpoint()->getArguments();
         for ($i = 0; $i < $argumentsCount; $i++) {
-            $context->setReference($endpointCall->getEndpoint()->getArguments()[$i], $references[$i]);
+            if ($parameters[$i] instanceof VariableReference) {
+                $context->setReference($arguments[$i], $parameters[$i]);
+            } else {
+                $context->setVariable($arguments[$i], $parameters[$i], AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+            }
         }
 
         // Init $request and $response variables
@@ -562,7 +573,7 @@ class Tester
                     try {
                         $this->runTestcase($testcaseCall);
                     } catch (MustException $exception) {
-
+                        // Just end current test case
                     }
                 }
             }
@@ -581,7 +592,7 @@ class Tester
         $argumentsCount = count($testcaseCall->testcase->arguments);
 
         if ($argumentsCount > $parametersCount) {
-            throw new \Exception('Not enough parameters given to ' . $testcaseCall->testcase->name);
+            throw new RuntimeError('Not enough parameters given to ' . $testcaseCall->testcase->name);
         }
         if ($argumentsCount < $parametersCount) {
             Out::printWarning('Too many parameters given to ' . $testcaseCall->testcase->name, $this->contextStack);
@@ -589,16 +600,20 @@ class Tester
 
         $this->statistics->endCurrentCall();
 
-        // Get all references
-        $references = [];
+        // Get all parameters
+        $parameters = [];
         foreach ($testcaseCall->parameters as $parameter) {
-            $variable = $this->parser->extractOperand($parameter, $this->contextStack->head());
-            if ($variable instanceof VariableName) {
-                $references[] = $this->contextStack->head()->getReference($variable);
+            $value = $this->parser->extractOperand($parameter, $this->contextStack->head());
+            if ($value instanceof VariableName) {
+                $parameters[] = $this->contextStack->head()->getReference($value);
+            } elseif ($value instanceof BaseLiteral) {
+                $parameters[] = $value;
+            } else {
+                throw new RuntimeError('Unknown parameter "' . $parameters . '"');
             }
         }
-        if ($argumentsCount > count($references)) {
-            throw new \Exception('Not enough parameters given to ' . $testcaseCall->testcase->name);
+        if ($argumentsCount > count($parameters)) {
+            throw new RuntimeError('Not enough parameters given to ' . $testcaseCall->testcase->name);
         }
 
         // Push Testcase Context
@@ -613,9 +628,13 @@ class Tester
         $this->contextStack->head()->setVariable($requestVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         $this->contextStack->head()->setVariable($responseVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
 
-        // Set all references
+        // Set all parameters
         for ($i = 0; $i < $argumentsCount; $i++) {
-            $context->setReference($testcaseCall->testcase->arguments[$i], $references[$i]);
+            if ($parameters[$i] instanceof VariableReference) {
+                $context->setReference($testcaseCall->testcase->arguments[$i], $parameters[$i]);
+            } else {
+                $context->setVariable($testcaseCall->testcase->arguments[$i], $parameters[$i], AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+            }
         }
 
         $this->executeLines($testcaseCall->testcase->lines, $testcaseCall->testcase->file, $testcaseCall->testcase->lineNumber + 1);

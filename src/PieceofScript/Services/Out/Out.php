@@ -136,17 +136,17 @@ class Out
         $verbosity = OutputInterface::VERBOSITY_DEBUG;
         $request = Utils::unwrapValueContainer($request);
         $url = self::getPrintableUrl($request);
-        static::writeln('Request: ' . $request['method'] . ' "' . $url , $verbosity, 0);
+        static::writeln('Request: ' . $request['method'] . ' ' . $url , $verbosity, 0);
 
-        if (!empty($response['headers'])) {
+        if (!empty($request['headers'])) {
             static::writeln('Headers:', $verbosity, 1);
-            foreach ($response['headers'] as $name => $value) {
-                static::writeln($name . ': ' . $value, $verbosity, 1);
+            foreach ($request['headers'] as $name => $value) {
+                static::writeln($name . ': ' . $value, $verbosity, 2);
             }
         }
-        if (!empty($response['cookies'])) {
+        if (!empty($request['cookies'])) {
             static::writeln('Cookies:', $verbosity, 1);
-            foreach ($response['cookies'] as $name => $value) {
+            foreach ($request['cookies'] as $name => $value) {
                 static::writeln($name . ': ' . $value, $verbosity, 2);
             }
         }
@@ -242,7 +242,7 @@ class Out
         if (!empty($response['cookies'])) {
             static::writeln('Cookies:', $verbosity, 1);
             foreach ($response['cookies'] as $name => $value) {
-                static::writeln($name . ': ' . $value, $verbosity, 2);
+                static::writeln($name . ': ' . $value['Value'], $verbosity, 2);
             }
         }
         if (!empty($response['raw'])) {

@@ -159,7 +159,7 @@ class TestcasesRepository
      */
     protected function match(string $testcaseCall, string $testcaseName)
     {
-        $regexp = str_replace(self::ARGUMENT_PLACEHOLDER, '\s+(\$.+)\s*', preg_quote($testcaseName));
+        $regexp = str_replace(self::ARGUMENT_PLACEHOLDER, '\s+(\$[a-z][a-z0-9_\.]*|{[^{]+?})(?:\s+|\s*$)', preg_quote($testcaseName));
         $regexp = '/^' . str_replace(' ', '\s+', $regexp) . '$/i';
         $flag = preg_match($regexp, $testcaseCall, $matches);
 
@@ -167,6 +167,9 @@ class TestcasesRepository
             return false;
         }
         array_shift($matches);
+        foreach ($matches as &$match) {
+            $match = trim(trim($match, '{}'));
+        }
         return $matches;
     }
 

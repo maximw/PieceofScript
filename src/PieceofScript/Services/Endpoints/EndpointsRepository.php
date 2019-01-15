@@ -13,7 +13,8 @@ use PieceofScript\Services\Values\VariableName;
 
 class EndpointsRepository
 {
-    const ARGUMENT_PLACEHOLDER = 'f132d59f3587463b99e3262a8b5a7975'; //random v4 UUID
+    //const ARGUMENT_PLACEHOLDER = 'f132d59f3587463b99e3262a8b5a7975'; //random v4 UUID
+    const ARGUMENT_PLACEHOLDER = '@'; //random v4 UUID
     const DIRECTORY = 'endpoints';
     const ROOT_FILE = 'endpoints.yaml';
 
@@ -189,7 +190,7 @@ class EndpointsRepository
      */
     protected function match(string $endpointCallExpression, string $endpointName)
     {
-        $regexp = str_replace(self::ARGUMENT_PLACEHOLDER, '\s+(\$.+)\s*', preg_quote($endpointName));
+        $regexp = str_replace(self::ARGUMENT_PLACEHOLDER, '\s+(\$[a-z][a-z0-9_\.]*|{[^{]+?})(?:\s+|\s*$)', preg_quote($endpointName));
         $regexp = '/^' . str_replace(' ', '\s+', $regexp) . '$/i';
         $flag = preg_match($regexp, $endpointCallExpression, $matches);
 
@@ -197,6 +198,9 @@ class EndpointsRepository
             return false;
         }
         array_shift($matches);
+        foreach ($matches as &$match) {
+            $match = trim(trim($match, '{}'));
+        }
         return $matches;
     }
 }

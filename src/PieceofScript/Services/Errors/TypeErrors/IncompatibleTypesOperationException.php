@@ -3,7 +3,9 @@
 
 namespace PieceofScript\Services\Errors\TypeErrors;
 
-class IncompatibleTypesOperationException extends \Exception
+use PieceofScript\Services\Errors\RuntimeError;
+
+class IncompatibleTypesOperationException extends RuntimeError
 {
     public function __construct(string $operation, string $type1, string $type2 = null)
     {
