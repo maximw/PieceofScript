@@ -86,7 +86,7 @@ class VariablesRepository
      * @param VariableName $varName
      * @param BaseLiteral $value
      * @param string $assignmentMode
-     * @throws VariableError
+     * @throws RuntimeError
      */
     public function set(VariableName $varName, BaseLiteral $value, string $assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE)
     {
@@ -109,7 +109,7 @@ class VariablesRepository
                 && $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE
                 && $assignmentMode === AbstractContext::ASSIGNMENT_MODE_CONST
             ){
-                throw new RuntimeError('Cannot set constant, variable ' . $varName->name . ' already exists');
+                throw new VariableError('Cannot set constant, variable ' . $varName->name . ' already exists');
             }
 
             if (!isset($this->assignmentModes[$varName->name]) || $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE) {
