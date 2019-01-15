@@ -7,6 +7,7 @@ use function DeepCopy\deep_copy;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Errors\Parser\ParserError;
 use PieceofScript\Services\Errors\Parser\VariableError;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -103,6 +104,14 @@ class VariablesRepository
         if ($currentValue instanceof VariableReference) {
             ($currentValue->set)($varName->path, $value);
         } else {
+            // If variable exists as variable and trying to make constant
+            if (isset($this->assignmentModes[$varName->name])
+                && $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE
+                && $assignmentMode === AbstractContext::ASSIGNMENT_MODE_CONST
+            ){
+                throw new RuntimeError('Cannot set constant, variable ' . $varName->name . ' already exists');
+            }
+
             if (!isset($this->assignmentModes[$varName->name]) || $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE) {
                 $this->setVal($varName->path, $currentValue, $value, $varName);
                 $this->variables[$varName->name] = $currentValue;
