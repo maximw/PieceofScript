@@ -237,7 +237,7 @@ class Endpoint
     /**
      * @return string|string[]
      */
-    public function getCookies(): array
+    public function getCookies()
     {
         return $this->cookies;
     }
