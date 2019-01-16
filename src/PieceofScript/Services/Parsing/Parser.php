@@ -526,7 +526,7 @@ class Parser
             if ($keyToken->getName() === Token::T_ARRAY_KEY) {
                 $key = $this->arrayKeyToLiteral($keyToken);
             } elseif ($keyToken->getName() === Token::T_ARRAY_SUB_AST) {
-                $key = $this->executeAST($keyToken->getValue(), $context);
+                $key = $this->extractLiteral($this->executeAST($keyToken->getValue(), $context), $context);
             }
             if (!$key instanceof IKeyValue) {
                 throw new \Exception('Cannot use ' . $key::TYPE_NAME . ' as array key');

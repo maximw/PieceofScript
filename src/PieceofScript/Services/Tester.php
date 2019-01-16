@@ -135,6 +135,8 @@ class Tester
             Out::printError($e, $this->contextStack);
             $executionResult = 1;
         } catch (\Exception $e) {
+            Out::printDebug($e->getMessage());
+            Out::printContextStack($this->contextStack);
             $executionResult = 1;
         }
 
@@ -174,20 +176,24 @@ class Tester
         $totalLines = count($lines);
 
         for ($lineNumber = 0; $lineNumber < $totalLines; $lineNumber++) {
+
             $this->contextStack->head()
                 ->setFile($currentFile)
                 ->setLine($offsetLineNumber + $lineNumber);
 
-            if ($this->isEmptyLine($lines[$lineNumber])) {
+            $currentCommandLine = $lineNumber;
+            $line = $this->getLine($lines, $lineNumber);
+
+            if ($this->isEmptyLine($line)) {
                 continue;
             }
 
-            list($operator, $expression, $indent) = $this->extractOperator($lines[$lineNumber]);
+            list($operator, $expression, $indent) = $this->extractOperator($line);
 
-            Out::printLine($lines[$lineNumber], $lineNumber);
+            Out::printLine($line, $currentCommandLine);
 
             if (!$this->contextStack->head()->isAllowedOperator($operator)) {
-                throw new \Exception('Cannot execute ' . $operator . ' in context');
+                throw new RuntimeError('Cannot execute ' . $operator . ' in context');
             }
 
             if ($operator === self::OPERATOR_TESTCASE) {
@@ -277,6 +283,16 @@ class Tester
         }
     }
 
+    protected function getLine(array $lines, int &$lineNumber): string
+    {
+        $totalLines = count($lines);
+        $line = rtrim($lines[$lineNumber], "\r\n");
+        while (substr(trim($line), -1, 1) == '\\' && $lineNumber < $totalLines) {
+            $lineNumber = $lineNumber + 1;
+            $line = rtrim(rtrim($line), '\\') . $lines[$lineNumber];
+        }
+        return $line;
+    }
 
     /**
      * Execute one-line operator

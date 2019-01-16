@@ -145,7 +145,7 @@ class HttpClient
             RequestOptions::AUTH => $auth,
             RequestOptions::HTTP_ERRORS => false,
             RequestOptions::CONNECT_TIMEOUT => Config::get()->getHttpConnectTimeout(),
-            RequestOptions::READ_TIMEOUT => Config::get()->getHttpReadTimeout(),
+            RequestOptions::TIMEOUT => Config::get()->getHttpTimeout(),
             RequestOptions::ALLOW_REDIRECTS => ['max' => Config::get()->getHttpMaxRedirects()],
         ];
 

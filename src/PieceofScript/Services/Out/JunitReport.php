@@ -167,7 +167,7 @@ class JunitReport
     {
         $result = '';
         $result .= $assertion->getCode() . PHP_EOL;
-        $result .= $assertion->getFile() . ' ' . $assertion->getLine() . PHP_EOL;
+        $result .= $assertion->getFile() . ' line ' . $assertion->getLine() . PHP_EOL;
         $result .= $assertion->getMessage() . PHP_EOL;
 
         $usedVariables = $assertion->getUsedVariables();

@@ -21,7 +21,7 @@ class Config
 
     protected $http_connect_timeout = 0;
 
-    protected $http_read_timeout = null;
+    protected $http_timeout = 0;
 
     protected $http_max_redirects = 0;
 
@@ -148,9 +148,9 @@ class Config
     /**
      * @return float
      */
-    public function getHttpReadTimeout(): float
+    public function getHttpTimeout(): float
     {
-        return $this->http_read_timeout;
+        return $this->http_timeout;
     }
 
     /**
@@ -159,9 +159,9 @@ class Config
     protected function setHttpReadTimeout($http_timeout = null)
     {
         if (null === $http_timeout) {
-            $http_timeout = (float) ini_get('default_socket_timeout');
+            $http_timeout = 0;
         }
-        $this->http_read_timeout = (float) $http_timeout;
+        $this->http_timeout = (float) $http_timeout;
     }
 
     /**
@@ -319,7 +319,6 @@ class Config
         $this->setCacheDir($this->cache_dir);
         $this->setCurrentTimestamp($this->current_timestamp);
         $this->setDefaultTimezone($this->default_timezone);
-        $this->setHttpReadTimeout($this->http_read_timeout);
         $this->setRandomSeed($this->random_seed);
     }
 
