@@ -1,6 +1,9 @@
 //require ./globals.txt
 //include ./globals_dev.txt
 
+Auth {123}
+cancel
+
 Testcase Create comment $bad
 	//var $user = User() //Сгенерировать юзера
 	var $count = 5

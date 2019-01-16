@@ -14,12 +14,11 @@ Test:
 
 Auth $user:
     method: "POST"
-    url: $domain + "/login"
+    url: "http://localhost"
     headers:
         content-type: "application/json"
-    body:
-        login: $user.login
-        password: $user.password
+    cookies:
+        XDEBUG_SESSIONS: "max_office_kernel"
     after:
-        - assert $response.code == 200
-        - let $user.auth_token = $response.body.auth_token
+        - assert $response.code == 201 || $rrrr == 5
+        - print $response.body

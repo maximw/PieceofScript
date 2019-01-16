@@ -2,6 +2,7 @@
 
 namespace PieceofScript\Services\Contexts;
 
+use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\VariableName;
@@ -108,7 +109,7 @@ abstract class AbstractContext
             return $this->getGlobalContext()->getVariable($variableName);
         }
 
-        throw new RuntimeError('Variable not found ' . $variableName);
+        throw new VariableError($variableName,'variable not found.');
     }
 
     public function getReference(VariableName $variableName): VariableReference
@@ -121,7 +122,7 @@ abstract class AbstractContext
             return $this->getGlobalContext()->getReference($variableName);
         }
 
-        throw new \Exception('Variable not found ' . $variableName);
+        throw new VariableError($variableName,'variable not found.');
     }
 
     /**

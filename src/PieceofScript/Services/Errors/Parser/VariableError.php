@@ -11,7 +11,7 @@ class VariableError extends RuntimeError
 {
     public function __construct(VariableName $variableName, string $message = "")
     {
-        $message = ' with ' . ((string) $variableName) . ': '. $message;
+        $message = ((string) $variableName) . ': '. $message;
         parent::__construct($message);
     }
 

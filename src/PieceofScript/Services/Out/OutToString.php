@@ -7,6 +7,7 @@ namespace PieceofScript\Services\Out;
 
 class OutToString extends Out
 {
+    const FORMATTING = false;
 
     protected static $buffer = '';
 

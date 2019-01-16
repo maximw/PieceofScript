@@ -133,6 +133,25 @@ class Parser
     }
 
     /**
+     * Analyze $expression and returns list of all used variables in it
+     *
+     * @param string $expression
+     * @return VariableName[]
+     */
+    public function getUsedVariables(string $expression): array
+    {
+        $tokens = $this->tokenize($expression);
+        $variables = [];
+        while(!$tokens->isEmpty()) {
+            $token = $tokens->pop();
+            if ($token->getType() === Token::TYPE_VARIABLE) {
+                $variables[] = new VariableName($token->getValue());
+            }
+        }
+        return $variables;
+    }
+
+    /**
      * Extract operand from given expression
      *
      * @param string|TokensQueue $expression

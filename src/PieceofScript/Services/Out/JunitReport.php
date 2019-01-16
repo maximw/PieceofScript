@@ -23,11 +23,6 @@ class JunitReport
     /** @var string */
     protected $startFile;
 
-
-
-    /** @var \SimpleXMLElement */
-    protected $report;
-
     public function __construct(
         string $reportFile,
         Statistics $statistics,
@@ -173,6 +168,21 @@ class JunitReport
         $result = '';
         $result .= $assertion->getCode() . PHP_EOL;
         $result .= $assertion->getFile() . ' ' . $assertion->getLine() . PHP_EOL;
+        $result .= $assertion->getMessage() . PHP_EOL;
+
+        $usedVariables = $assertion->getUsedVariables();
+        if (count($assertion->getUsedVariables())) {
+            $result .= 'Variables dump:' . PHP_EOL;
+            foreach ($usedVariables as $varName) {
+                if ($assertion->getVariables()->exists($varName, false)) {
+                    OutToString::printValues([$assertion->getVariables()->get($varName)->toPrint()]);
+                    $value = ' = ' . OutToString::getBuffer();
+                } else {
+                    $value = ' - not found';
+                }
+                $result .= '$' . $varName->name . $value . PHP_EOL;
+            }
+        }
         return $result;
     }
 

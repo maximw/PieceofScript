@@ -5,7 +5,6 @@ namespace PieceofScript\Services\Variables;
 
 use function DeepCopy\deep_copy;
 use PieceofScript\Services\Contexts\AbstractContext;
-use PieceofScript\Services\Errors\Parser\ParserError;
 use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Out\Out;
@@ -91,7 +90,7 @@ class VariablesRepository
     public function set(VariableName $varName, BaseLiteral $value, string $assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE)
     {
         if (AbstractContext::ASSIGNMENT_MODE_OFF === $assignmentMode) {
-            throw new VariableError($varName, 'cannot assign value here. Did you mean == instead of = ?');
+            throw new RuntimeError($varName, 'cannot assign value here. Did you mean == instead of = ?');
         }
 
         $currentValue = new NullLiteral();
@@ -109,7 +108,7 @@ class VariablesRepository
                 && $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE
                 && $assignmentMode === AbstractContext::ASSIGNMENT_MODE_CONST
             ){
-                throw new VariableError('Cannot set constant, variable ' . $varName->name . ' already exists');
+                throw new VariableError($varName,'cannot set constant, variable already exists.');
             }
 
             if (!isset($this->assignmentModes[$varName->name]) || $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE) {
@@ -191,7 +190,7 @@ class VariablesRepository
     public function setReference(VariableName $varName, VariableReference $reference)
     {
         if (!$varName->isSimple()) {
-            throw new VariableError($varName, ' cannot make reference. Did you mean just $' . $varName->name);
+            throw new RuntimeError($varName, ' cannot make reference. Did you mean just $' . $varName->name);
         }
         $this->variables[$varName->name] = $reference;
     }
@@ -245,7 +244,7 @@ class VariablesRepository
             if ($value instanceof VariableReference) {
                 $value = ($value->get)([]);
             }
-            $repo->set(new VariableName($key), deep_copy($value));
+            $repo->set(new VariableName('$' . $key), deep_copy($value));
 
         }
         return $repo;

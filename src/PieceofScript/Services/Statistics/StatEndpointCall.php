@@ -54,9 +54,17 @@ class StatEndpointCall
         $this->endDate = microtime(true);
     }
 
-    public function addAssertion(string $code, string $file, int $line, bool $status, VariablesRepository $variablesDump): self
+    public function addAssertion(
+        string $code,
+        string $file,
+        int $line,
+        bool $status,
+        VariablesRepository $variablesDump,
+        array $usedVariables,
+        $message
+    ): self
     {
-        $assertion = new StatAssertion($code, $file, $line, $status, $variablesDump);
+        $assertion = new StatAssertion($code, $file, $line, $status, $variablesDump, $usedVariables, $message);
         $this->assertions[] = $assertion;
         $this->status = $this->status && $assertion->getStatus();
         return $this;

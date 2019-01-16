@@ -7,6 +7,7 @@ namespace PieceofScript\Services\Statistics;
 
 
 use PieceofScript\Services\Contexts\AbstractContext;
+use PieceofScript\Services\Values\VariableName;
 use PieceofScript\Services\Variables\VariablesRepository;
 
 class StatAssertion
@@ -30,12 +31,20 @@ class StatAssertion
     /** @var VariablesRepository */
     protected $variables;
 
+    /** @var VariableName[] */
+    protected $usedVariables;
+
+    /** @var string */
+    protected $message;
+
     public function __construct(
         string $code,
         string $file,
         int $line,
         bool $status,
-        VariablesRepository $variablesDump
+        VariablesRepository $variablesDump,
+        array $usedVariables,
+        string $message
     )
     {
         $this->code = $code;
@@ -43,6 +52,8 @@ class StatAssertion
         $this->line = $line;
         $this->status = $status;
         $this->variables = $variablesDump;
+        $this->usedVariables = $usedVariables;
+        $this->message = $message;
     }
 
     /**
@@ -82,5 +93,19 @@ class StatAssertion
         return $this->variables;
     }
 
+    /**
+     * @return VariableName[]
+     */
+    public function getUsedVariables(): array
+    {
+        return $this->usedVariables;
+    }
 
+    /**
+     * @return string
+     */
+    public function getMessage(): string
+    {
+        return $this->message;
+    }
 }

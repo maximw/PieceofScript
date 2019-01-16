@@ -21,6 +21,7 @@ class Out
     const STYLES = [
         'error' => '',
     ];
+    const FORMATTING = true;
 
     /** @var OutputInterface */
     protected static $output;
@@ -51,14 +52,16 @@ class Out
 
     public static function printDebug(string $message)
     {
-        $verbosity = OutputInterface::VERBOSITY_VERY_VERBOSE;
+        $verbosity = OutputInterface::VERBOSITY_DEBUG;
         static::writeln($message, $verbosity);
     }
 
     public static function printStatistics(string $message, int $indent = 0)
     {
         $verbosity = OutputInterface::VERBOSITY_NORMAL;
+        static::startFormatting('<fg=yellow>', $verbosity);
         static::writeln($message, $verbosity, $indent);
+        static::endFormatting($verbosity);
     }
 
     public static function printContextStack(ContextStack $contextStack)
@@ -86,18 +89,21 @@ class Out
     public static function printValues(array $values)
     {
         $verbosity = OutputInterface::VERBOSITY_VERBOSE;
+        static::startFormatting('<fg=yellow>', $verbosity);
         foreach ($values as $value) {
-            static::write('<fg=yellow>'.$value.'</>',  $verbosity);
+            static::write($value,  $verbosity);
         }
+        static::endFormatting($verbosity);
 
         static::writeln('', $verbosity);
     }
 
-    public static function printLine(string $line)
+    public static function printLine(string $line, string $lineNumber)
     {
         $line = trim($line, PHP_EOL);
         $verbosity = OutputInterface::VERBOSITY_DEBUG;
-        static::writeln($line, $verbosity);
+        //$lineNumber = str_pad($lineNumber, 4, ' ', STR_PAD_LEFT);
+        static::writeln($lineNumber . ' '. $line, $verbosity);
     }
 
     public static function printCancel()
@@ -106,14 +112,19 @@ class Out
         static::writeln('Testing is cancelled', $verbosity);
     }
 
-    public static function printAssert(string $code, bool $success)
+    public static function printAssert(string $code, bool $success, string $message)
     {
+        $message = empty($message) ? '' : ': ' . $message;
         if ($success) {
             $verbosity = OutputInterface::VERBOSITY_DEBUG;
-            static::writeln('Assert: "' . trim($code) . '" successful', $verbosity);
+            static::startFormatting('<fg=green>', $verbosity);
+            static::writeln('Assert: "' . trim($code) . '" successful' . $message, $verbosity);
+            static::endFormatting($verbosity);
         } else {
             $verbosity = OutputInterface::VERBOSITY_NORMAL;
-            static::writeln('Assert: "' . trim($code) . '" failed', $verbosity);
+            static::startFormatting('<fg=cyan>', $verbosity);
+            static::writeln('Assert: "' . trim($code) . '" failed' . $message, $verbosity);
+            static::endFormatting($verbosity);
         }
     }
 
@@ -134,6 +145,7 @@ class Out
     public static function printRequest($request)
     {
         $verbosity = OutputInterface::VERBOSITY_DEBUG;
+        static::startFormatting('<fg=blue>', $verbosity);
         $request = Utils::unwrapValueContainer($request);
         $url = self::getPrintableUrl($request);
         static::writeln('Request: ' . $request['method'] . ' ' . $url , $verbosity, 0);
@@ -165,8 +177,7 @@ class Out
         } else {
             throw new RuntimeError('Unknown request format "' . $request['format'] . '"');
         }
-
-
+        static::endFormatting($verbosity);
     }
 
     protected static function getPrintableUrl($request)
@@ -226,6 +237,7 @@ class Out
     public static function printResponse($response)
     {
         $verbosity = OutputInterface::VERBOSITY_DEBUG;
+        static::startFormatting('<fg=magenta>', $verbosity);
         $response = Utils::unwrapValueContainer($response);
         if (!$response['network']) {
             static::writeln('Network error', $verbosity);
@@ -253,11 +265,9 @@ class Out
                 static::writeln($response['raw'], $verbosity, 1);
             }
         }
+        static::endFormatting($verbosity);
         static::writeln('', $verbosity);
     }
-
-
-
 
     protected static function writeln($text, int $verbosity, int $indent = 0)
     {
@@ -272,4 +282,17 @@ class Out
         static::$output->write(str_repeat(' ', $indent * self::INDENT) . $text, false, $verbosity);
     }
 
+    protected static function startFormatting($formatting, $verbosity)
+    {
+        if (static::FORMATTING) {
+            static::$output->write($formatting, false, $verbosity);
+        }
+    }
+
+    protected static function endFormatting($verbosity)
+    {
+        if (static::FORMATTING) {
+            static::$output->write('</>', false, $verbosity);
+        }
+    }
 }

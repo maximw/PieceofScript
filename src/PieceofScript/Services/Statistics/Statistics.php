@@ -79,19 +79,20 @@ class Statistics
     public function addAssertion(
         string $code,
         bool $status,
-        ContextStack $contextStack
+        ContextStack $contextStack,
+        array $usedVariables,
+        string $message
     )
     {
         if ($this->currentEndpointCall instanceof StatEndpointCall) {
-            if (!$status) {
-                $this->failuresCount++;
-            }
             $this->currentEndpointCall->addAssertion(
                 $code,
                 $contextStack->head()->getFile(),
                 $contextStack->head()->getLine(),
                 $status,
-                $contextStack->head()->dumpVariables()
+                $contextStack->head()->dumpVariables(),
+                $usedVariables,
+                $message
             );
         } else {
             Out::printWarning('Skipped assertion outside of Endpoint call "' . $code . '" ', $contextStack);

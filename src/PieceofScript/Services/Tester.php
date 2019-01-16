@@ -5,6 +5,7 @@ namespace PieceofScript\Services;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Errors\ControlFlow\CancelException;
 use PieceofScript\Services\Errors\ControlFlow\MustException;
+use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Out\JunitReport;
 use PieceofScript\Services\Out\Out;
@@ -120,6 +121,7 @@ class Tester
 
     public function run()
     {
+        $executionResult = 0;
         try {
             $context = new GlobalContext('Global', $this->startFile);
             $this->contextStack->push($context);
@@ -131,7 +133,9 @@ class Tester
             Out::printMustExit($this->contextStack);
         } catch (RuntimeError $e) {
             Out::printError($e, $this->contextStack);
-            return 1;
+            $executionResult = 1;
+        } catch (\Exception $e) {
+            $executionResult = 1;
         }
 
         $this->statistics->prepareStatistics();
@@ -140,7 +144,7 @@ class Tester
             $this->junitReport->generate();
         }
 
-        return 0;
+        return $executionResult;
     }
 
     /**
@@ -158,6 +162,7 @@ class Tester
         $lines = $this->files->read($fileName);
         Out::printDebug('Start executing ' . $fileName);
         $this->executeLines($lines, $fileName, 0);
+        Out::printDebug('End executing ' . $fileName);
     }
 
     protected function executeLines(array $lines, string $currentFile, int $offsetLineNumber)
@@ -179,7 +184,7 @@ class Tester
 
             list($operator, $expression, $indent) = $this->extractOperator($lines[$lineNumber]);
 
-            Out::printLine($lines[$lineNumber]);
+            Out::printLine($lines[$lineNumber], $lineNumber);
 
             if (!$this->contextStack->head()->isAllowedOperator($operator)) {
                 throw new \Exception('Cannot execute ' . $operator . ' in context');
@@ -292,6 +297,7 @@ class Tester
 
             $requiredFile = $this->parser->evaluate($expression, $this->contextStack->head())->getValue();
             $this->executeFile($requiredFile);
+            Out::printDebug('Continue executing ' . $fileName);
             $this->contextStack->head()
                 ->setFile($fileName)
                 ->setLine($lineNumber);
@@ -303,6 +309,7 @@ class Tester
             foreach ($files as $file) {
                 try {
                     $this->executeFile($file);
+                    Out::printDebug('Continue executing ' . $fileName);
                 } catch (FileNotFoundError $e) {
                     Out::printWarning($e->getMessage(), $this->contextStack->head());
                 }
@@ -451,9 +458,16 @@ class Tester
 
     protected function operatorAssert(string $expression)
     {
-        $success = $this->parser->evaluate($expression, $this->contextStack->head())->toBool()->getValue();
-        $this->statistics->addAssertion($expression, $success, $this->contextStack);
-        Out::printAssert($expression, $success);
+        $message = '';
+        $success = false;
+        try {
+            $success = $this->parser->evaluate($expression, $this->contextStack->head())->toBool()->getValue();
+        } catch (VariableError $e) {
+            $message = $e->getMessage();
+        }
+        $usedVariables = $this->parser->getUsedVariables($expression);
+        $this->statistics->addAssertion($expression, $success, $this->contextStack, $usedVariables, $message);
+        Out::printAssert($expression, $success, $message);
         return $success;
     }
 
