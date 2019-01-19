@@ -5,10 +5,13 @@ namespace PieceofScript\Services;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Errors\ControlFlow\CancelException;
 use PieceofScript\Services\Errors\ControlFlow\MustException;
+use PieceofScript\Services\Errors\Parser\EmptyExpressionError;
 use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\RuntimeError;
+use PieceofScript\Services\Out\In;
 use PieceofScript\Services\Out\JunitReport;
 use PieceofScript\Services\Out\Out;
+use PieceofScript\Services\Utils\LocalStorage;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NullLiteral;
 use PieceofScript\Services\Values\NumberLiteral;
@@ -45,6 +48,7 @@ class Tester
     const OPERATOR_RUN = 'run';
     const OPERATOR_PRINT = 'print';
     const OPERATOR_SLEEP ='sleep';
+    const OPERATOR_PAUSE = 'pause';
     const OPERATOR_WHILE = 'while';
     const OPERATOR_FOREACH = 'foreach';
     const OPERATOR_IF = 'if';
@@ -64,6 +68,7 @@ class Tester
         self::OPERATOR_RUN,
         self::OPERATOR_PRINT,
         self::OPERATOR_SLEEP,
+        self::OPERATOR_PAUSE,
         self::OPERATOR_WHILE,
         self::OPERATOR_FOREACH,
         self::OPERATOR_IF,
@@ -97,7 +102,10 @@ class Tester
     /** @var JunitReport|null */
     protected $junitReport;
 
-    public function __construct(string $startFile, string $reportFile = null)
+    /** @var LocalStorage */
+    protected $localStorage;
+
+    public function __construct(string $startFile, string $reportFile = null, string $localStorageFile = null)
     {
         $this->startFile = $startFile;
 
@@ -107,6 +115,7 @@ class Tester
         $this->generators = new GeneratorsRepository();
         $this->endpoints = new EndpointsRepository();
         $this->testcases = new TestcasesRepository();
+        $this->localStorage = new LocalStorage($localStorageFile);
 
         $this->parser = new Parser($this->generators, $this->contextStack);
         $this->statistics = new Statistics($this->endpoints->getCount());
@@ -374,6 +383,10 @@ class Tester
         } elseif ($operator === self::OPERATOR_SLEEP) {
 
             $this->operatorSleep($expression);
+
+        } elseif ($operator === self::OPERATOR_PAUSE) {
+
+            $this->operatorPause($expression);
 
         } elseif ($operator === self::OPERATOR_CANCEL) {
 
@@ -697,9 +710,26 @@ class Tester
     {
         $value = $this->parser->evaluate($expression, $this->contextStack->head());
         if (!$value instanceof NumberLiteral) {
-            throw new RuntimeError('Sleep required Number of microseconds. ' . $value::TYPE_NAME . ' given');
+            throw new RuntimeError('Sleep required Number of seconds. But ' . $value::TYPE_NAME . ' given');
         }
-        usleep((int) $value->getValue());
+        usleep((int) ($value->getValue() * 1000000));
+    }
+
+    /**
+     * @param string $expression
+     * @throws RuntimeError
+     */
+    protected function operatorPause(string $expression)
+    {
+        try {
+            $value = $this->parser->evaluate($expression, $this->contextStack->head());
+        } catch (EmptyExpressionError $e) {
+            $value = new NumberLiteral(0);
+        }
+        if (!$value instanceof NumberLiteral) {
+            throw new RuntimeError('Pause required Number of seconds. But ' . $value::TYPE_NAME . ' given');
+        }
+        In::pressEnter($value->getValue());
     }
 
     /**

@@ -4,13 +4,16 @@ namespace PieceofScript;
 
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\InternalError;
+use PieceofScript\Services\Out\In;
 use PieceofScript\Services\Out\Out;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use PieceofScript\Services\Tester;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class RunCommand extends Command
 {
@@ -22,7 +25,8 @@ class RunCommand extends Command
             ->setHelp('This command runs testing scenario')
             ->addArgument('scenario', InputArgument::REQUIRED, 'Start script file')
             ->addOption('junit-report', 'j', InputOption::VALUE_OPTIONAL, 'Reporting file in JUnit format', null)
-            ->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Configuration file', '')
+            ->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Configuration file', null)
+            ->addOption('local-storage', 'ls', InputOption::VALUE_OPTIONAL, 'Local storage file', null)
             ->setHelp('Run testing scenario');
     }
 
@@ -30,6 +34,7 @@ class RunCommand extends Command
     {
         try {
             Out::setOutput($output);
+            In::init($input, $output, $this->getHelper('question'));
             $startFile = realpath($input->getArgument('scenario'));
             if (!file_exists($startFile) || !is_readable($startFile)) {
                 throw new InternalError('File is not readable ' . $input->getArgument('scenario'));
@@ -40,7 +45,11 @@ class RunCommand extends Command
             } else {
                 Config::loadFromFile('./config.yaml', false);
             }
-            $tester = new Tester($startFile, $input->getOption('junit-report', null));
+            $tester = new Tester(
+                $startFile,
+                $input->getOption('junit-report'),
+                $input->getOption('local-storage')
+                );
             return $tester->run();
         } catch (InternalError $e) {
             Out::printError($e);

@@ -1,7 +1,7 @@
 //require ./globals.txt
 //include ./globals_dev.txt
 
-Auth {123}
+pause  6 //test
 cancel
 
 Testcase Create comment $bad

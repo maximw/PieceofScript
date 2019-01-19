@@ -103,7 +103,7 @@ class Out
         $line = trim($line, PHP_EOL);
         $verbosity = OutputInterface::VERBOSITY_DEBUG;
         //$lineNumber = str_pad($lineNumber, 4, ' ', STR_PAD_LEFT);
-        static::writeln($lineNumber . ' '. $line, $verbosity);
+        static::writeln($lineNumber . ': '. $line, $verbosity);
     }
 
     public static function printCancel()

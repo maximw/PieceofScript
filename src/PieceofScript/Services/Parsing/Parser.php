@@ -6,6 +6,7 @@ namespace PieceofScript\Services\Parsing;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Contexts\GeneratorContext;
+use PieceofScript\Services\Errors\Parser\EmptyExpressionError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Generators\GeneratorsRepository;
 use PieceofScript\Services\Utils\Utils;
@@ -367,7 +368,7 @@ class Parser
     protected function executeAST(TokensStack $ast, AbstractContext $context): Operand
     {
         if ($ast->isEmpty()) {
-            throw new \Exception('AST is empty');
+            throw new EmptyExpressionError($context);
         }
         $token = $ast->pop();
         if ($token->getType() === Token::TYPE_VALUE) {

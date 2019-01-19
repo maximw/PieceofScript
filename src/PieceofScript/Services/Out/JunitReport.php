@@ -96,7 +96,7 @@ class JunitReport
 
         $property = $properties->addChild('property');
         $property->addAttribute('name', 'config.http_read_timeout');
-        $property->addAttribute('value', $this->xmlEscape(Config::get()->getHttpReadTimeout()));
+        $property->addAttribute('value', $this->xmlEscape(Config::get()->getHttpTimeout()));
 
         $property = $properties->addChild('property');
         $property->addAttribute('name', 'config.http_max_redirects');
