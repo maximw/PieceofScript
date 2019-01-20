@@ -11,7 +11,6 @@ use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Out\In;
 use PieceofScript\Services\Out\JunitReport;
 use PieceofScript\Services\Out\Out;
-use PieceofScript\Services\Utils\LocalStorage;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NullLiteral;
 use PieceofScript\Services\Values\NumberLiteral;
@@ -105,7 +104,7 @@ class Tester
     /** @var LocalStorage */
     protected $localStorage;
 
-    public function __construct(string $startFile, string $reportFile = null, string $localStorageFile = null)
+    public function __construct(string $startFile, string $reportFile = null)
     {
         $this->startFile = $startFile;
 
@@ -115,7 +114,6 @@ class Tester
         $this->generators = new GeneratorsRepository();
         $this->endpoints = new EndpointsRepository();
         $this->testcases = new TestcasesRepository();
-        $this->localStorage = new LocalStorage($localStorageFile);
 
         $this->parser = new Parser($this->generators, $this->contextStack);
         $this->statistics = new Statistics($this->endpoints->getCount());

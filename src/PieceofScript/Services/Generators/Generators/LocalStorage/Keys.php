@@ -4,16 +4,10 @@
 namespace PieceofScript\Services\Generators\Generators\LocalStorage;
 
 
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\Token;
-use PieceofScript\Services\Config\Config;
-use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
 use PieceofScript\Services\Generators\Generators\LocalStorage\Services\LocalStorage;
-use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
-use PieceofScript\Services\Values\NullLiteral;
 use PieceofScript\Services\Values\StringLiteral;
 
 class Keys extends BaseLocalStorageGenerator

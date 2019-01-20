@@ -4,7 +4,6 @@
 namespace PieceofScript\Services\Generators\Generators\LocalStorage;
 
 
-use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
 use PieceofScript\Services\Generators\Generators\LocalStorage\Services\LocalStorage;

@@ -25,7 +25,7 @@ class RunCommand extends Command
             ->addArgument('scenario', InputArgument::REQUIRED, 'Start script file')
             ->addOption('junit-report', 'j', InputOption::VALUE_OPTIONAL, 'Reporting file in JUnit format', null)
             ->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Configuration file', null)
-            ->addOption('local-storage', 'ls', InputOption::VALUE_OPTIONAL, 'Local storage file', null)
+            ->addOption('local-storage', 'l', InputOption::VALUE_OPTIONAL, 'Local storage file', null)
             ->setHelp('Run testing scenario');
     }
 
@@ -44,11 +44,8 @@ class RunCommand extends Command
             } else {
                 Config::loadFromFile('./config.yaml', false);
             }
-            $tester = new Tester(
-                $startFile,
-                $input->getOption('junit-report'),
-                $input->getOption('local-storage')
-                );
+            Config::loadInput($input);
+            $tester = new Tester($startFile, $input->getOption('junit-report'));
             return $tester->run();
         } catch (InternalError $e) {
             Out::printError($e);

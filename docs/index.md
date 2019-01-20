@@ -17,6 +17,7 @@ of HTTP JSON API.
     <li><a href="functions_common.md">Common</a></li>
     <li><a href="functions_faker.md">Faker</a></li>
     <li><a href="functions_jwt.md">JWT</a></li>
+    <li><a href="functions_localstorage.md">Local storage</a></li>
     </ul>
  </li>   
  <li><a href="variables.md">Variables and Contexts</a></li> 

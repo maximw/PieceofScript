@@ -5,6 +5,7 @@ namespace PieceofScript\Services\Generators\Generators\LocalStorage\Services;
 
 
 use PieceofScript\Services\Config\Config;
+use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\BoolLiteral;
 use PieceofScript\Services\Values\DateLiteral;
@@ -51,10 +52,13 @@ class LocalStorage
 
     protected function load()
     {
-        $cache = Yaml::parseFile($this->file);
-        foreach ($cache as $key => $value) {
-            $this->cache[trim($key, '\'')] = $value;
+        if (!file_exists($this->file)) {
+            file_put_contents($this->file, '');
         }
+        if (!is_readable($this->file)) {
+            throw new InternalError('Local storage error. File is not readable');
+        }
+        $this->cache = $this->trimQuotes(Yaml::parseFile($this->file));
     }
 
     protected function flush()
@@ -68,8 +72,6 @@ class LocalStorage
             throw new \Exception('Broken structure for in local storage');
         }
 
-        $data['type'] = trim($data['type'], '\'');
-
         if ($data['type'] === ArrayLiteral::TYPE_NAME) {
             if (!is_array($data['data'])) {
                 throw new \Exception('Broken structure for in local storage');
@@ -80,8 +82,6 @@ class LocalStorage
             }
             return new ArrayLiteral($result);
         }
-
-        $data['data'] = trim($data['data'], '"\'');
 
         if ($data['type'] === NullLiteral::TYPE_NAME) {
             return new NullLiteral();
@@ -145,5 +145,20 @@ class LocalStorage
         }
 
         throw new \Exception('Broken structure for in local storage');
+    }
+
+    protected function trimQuotes($data)
+    {
+        if (is_array($data)) {
+            $array = [];
+            foreach ($data as $key => $value) {
+                $array[$this->trimQuotes($key)] = $this->trimQuotes($value);
+            }
+            return $array;
+        }
+        if (is_string($data) && isset($data[0]) && $data[0] === '"') {
+            $data = mb_substr($data, 1, -1, 'UTF-8');
+        }
+        return $data;
     }
 }

@@ -208,9 +208,7 @@ class Inline
                 return 'true';
             case false === $value:
                 return 'false';
-            case ctype_digit($value):
-                return \is_string($value) ? "'$value'" : (int) $value;
-            case is_numeric($value):
+            case is_int($value) || is_float($value):
                 $locale = setlocale(LC_NUMERIC, 0);
                 if (false !== $locale) {
                     setlocale(LC_NUMERIC, 'C');
@@ -232,18 +230,11 @@ class Inline
 
                 return $repr;
             case '' == $value:
-                return "''";
+                return '""';
             case self::isBinaryString($value):
                 return '!!binary '.base64_encode($value);
-            case Escaper::requiresDoubleQuoting($value):
-                return Escaper::escapeWithDoubleQuotes($value);
-            case Escaper::requiresSingleQuoting($value):
-            case Parser::preg_match('{^[0-9]+[_0-9]*$}', $value):
-            case Parser::preg_match(self::getHexRegex(), $value):
-            case Parser::preg_match(self::getTimestampRegex(), $value):
-                return Escaper::escapeWithSingleQuotes($value);
             default:
-                return $value;
+                return Escaper::escapeWithDoubleQuotes($value);
         }
     }
 

@@ -12,7 +12,7 @@ use Symfony\Component\Yaml\Yaml;
 class Config
 {
     const INPUT_OPTIONS_MAP = [
-        'ls' => 'local_storage_name',
+        'local-storage' => 'local_storage_name',
     ];
 
 
