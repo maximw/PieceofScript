@@ -4,11 +4,18 @@
 namespace PieceofScript\Services\Config;
 
 
+use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Errors\RuntimeError;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
+    const INPUT_OPTIONS_MAP = [
+        'ls' => 'local_storage_name',
+    ];
+
+
     protected $endpoints_file = './endpoints.yaml';
 
     protected $endpoints_dir = './endpoints';
@@ -36,6 +43,8 @@ class Config
     protected $random_seed = null;
 
     protected $faker_locale = 'en_US';
+
+    protected $local_storage_name = null;
 
     protected static $instance;
 
@@ -121,10 +130,10 @@ class Config
         }
         $dir = (string) $dir;
         if (!is_writable($dir)) {
-            throw new \Exception('Cache directory is not writable');
+            throw new InternalError('Cache directory is not writable');
         }
         if (!is_readable($dir)) {
-            throw new \Exception('Cache directory is not readable');
+            throw new InternalError('Cache directory is not readable');
         }
         $this->cache_dir = $dir;
     }
@@ -282,7 +291,7 @@ class Config
      */
     public function getFakerLocale(): string
     {
-        return $this->faker_locale;
+        return $this->faker_locale ?? 'en_US';
     }
 
     /**
@@ -293,6 +302,21 @@ class Config
         $this->faker_locale = $locale;
     }
 
+    /**
+     * @return string
+     */
+    public function getLocalStorageName()
+    {
+        return $this->local_storage_name;
+    }
+
+    /**
+     * @param string $name
+     */
+    protected function setLocalStorageName($name)
+    {
+        $this->local_storage_name = $name;
+    }
 
     public static function loadFromFile(string $filename, bool $requireFile)
     {
@@ -310,6 +334,19 @@ class Config
             $method = 'set' . self::toCamelCase($item);
             if (method_exists(self::get(), $method)) {
                 self::get()->$method($value);
+            }
+        }
+    }
+
+    public static function loadInput(InputInterface $input)
+    {
+        foreach (static::INPUT_OPTIONS_MAP as $optionName => $fieldName) {
+            $value = $input->getOption($optionName);
+            if (null !== $value) {
+                $method = 'set' . self::toCamelCase($fieldName);
+                if (method_exists(self::get(), $method)) {
+                    self::get()->$method($value);
+                }
             }
         }
     }
