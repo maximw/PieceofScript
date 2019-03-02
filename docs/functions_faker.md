@@ -10,9 +10,62 @@ There are 2 related config settings:
 `faker_locale` - locale of generated data. In some case could fallback to `en_US`, by default `en_US`.
 
 ## fzaninotto/Faker
-<b>faker\address</b>() <i>Number</i> - 8888 Cummings Vista Apt. 101, Susanbury, NY 95473
+`Faker\address()` <i>string</i> - 8888 Cummings Vista Apt. 101, Susanbury, NY 95473
 
-<b>faker\randomDigitPositive</b>() - <i>Number</i> - returns random number from 1 to 9
+`Faker\arrayElement(array $array)` <i>number</i> - returns random element of $array
+
+`Faker\asciify(string $template)` <i>string</i> - replace symbols "*" in $template with random ASCII chars, i.e. "Hello ***" to 'Hello R6+'
+
+`Faker\bankCardExpiration()` <i>string</i> - return random bank card expiration date, i.e. "02/19"
+
+`Faker\bankCardNumber()` <i>string</i> - return random bank card number, i.e. "4485480221084675"
+
+`Faker\bankCardType()` <i>string</i> - return random bank card type, i.e. "MasterCard"
+
+`Faker\boolean(number $chanceOfTrue)` <i>boolean</i> - returns random boolean value with chance of getting true 0 to 100
+
+`Faker\city()` <i>string</i> - returns random city name, i.e. "West Judge"
+
+`Faker\cololrCss()` <i>string</i> - returns random color code in CSS format, i.e. "rgb(0,255,122)"
+
+`Faker\cololrHex()` <i>string</i> - returns random color code in HEX format, i.e. "#fa3cc2"
+
+`Faker\cololrName()` <i>string</i> - returns random color name, i.e. "Gainsbor"
+
+`Faker\cololrRgb()` <i>string</i> - returns random color code, i.e. "0,255,122"
+
+`Faker\cololrSafeName()` <i>string</i> - returns random color name from limited set of colors, i.e. "fuchsia"
+
+`Faker\country()` <i>string</i> - returns random country name, i.e. "Falkland Islands (Malvinas)"
+
+`Faker\countryCode()` <i>string</i> - returns random country code, i.e. "UK"
+
+`Faker\currencyCode()` <i>string</i> - returns random currency code, i.e. "EUR"
+
+`Faker\dateTime($dateMin = "-30 years", $dateMax = "now")` <i>date</i> - returns random date between $dateMin and $dateMax. Null value - use default value, number value - use ad timestamp, date value - user as is, string value - use as converted string to date, include <a href="http://php.net/manual/en/datetime.formats.php">relative formats</a>.
+
+`Faker\domain()` <i>string</i> - returns random domain name, i.e. "wolffdeckow.net"
+
+`Faker\email()` <i>string</i> - returns random email address, i.e. "tkshlerin@collins.com"
+
+`Faker\emoji()` <i>string</i> - returns random emoji symbol, i.e. "😁"
+
+`Faker\file(string $dirName)` <i>string</i> - returns path of random file in directory $dirName
+
+`Faker\fileExtension()` <i>string</i> - returns random file extension, i.e. "avi"
+
+`Faker\firstName(string $gender = null)` <i>string</i> - returns random first name, in dependency of $gender "male" or "female" if given, i.e. "Maynard"
+
+`Faker\html(number $maxDepth = 2, number $maxWidth = 3)` <i>string</i> - returns random text with HTML markup, $maxDepth - maximal tags nesting level, $maxWith - maximal number of tags on one level
+
+`Faker\iban(string $countryCode)` <i>string</i> - returns random IBAN, i.e. "IT31A8497112740YZ575DJ28BP4"
+
+`Faker\iban(number $maxDepth = 2, number $maxWidth = 3)` <i>string</i> - returns random IBAN, i.e. "IT31A8497112740YZ575DJ28BP4"
+
+`Faker\imageFile(number $width = 640, number $height = 480, string $category = null, boolean $fullPath = true, string $watermark = null)` <i>string</i> - returns path to random image file in cache directory
+
+`Faker\imageUrl(number $width = 640, number $height = 480, string $category = null, string $watermark = null, boolean $monochrome = false)` <i>string</i> - returns random image URL 
+
 
 <b>faker\randomNumber</b>($digitsCount = NULL, $strict = false) <i>Number</i> - returns random number with $digitsCount digits or less, if $strict == false
 
@@ -32,7 +85,6 @@ There are 2 related config settings:
 
 <b>faker\bothify</b>("Hello ##??") <i>String</i> - replace symbols "#" with random digits and "?" with random letters, i.e. 'Hello 42jz'
 
-<b>faker\asciify</b>("Hello ***") <i>String</i> - replace symbols "*" with random ASCII chars, i.e. 'Hello R6+'
 
 <b>faker\regexify</b>("[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}") <i>String</i> - return random string fit to given regex
 
@@ -47,10 +99,10 @@ There are 2 related config settings:
 <b>faker\paragraph($nbSentences = 3, $randomizeCount = true) <i>String or Array</i> // 'Ut ab voluptas sed a nam. Sint autem inventore aut officia aut aut blanditiis. Ducimus eos odit amet et est ut eum.'
 
 <b>Faker\Paragraphs($nb = 3, $asText = false) <i>String or Array</i>             // array('Quidem ut sunt et quidem est accusamus aut. Fuga est placeat rerum ut. Enim ex eveniet facere sunt.', 'Aut nam et eum architecto fugit repellendus illo. Qui ex esse veritatis.', 'Possimus omnis aut incidunt sunt. Asperiores incidunt iure sequi cum culpa rem. Rerum exercitationem est rem.')
-
 text($maxNbChars = 200)                          // 'Fuga totam reiciendis qui architecto fugiat nemo. Consequatur recusandae qui cupiditate eos quod.'
 
 
 <b>faker\name</b>() <i>String</i> - random name, i.e. "Lucy Cechtelar"
 
 <b>Faker\Address</b>() <i>String</i> - random address, i.e. "426 Jordy Lodge Cartwrightshire, SC 88120-6700"
+

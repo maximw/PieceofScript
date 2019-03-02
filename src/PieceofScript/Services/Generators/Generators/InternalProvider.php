@@ -9,6 +9,7 @@ use PieceofScript\Services\Generators\Generators\Internal\DateFormat;
 use PieceofScript\Services\Generators\Generators\Internal\Explode;
 use PieceofScript\Services\Generators\Generators\Internal\IfGenerator;
 use PieceofScript\Services\Generators\Generators\Internal\Implode;
+use PieceofScript\Services\Generators\Generators\Internal\Keys;
 use PieceofScript\Services\Generators\Generators\Internal\Prepend;
 use PieceofScript\Services\Generators\IGeneratorProvider;
 use PieceofScript\Services\Generators\Generators\Internal\ArrayGenerator;
@@ -45,6 +46,7 @@ class InternalProvider implements IGeneratorProvider
             new Identical(),
             new IfGenerator(),
             new Implode(),
+            new Keys(),
             new Max(),
             new Min(),
             new Prepend(),

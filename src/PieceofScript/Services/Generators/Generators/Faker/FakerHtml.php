@@ -16,11 +16,11 @@ class FakerHtml extends FakerGenerator
     {
         $maxDepth = 2;
         if (isset($this->arguments[0])) {
-            $maxDepth = $this->arguments[0]->toNumber()->getValue();
+            $maxDepth = (int) $this->arguments[0]->toNumber()->getValue();
         }
         $maxWidth = 3;
         if (isset($this->arguments[1])) {
-            $maxWidth = $this->arguments[0]->toNumber()->getValue();
+            $maxWidth = (int) $this->arguments[0]->toNumber()->getValue();
         }
         return new StringLiteral($this->faker->randomHtml($maxDepth, $maxWidth));
     }

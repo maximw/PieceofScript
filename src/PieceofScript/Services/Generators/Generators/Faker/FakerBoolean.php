@@ -16,7 +16,7 @@ class FakerBoolean extends FakerGenerator
     {
         $trueChance = 50;
         if (isset($this->arguments[0])) {
-            $trueChance = max(min($this->arguments[0]->toNumber()->getValue(), 100), 0);
+            $trueChance = (int) max(min($this->arguments[0]->toNumber()->getValue(), 100), 0);
         }
 
         return new BoolLiteral($this->faker->boolean($trueChance));

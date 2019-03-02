@@ -17,12 +17,12 @@ class FakerImageFile extends FakerGenerator
     {
         $width = 640;
         if (isset($this->arguments[0])) {
-            $width = $this->arguments[0]->toNumber()->getValue();
+            $width = (int) $this->arguments[0]->toNumber()->getValue();
         }
 
         $height = 480;
         if (isset($this->arguments[1])) {
-            $height = $this->arguments[1]->toNumber()->getValue();
+            $height = (int) $this->arguments[1]->toNumber()->getValue();
         }
 
         $category = null;
@@ -30,12 +30,12 @@ class FakerImageFile extends FakerGenerator
             $category = $this->arguments[2]->toString()->getValue();
         }
 
-        $fullPath = null;
+        $fullPath = true;
         if (isset($this->arguments[3])) {
             $fullPath = $this->arguments[2]->toBool()->getValue();
         }
 
-        $randomize = null;
+        $randomize = true;
         if (isset($this->arguments[4])) {
             $randomize = $this->arguments[4]->toBool()->getValue();
         }
