@@ -1,4 +1,4 @@
-<h1>Faker functions</h1>
+# Faker functions
 
 This set of functions based on <a href="https://github.com/fzaninotto/Faker">fzaninotto/Faker</a> 
 library, and intended for generating random various data.
@@ -9,8 +9,9 @@ There are 2 related config settings:
 
 `faker_locale` - locale of generated data. In some case could fallback to `en_US`, by default `en_US`.
 
-## fzaninotto/Faker
-`Faker\address()` <i>string</i> - 8888 Cummings Vista Apt. 101, Susanbury, NY 95473
+## Functions list
+
+`Faker\address()` <i>string</i> - returns random address string, i.e. "8888 Cummings Vista Apt. 101, Susanbury, NY 95473"
 
 `Faker\arrayElement(array $array)` <i>number</i> - returns random element of $array
 
@@ -66,8 +67,10 @@ There are 2 related config settings:
 
 `Faker\imageUrl(number $width = 640, number $height = 480, string $category = null, string $watermark = null, boolean $monochrome = false)` <i>string</i> - returns random image URL 
 
+`Faker\integer(number $min = 0, number $max = PHP_INT_MAX)` <i>number</i> - returns random integer between $min and $max inclusive
 
-<b>faker\randomNumber</b>($digitsCount = NULL, $strict = false) <i>Number</i> - returns random number with $digitsCount digits or less, if $strict == false
+`Faker\ipv4(number $min = 0, number $max = PHP_INT_MAX)` <i>number</i> - returns random integer between $min and $max inclusive
+
 
 <b>faker\randomFloat</b>($digitsCount = NULL, $min = 0, $max = NULL) <i>Number</i> - returns random float number with $digitsCount digits include integer and fractional parts, between $min and $max
 

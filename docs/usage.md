@@ -35,7 +35,6 @@ Running testing scenario `startFile.pos`:
 
 Directory containing startFile.pos set as current working dir during testing. All relative paths count from it. 
 
-
 Get list of all available commands: 
 
     ```
@@ -45,7 +44,7 @@ Get list of all available commands:
 <a name="config"></a>    
 ### Configuration
 
-Configuration file could be set in command line by `--config` option or it will be read from `./config.yaml` from current directory. If config file was not set, default values will be used.
+Configuration values set in YAML-file that could be passed in command line by `--config` option or it will be read from `./config.yaml` from current directory. If config file was not set, default configuration values will be used.
 
 <b>endpoints_file</b> - file to read API Endpoints definitions from. Default is `./endpoints.yaml`.
 
@@ -54,8 +53,6 @@ Configuration file could be set in command line by `--config` option or it will 
 <b>generators_file</b> - file to read generators definitions from. Default is `./generators.yaml`.
 
 <b>generators_dir</b>  - directory to search files *.yaml to read generetors definitions from. Default is `./generators`.
-
-<b>cache_dir</b>  - directory to store temporary files. Default is system temp directory.
 
 <b>http_connect_timeout</b> - HTTP connection timeout in seconds. Default `0` - no timeout.
 
@@ -73,4 +70,4 @@ Configuration file could be set in command line by `--config` option or it will 
 
 <b>random_seed</b> - integer seed for initiate random functions. Default value selected randomly.
 
-<b>faker_locale</b> - locale for Faker functions. Default is `en_US`.
+<b>faker_locale</b> - locale for <a href="functions_faker.md">Faker functions</a>. Default is `en_US`.
