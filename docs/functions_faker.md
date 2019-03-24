@@ -106,6 +106,3 @@ text($maxNbChars = 200)                          // 'Fuga totam reiciendis qui a
 
 
 <b>faker\name</b>() <i>String</i> - random name, i.e. "Lucy Cechtelar"
-
-<b>Faker\Address</b>() <i>String</i> - random address, i.e. "426 Jordy Lodge Cartwrightshire, SC 88120-6700"
-
