@@ -5,7 +5,7 @@ namespace PieceofScript\Services\Errors\Parser;
 
 
 
-class EmptyExpressionError extends ParserError
+class EmptyExpressionError extends EvaluationError
 {
     public function __construct()
     {

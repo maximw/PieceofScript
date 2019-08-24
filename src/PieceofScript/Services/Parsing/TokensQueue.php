@@ -26,7 +26,7 @@ class TokensQueue
      */
     public function head(): Token
     {
-        $token = end($this->queue);
+        $token = reset($this->queue);
         if (!$token instanceof Token) {
             throw new \Exception('Something went wrong. Token stack is empty.');
         }

@@ -1,3 +1,5 @@
+# Null
+
 Null value means variable has no any special value.
 
 

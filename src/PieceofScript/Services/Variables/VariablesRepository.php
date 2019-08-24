@@ -8,7 +8,6 @@ use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Out\Out;
-use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\Hierarchy\IKeyValue;
@@ -19,6 +18,7 @@ use PieceofScript\Services\Values\VariableReference;
 
 class VariablesRepository
 {
+    /** @var Variable[] */
     public $variables = [];
 
     public $assignmentModes = [];
@@ -29,7 +29,7 @@ class VariablesRepository
      * Get variable value
      *
      * @param VariableName $varName
-     * @return string
+     * @return BaseLiteral
      * @throws VariableError
      */
     public function get(VariableName $varName): BaseLiteral
@@ -38,10 +38,10 @@ class VariablesRepository
             throw new VariableError($varName,'variable does not exist.');
         }
 
-        if ($this->variables[$varName->name] instanceof VariableReference) {
-            return ($this->variables[$varName->name]->get)($varName->path);
+        if ($this->variables[$varName->name]->getValue() instanceof VariableReference) {
+            return ($this->variables[$varName->name]->getValue()->get)($varName->path);
         } else {
-            return $this->getVal($varName->path, $this->variables[$varName->name], $varName);
+            return $this->getVal($varName->path, $this->variables[$varName->name]->getValue(), $varName);
         }
     }
 
@@ -90,33 +90,27 @@ class VariablesRepository
     public function set(VariableName $varName, BaseLiteral $value, string $assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE)
     {
         if (AbstractContext::ASSIGNMENT_MODE_OFF === $assignmentMode) {
-            throw new RuntimeError($varName, 'cannot assign value here. Did you mean == instead of = ?');
+            throw new RuntimeError($varName, 'Cannot assign value here. Did you mean == instead of = ?');
         }
 
-        $currentValue = new NullLiteral();
-        if ($this->existsWithoutPath($varName)) {
-            $currentValue = $this->variables[$varName->name];
-        }
-
-        $value = Utils::wrapValueContainer($value);
-
-        if ($currentValue instanceof VariableReference) {
-            ($currentValue->set)($varName->path, $value);
+        if (!$this->existsWithoutPath($varName)) {
+            $this->variables[$varName->name] = new Variable($varName, new NullLiteral(), $assignmentMode);
         } else {
             // If variable exists as variable and trying to make constant
-            if (isset($this->assignmentModes[$varName->name])
-                && $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE
-                && $assignmentMode === AbstractContext::ASSIGNMENT_MODE_CONST
-            ){
+            if ($assignmentMode === AbstractContext::ASSIGNMENT_MODE_CONST
+                && $this->variables[$varName->name]->getAssignmentMode() === AbstractContext::ASSIGNMENT_MODE_VARIABLE) {
                 throw new VariableError($varName,'cannot set constant, variable already exists.');
             }
+        }
 
-            if (!isset($this->assignmentModes[$varName->name]) || $this->assignmentModes[$varName->name] === AbstractContext::ASSIGNMENT_MODE_VARIABLE) {
-                $this->setVal($varName->path, $currentValue, $value, $varName);
-                $this->variables[$varName->name] = $currentValue;
-                $this->assignmentModes[$varName->name] = $assignmentMode;
-            } else {
+        if ($this->variables[$varName->name]->getValue() instanceof VariableReference) {
+            ($this->variables[$varName->name]->getValue()->set)($varName->path, $value);
+        } else {
+            if ($this->variables[$varName->name]->getAssignmentMode() === AbstractContext::ASSIGNMENT_MODE_CONST) {
                 Out::printWarning('Cannot change constant value ' . (string) $varName);
+            } else {
+                $newValue = $this->setVal($varName->path, $this->variables[$varName->name]->getValue(), $value, $varName);
+                $this->variables[$varName->name]->setValue($newValue);
             }
         }
     }
@@ -131,7 +125,7 @@ class VariablesRepository
      * @return mixed
      * @throws VariableError
      */
-    protected function setVal(array $path, &$currentValue, $value, VariableName $variableName)
+    protected function setVal(array $path, BaseLiteral $currentValue, BaseLiteral $value, VariableName $variableName): BaseLiteral
     {
         if (empty($path)) {
             return $currentValue = deep_copy($value);
@@ -144,10 +138,10 @@ class VariablesRepository
             if (!$currentValue->offsetExists($key)) {
                 $currentValue[$key] = null;
             }
-            $this->setVal($path, $currentValue->value[$key], $value, $variableName);
+            return $this->setVal($path, $currentValue->value[$key], $value, $variableName);
         } else {
             $currentValue = new ArrayLiteral();
-            $this->setVal($path, $currentValue->value[$key], $value, $variableName);
+            return $this->setVal($path, $currentValue->value[$key], $value, $variableName);
         }
     }
 
@@ -185,7 +179,7 @@ class VariablesRepository
      *
      * @param VariableName $varName
      * @param VariableReference $reference
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function setReference(VariableName $varName, VariableReference $reference)
     {
@@ -202,6 +196,7 @@ class VariablesRepository
      * @param VariableName $varName
      * @param bool $checkPath
      * @return bool
+     * @throws VariableError
      */
     public function exists(VariableName $varName, bool $checkPath = true): bool
     {
@@ -212,7 +207,7 @@ class VariablesRepository
         }
 
         if ($this->variables[$varName->name] instanceof VariableReference) {
-            return ($this->variables[$varName->name]->get)($varName->path, $checkPath);
+            return ($this->variables[$varName->name]->exists)($varName->path, $checkPath);
         } else {
             return $this->existsPath($varName->path, $this->variables[$varName->name], $varName);
         }
@@ -235,14 +230,16 @@ class VariablesRepository
      * Makes copy of repository resolving all references
      *
      * @return VariablesRepository
-     * @throws VariableError
+     * @throws RuntimeError
      */
     public function getDump(): self
     {
         $repo = new VariablesRepository();
-        foreach ($this->variables as $key => $value) {
-            if ($value instanceof VariableReference) {
-                $value = ($value->get)([]);
+        foreach ($this->variables as $key => $variable) {
+            if ($variable->getValue() instanceof VariableReference) {
+                $value = ($variable->getValue()->get)([]);
+            } else {
+                $value = $variable->getValue();
             }
             $repo->set(new VariableName('$' . $key), deep_copy($value));
 
@@ -254,14 +251,30 @@ class VariablesRepository
      * Merge other $variablesRepository to current, current has priority if variable exists
      *
      * @param VariablesRepository $variablesRepository
-     * @throws VariableError
+     * @throws RuntimeError
      */
     public function merge(VariablesRepository $variablesRepository)
     {
-        foreach ($variablesRepository->variables as $name => $value) {
-            $varName = new VariableName($name);
-            if (!$this->exists($varName)) {
-                $this->set($varName, $value);
+        foreach ($variablesRepository->variables as $name => $variable) {
+            if (!$this->exists($variable->getName())) {
+                $this->variables[$name] = deep_copy($variable);
+            }
+        }
+    }
+
+    /**
+     * Imports variables values from $variablesRepository to current, if variable exists in current and not const
+     *
+     * @param VariablesRepository $variablesRepository
+     * @return void
+     * @throws RuntimeError
+     * @throws VariableError
+     */
+    public function importValues(VariablesRepository $variablesRepository)
+    {
+        foreach ($this->variables as $name => $variable) {
+            if ($variablesRepository->exists($variable->getName())) {
+                $this->variables[$name] = deep_copy($variable);
             }
         }
     }
@@ -302,7 +315,7 @@ class VariablesRepository
     {
         if ($key instanceof IKeyValue) {
             $key = $key->toKey();
-        } elseif (!is_scalar($key)) {
+        } elseif (!is_scalar($key)) { //TODO протестировать в каких это случаях
             throw new VariableError($variableName, 'array access requires scalar key');
         }
         return $key;

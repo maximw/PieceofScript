@@ -5,7 +5,7 @@ namespace PieceofScript\Services\Generators;
 
 
 use PieceofScript\Services\Contexts\ContextStack;
-use PieceofScript\Services\Parsing\Parser;
+use PieceofScript\Services\Parsing\Evaluator;
 use PieceofScript\Services\Parsing\TokensStack;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 
@@ -24,7 +24,7 @@ interface IGenerator
 
     public function setContextStack(ContextStack $contextStack);
 
-    public function setParser(Parser $parser);
+    public function setEvaluator(Evaluator $evaluator);
 
     public function setAst(TokensStack $ast);
 }

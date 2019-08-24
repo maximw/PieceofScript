@@ -1,4 +1,4 @@
-## Type String
+# String
 
 String is sequence of UTF-8 characters. 
 String constant can by specified by enclosing it in double quotes ".

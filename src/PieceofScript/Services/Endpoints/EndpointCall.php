@@ -4,7 +4,9 @@
 namespace PieceofScript\Services\Endpoints;
 
 
-class EndpointCall
+use PieceofScript\Services\Call\BaseCall;
+
+class EndpointCall extends BaseCall
 {
     /**
      * Called Endpoint

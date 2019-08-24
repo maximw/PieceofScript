@@ -6,6 +6,7 @@ use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Out\In;
 use PieceofScript\Services\Out\Out;
+use PieceofScript\Services\Parsing\CallLexer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,6 +32,12 @@ class RunCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $lexer = new CallLexer();
+        $call1 = $lexer->getCall('Hi there; {$x+5} $x1.2.gfhg.0 {{$page=$page;$test=$test}} // 23123213');
+        $call2 = $lexer->getCall('  Hi {{$page=$page;$test\'}}\'}}there; $t {5}');
+
+        $t = $call1->isEqual($call2);
+
         try {
             Out::setOutput($output);
             In::init($input, $output, $this->getHelper('question'));

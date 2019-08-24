@@ -6,6 +6,7 @@ namespace PieceofScript\Services\Testcases;
 
 use PieceofScript\Services\Errors\TestcaseExistsException;
 use PieceofScript\Services\Errors\TestcaseNotFoundException;
+use PieceofScript\Services\Parsing\CallLexer;
 use PieceofScript\Services\Values\VariableName;
 
 class TestcasesRepository
@@ -15,8 +16,12 @@ class TestcasesRepository
     /** @var Testcase[] */
     protected $testcases = [];
 
-    public function __construct()
+    /** @var CallLexer */
+    protected $callLexer;
+
+    public function __construct(CallLexer $callLexer)
     {
+        $this->callLexer = $callLexer;
     }
 
     /**

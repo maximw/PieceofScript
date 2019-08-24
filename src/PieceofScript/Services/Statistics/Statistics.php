@@ -5,6 +5,7 @@ namespace PieceofScript\Services\Statistics;
 
 
 use PieceofScript\Services\Contexts\ContextStack;
+use PieceofScript\Services\Endpoints\Endpoint;
 use PieceofScript\Services\Endpoints\EndpointCall;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Values\ArrayLiteral;
@@ -36,10 +37,8 @@ class Statistics
         $this->endpointsTotal = $totalEndpointsCount;
     }
 
-    public function addCall(string $code, EndpointCall $call, ContextStack $contextStack, ArrayLiteral $request, ArrayLiteral $response)
+    public function addCall(string $code, Endpoint $endPoint, ContextStack $contextStack, ArrayLiteral $request, ArrayLiteral $response)
     {
-        $endPoint = $call->getEndpoint();
-
         if (!array_key_exists($endPoint->getName(), $this->statEndpoints)) {
             $this->statEndpoints[$endPoint->getName()] = new StatEndpoint($endPoint);
         }
@@ -50,7 +49,7 @@ class Statistics
 
         $newCall = new StatEndpointCall($code, $contextStack->neck()->getFile(), $contextStack->neck()->getLine(), $request, $response);
 
-        $this->statEndpoints[$endPoint->getName()]->addCall($newCall);
+        $this->statEndpoints[$endPoint->getDefinition()->getOriginalString()]->addCall($newCall);
         $this->currentEndpointCall = $newCall;
     }
 

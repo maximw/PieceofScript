@@ -4,37 +4,28 @@
 namespace PieceofScript\Services\Endpoints;
 
 
+use PieceofScript\Services\Call\BaseCall;
+
 class Endpoint
 {
     const FORMAT_NONE = 'none'; // No data
     const FORMAT_JSON = 'json'; // Json body
+    const FORMAT_RAW = 'raw';   // Raw string
     const FORMAT_FROM = 'form'; // application/x-www-form-urlencoded
     const FORMAT_MULTIPART = 'multipart'; // multipart/form-data
 
     const FORMATS = [
         self::FORMAT_NONE,
         self::FORMAT_JSON,
+        self::FORMAT_RAW,
         self::FORMAT_FROM,
         self::FORMAT_MULTIPART,
     ];
 
     /**
-     * Name of Endpoint
-     * @var string
+     * @var BaseCall
      */
-    protected $name;
-
-    /**
-     * Arguments names of endpoint
-     * @var string[]
-     */
-    protected $arguments = [];
-
-    /**
-     * Original name for reports
-     * @var string
-     */
-    protected $originalName;
+    protected $definition;
 
     /**
      * File name where endpoint was declared
@@ -102,63 +93,27 @@ class Endpoint
      */
     protected $after;
 
-    public function __construct(string $name, string $file)
+    public function __construct(BaseCall $definition, string $file)
     {
-        $this->setName($name);
+        $this->setDefinition($definition);
         $this->setFile($file);
     }
 
     /**
-     * @return string
+     * @return BaseCall
      */
-    public function getName(): string
+    public function getDefinition(): BaseCall
     {
-        return $this->name;
+        return $this->definition;
     }
 
     /**
-     * @param string $name
+     * @param BaseCall $definition
      * @return Endpoint
      */
-    public function setName(string $name): Endpoint
+    public function setDefinition(BaseCall $definition): Endpoint
     {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getOriginalName(): string
-    {
-        return $this->originalName;
-    }
-
-    /**
-     * @param string $originalName
-     * @return Endpoint
-     */
-    public function setOriginalName(string $originalName): Endpoint
-    {
-        $this->originalName = $originalName;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getArguments(): array
-    {
-        return $this->arguments;
-    }
-
-    /**
-     * @param array $arguments
-     * @return Endpoint
-     */
-    public function setArguments(array $arguments): Endpoint
-    {
-        $this->arguments = $arguments;
+        $this->definition = $definition;
         return $this;
     }
 
@@ -299,7 +254,6 @@ class Endpoint
     /**
      * @param string $format
      * @return Endpoint
-     * @throws \Exception
      */
     public function setFormat($format): Endpoint
     {

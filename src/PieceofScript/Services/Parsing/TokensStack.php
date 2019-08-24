@@ -4,8 +4,6 @@
 namespace PieceofScript\Services\Parsing;
 
 
-use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
-
 class TokensStack
 {
     /** @var Token[]  */
@@ -70,11 +68,11 @@ class TokensStack
     {
         echo PHP_EOL;
         foreach ($this->stack as $item) {
-            if ($item->getName() === Parser::T_ARRAY_SUB_AST) {
+            if ($item->getName() === Evaluator::T_ARRAY_SUB_AST) {
                 echo ' [ ';
                 $item->getValue()->debug();
                 echo ' ] ';
-            } elseif ($item->getName() === Parser::T_ARRAY_KEY) {
+            } elseif ($item->getName() === Evaluator::T_ARRAY_KEY) {
                 echo '.' . $item->getValue() . ' ';
             } else {
                 echo $item->getValue() . ' ';

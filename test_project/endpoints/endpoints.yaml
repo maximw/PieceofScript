@@ -1,4 +1,4 @@
-Test:
+Test $a with $b {{$page=1; $per_page=20}}:
     method: "GET"
     url: "http://localhost"
     before: |

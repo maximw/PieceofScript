@@ -69,8 +69,13 @@ There are 2 related config settings:
 
 `Faker\integer(number $min = 0, number $max = PHP_INT_MAX)` <i>number</i> - returns random integer between $min and $max inclusive
 
-`Faker\ipv4(number $min = 0, number $max = PHP_INT_MAX)` <i>number</i> - returns random integer between $min and $max inclusive
+`Faker\ipv4(number $min = 0, number $max = PHP_INT_MAX)` <i>string</i> - returns random IP v4 string
 
+`Faker\ipv6(number $min = 0, number $max = PHP_INT_MAX)` <i>string</i> - returns random IP v6 string
+
+`Faker\languageCode()` <i>string</i> - returns random language code, i.e. "en"
+
+`Faker\lastName(string $gender = null)` <i>string</i> - returns random language code, i.e. "en"
 
 <b>faker\randomFloat</b>($digitsCount = NULL, $min = 0, $max = NULL) <i>Number</i> - returns random float number with $digitsCount digits include integer and fractional parts, between $min and $max
 
@@ -87,7 +92,6 @@ There are 2 related config settings:
 <b>faker\lexify</b>("Hello ???") <i>String</i> - replace symbol "?" with random letters, i.e. 'Hello wgt'
 
 <b>faker\bothify</b>("Hello ##??") <i>String</i> - replace symbols "#" with random digits and "?" with random letters, i.e. 'Hello 42jz'
-
 
 <b>faker\regexify</b>("[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}") <i>String</i> - return random string fit to given regex
 

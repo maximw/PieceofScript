@@ -49,7 +49,9 @@ class Utils
                     } else {
                         $filename = $dir . DIRECTORY_SEPARATOR . $file;
                         if (null === $mask || fnmatch($mask, $filename)) {
-                            $files[] = $filename;
+                            if (is_readable($filename)) {
+                                $files[] = $filename;
+                            }
                         }
                     }
                 }

@@ -1,0 +1,42 @@
+Testcase Context example changes $argument1, $argument2, $argument3
+   var $a = "changed"
+   let $b = "changed"
+   const $c = "changed"
+   import $i
+   let $i = "changed"
+   var $argument1 = "changed"
+   var $argument2 = "changed"
+   var $argument3 = "changed" // предупреждение, по ссылке передали константу
+
+var $a = "original"
+var $b = "original"
+var $i = "original"
+const $c = "original";
+var $paramByRef = "original"
+var $paramByVal = "original"
+const $paramConst = "original"
+
+run Context example changes $paramByRef, {$paramByVal} and $paramConst
+
+// новая $a была создана в контексте тест-кейса
+print $a // "original"
+
+//  $b не было в контексте тест-кейса, и let обратился к глобальной $b
+print $b // "changed"
+
+// $i была импортирована из глобального контекста
+print $i // "original"
+
+// константы создаются в каждом контексте свои, аналогично var создает переменные
+print $c // "original"
+
+// параметры передавался по ссылке
+print $paramByRef // "changed"
+
+// параметры передавался по значению
+print $paramByVal // "original"
+
+// константа была передана по значению, но измениться не может
+print $paramConst // "original"
+
+

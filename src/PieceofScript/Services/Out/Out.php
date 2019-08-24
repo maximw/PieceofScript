@@ -122,7 +122,7 @@ class Out
             static::endFormatting($verbosity);
         } else {
             $verbosity = OutputInterface::VERBOSITY_NORMAL;
-            static::startFormatting('<fg=cyan>', $verbosity);
+            static::startFormatting('<fg=magenta>', $verbosity);
             static::writeln('Assert: "' . trim($code) . '" failed' . $message, $verbosity);
             static::endFormatting($verbosity);
         }
@@ -166,6 +166,9 @@ class Out
         if ($request['format'] === Endpoint::FORMAT_JSON) {
             static::writeln('JSON body:', $verbosity, 1);
             static::writeln(json_encode($request['data'], JSON_PRETTY_PRINT), $verbosity, 2);
+        } elseif ($request['format'] === Endpoint::FORMAT_RAW) {
+            static::writeln('Body:', $verbosity, 1);
+            static::writeln($request['data'], $verbosity, 2);
         } elseif ($request['format'] === Endpoint::FORMAT_FROM) {
             static::writeln('Form data:', $verbosity, 1);
             static::printFormData($request['data'], $verbosity, 2);
@@ -237,7 +240,7 @@ class Out
     public static function printResponse($response)
     {
         $verbosity = OutputInterface::VERBOSITY_DEBUG;
-        static::startFormatting('<fg=magenta>', $verbosity);
+        static::startFormatting('<fg=cyan>', $verbosity);
         $response = Utils::unwrapValueContainer($response);
         if (!$response['network']) {
             static::writeln('Network error', $verbosity);

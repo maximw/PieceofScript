@@ -1,4 +1,4 @@
-# Arrays
+# Array
 
 Arrays are very similar to <a href="http://php.net/manual/en/language.types.array.php">PHP Arrays</a>
 and internally based on them.

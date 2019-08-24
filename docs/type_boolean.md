@@ -1,3 +1,5 @@
+# Boolean
+
 To specify a Boolean literal, use case-insensitive constants `true` or `false`.
 
 ***

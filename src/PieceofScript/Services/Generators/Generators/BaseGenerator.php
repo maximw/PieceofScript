@@ -5,7 +5,7 @@ namespace PieceofScript\Services\Generators\Generators;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Generators\IGenerator;
-use PieceofScript\Services\Parsing\Parser;
+use PieceofScript\Services\Parsing\Evaluator;
 use PieceofScript\Services\Parsing\Token;
 use PieceofScript\Services\Parsing\TokensStack;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -33,8 +33,8 @@ abstract class BaseGenerator implements IGenerator
     /** @var AbstractContext */
     protected $context;
 
-    /** @var Parser */
-    protected $parser;
+    /** @var Evaluator */
+    protected $evaluator;
 
     /** @var TokensStack */
     protected $ast;
@@ -71,18 +71,18 @@ abstract class BaseGenerator implements IGenerator
 
     protected function getNextArgument(): BaseLiteral
     {
-        return $this->parser->evaluate($this->ast, $this->context);
+        return $this->evaluator->evaluate($this->ast, $this->context);
     }
 
     protected function skipNextArgument()
     {
-       $this->parser->skipAST($this->ast);
+       $this->evaluator->skipAST($this->ast);
     }
 
     protected function skipRestArguments()
     {
         while($this->hasNextArgument()) {
-            $this->parser->skipAST($this->ast);
+            $this->evaluator->skipAST($this->ast);
         }
         $this->ast->pop(); //Remove TYPE_ARGUMENTS_END
         $this->argumentsSkipped = true;
@@ -145,12 +145,12 @@ abstract class BaseGenerator implements IGenerator
     }
 
     /**
-     * @param Parser $parser
+     * @param Evaluator $evaluator
      * @return BaseGenerator
      */
-    public function setParser(Parser $parser): BaseGenerator
+    public function setEvaluator(Evaluator $evaluator): BaseGenerator
     {
-        $this->parser = $parser;
+        $this->evaluator = $evaluator;
         return $this;
     }
 

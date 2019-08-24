@@ -1,3 +1,5 @@
+# Date
+
 Dates is wrapped PHP [DateTime](http://php.net/manual/en/class.datetime.php).
 
 Date constants is strings in single quotes in one of <a href="http://php.net/manual/en/datetime.formats.php">available formats</a>.

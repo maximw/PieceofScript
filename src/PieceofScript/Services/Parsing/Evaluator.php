@@ -5,7 +5,6 @@ namespace PieceofScript\Services\Parsing;
 
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Contexts\ContextStack;
-use PieceofScript\Services\Contexts\GeneratorContext;
 use PieceofScript\Services\Errors\Parser\EmptyExpressionError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Generators\GeneratorsRepository;
@@ -20,7 +19,7 @@ use PieceofScript\Services\Values\Hierarchy\Operand;
 use PieceofScript\Services\Values\StringLiteral;
 use PieceofScript\Services\Values\VariableName;
 
-class Parser
+class Evaluator
 {
 
     protected $lexemes = [
@@ -68,19 +67,22 @@ class Parser
     /** @var ContextStack */
     protected $contextStack;
 
+    /** @var ExpressionLexer */
+    protected $expressionLexer;
+
     public function __construct(
         GeneratorsRepository $generators,
-        ContextStack $contextStack
+        ContextStack $contextStack,
+        ExpressionLexer $expressionLexer
     )
     {
         $this->generators = $generators;
         $this->contextStack = $contextStack;
+        $this->expressionLexer = $expressionLexer;
     }
 
-
-
     /**
-     * Evaluate string or array. Entry point of Parser
+     * Evaluate string or array. Entry point of Evaluator
      *
      * @param string|array|TokensQueue|TokensStack|BaseLiteral $value
      * @param AbstractContext $context
@@ -89,7 +91,7 @@ class Parser
     public function evaluate($value, AbstractContext $context): BaseLiteral
     {
         if (is_string($value)) {
-            $tokens = $this->tokenize($value);
+            $tokens = $this->expressionLexer->tokenize($value);
             $ast =  $this->buildAST($tokens);
             return $this->extractLiteral($this->executeAST($ast, $context), $context);
         } elseif ($value instanceof TokensQueue) {
@@ -113,9 +115,22 @@ class Parser
      * @return TokensQueue[]
      * @throws \Exception
      */
-    public function tokenizeSplitBy(string $expression, string $splitTokenName): array
+    public function tokenizeSplitBy(string $expression, string $splitTokenName = Token::T_SEMICOLON): array
     {
-        $tokens = $this->tokenize($expression);
+        $tokens = $this->expressionLexer->tokenize($expression);
+        return $this->queueSplitBy($tokens, $splitTokenName);
+    }
+
+    /**
+     * Splits expression to array of TokensQueue by token name
+     *
+     * @param TokensQueue $tokens
+     * @param string $splitTokenName
+     * @return TokensQueue[]
+     * @throws \Exception
+     */
+    public function queueSplitBy(TokensQueue $tokens, string $splitTokenName = Token::T_SEMICOLON): array
+    {
         $split = [];
         $tokensList = new TokensQueue();
         while(!$tokens->isEmpty()) {
@@ -141,7 +156,7 @@ class Parser
      */
     public function getUsedVariables(string $expression): array
     {
-        $tokens = $this->tokenize($expression);
+        $tokens = $this->expressionLexer->tokenize($expression);
         $variables = [];
         while(!$tokens->isEmpty()) {
             $token = $tokens->pop();
@@ -163,7 +178,7 @@ class Parser
     public function extractOperand($expression, AbstractContext $context): Operand
     {
         if (!$expression instanceof TokensQueue) {
-            $expression = $this->tokenize($expression);
+            $expression = $this->expressionLexer->tokenize($expression);
         }
         $ast = $this->buildAST($expression);
         //$ast->debug();
@@ -226,68 +241,7 @@ class Parser
 
     }
 
-    /**
-     * Split string expression to lexical tokens
-     *
-     * @param string $expression
-     * @return TokensQueue
-     * @throws \Exception
-     */
-    protected function tokenize(string $expression): TokensQueue
-    {
-        $tokens = new TokensQueue();
-        $offset = 0;
-        $matches = null;
-        $expressionCopy = $expression;
-        while (mb_strlen($expressionCopy, 'UTF-8')) {
-            $anyMatch = false;
-            foreach ($this->lexemes as $regex => $lexemeName) {
-                if (preg_match($regex, $expressionCopy, $matches)) {
-                    $value = $matches[0];
-                    $len = mb_strlen($value, 'UTF-8');
 
-                    if (Token::TYPES[$lexemeName] !== Token::TYPE_IGNORED) {
-                        if ($lexemeName === Token::T_STRING_DOUBLE) {
-                            $value = trim($value, '"');
-                        } elseif ($lexemeName === Token::T_STRING) {
-                            $value = trim($value, "'");
-                        } elseif ($lexemeName === Token::T_ARRAY_KEY) {
-                            $value = ltrim($value, '.');
-                        }
-
-                        // Unary positive and negative
-                        if ($tokens->isEmpty()
-                            || $tokens->head()->getName() === Token::T_OPEN_PARENTHESIS
-                            || $tokens->head()->getName() === Token::T_OPEN_BRACKETS
-                            || $tokens->head()->getName() === Token::T_COMMA
-                            || $tokens->head()->getType() === Token::TYPE_OPERATION
-                            || $tokens->head()->getType() === Token::TYPE_ASSIGNMENT
-                        ) {
-                            if ($lexemeName === Token::T_MINUS) {
-                                $lexemeName = Token::T_NEGATIVE;
-                            }
-                            if ($lexemeName === Token::T_PLUS) {
-                                $lexemeName = Token::T_POSITIVE;
-                            }
-                        }
-
-                        $token = new Token($lexemeName, $value, $offset);
-                        $tokens->add($token);
-                    }
-
-                    $expressionCopy = mb_substr($expressionCopy, $len, null, 'UTF-8');
-                    $anyMatch = true;
-                    $offset += $len;
-                    break;
-                }
-            }
-            if (!$anyMatch) {
-                throw new RuntimeError(sprintf('Cannot parse expression at offset %s: %s', $offset, $expression));
-            }
-        }
-
-        return $tokens;
-    }
 
     protected function buildAST(TokensQueue $tokens): TokensStack
     {
@@ -498,7 +452,7 @@ class Parser
     protected function executeGenerator(Token $token, TokensStack $ast, AbstractContext $context): BaseLiteral
     {
         $generator = $this->generators->get($token->getValue());
-        $generator->setParser($this)
+        $generator->setEvaluator($this)
                     ->setAst($ast)
                     ->setContext($context)
                     ->setContextStack($this->contextStack);
@@ -595,13 +549,13 @@ class Parser
                         $value = $context->getVariable($operand);
                         return new StringLiteral($value::TYPE_NAME);
                     }
-                    return new BoolLiteral(false);
+                    return new NullLiteral();
                 }
                 if ($context->getGlobalContext()->hasVariable($operand, true)) {
                     $value = $context->getGlobalContext()->getVariable($operand);
                     return new StringLiteral($value::TYPE_NAME);
                 }
-                return new BoolLiteral(false);
+                return new NullLiteral();
 
             }
 

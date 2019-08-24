@@ -2,8 +2,8 @@
 
 namespace PieceofScript\Services\Contexts;
 
+use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Errors\Parser\VariableError;
-use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\VariableName;
 use PieceofScript\Services\Values\VariableReference;
@@ -182,16 +182,25 @@ abstract class AbstractContext
         return $this->variables->exists($variableName, $checkPath);
     }
 
+    /**
+     * Makes snapshot of all available variables in Context
+     *
+     * @return VariablesRepository
+     * @throws VariableError
+     */
     public function dumpVariables(): VariablesRepository
     {
         $local = $this->variables->getDump();
-        $global = $this->getGlobalContext()->variables->getDump();
-        $local->merge($global);
+        if (!$this instanceof GlobalContext) {
+            $global = $this->getGlobalContext()->variables->getDump();
+            $local->merge($global);
+        }
         return $local;
     }
 
     /**
      * Check if operator allowed in Context
+     *
      * @param $operator
      * @return bool
      */
@@ -208,11 +217,22 @@ abstract class AbstractContext
         return true;
     }
 
+    /**
+     * Get current executed file name
+     *
+     * @return string
+     */
     public function getFile(): string
     {
         return $this->file;
     }
 
+    /**
+     * Set current executed file name
+     *
+     * @param string $file
+     * @return AbstractContext
+     */
     public function setFile(string $file): self
     {
         $this->file = $file;
@@ -224,12 +244,21 @@ abstract class AbstractContext
         return $this->line;
     }
 
+    /**
+     * Get current executed line number
+     *
+     * @param int|null $line
+     * @return AbstractContext
+     */
     public function setLine(int $line = null): self
     {
         $this->line = $line;
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getName(): string
     {
         return $this->name;
@@ -241,6 +270,11 @@ abstract class AbstractContext
         return $this;
     }
 
+    /**
+     * Return parent Context, where current Context was created
+     *
+     * @return AbstractContext|null
+     */
     public function getParentContext()
     {
         if ($this instanceof GlobalContext) {
@@ -249,6 +283,13 @@ abstract class AbstractContext
         return $this->parentContext;
     }
 
+    /**
+     * Save link to parent Context
+     *
+     * @param AbstractContext|null $context
+     * @return AbstractContext
+     * @throws \Exception
+     */
     public function setParentContext(AbstractContext $context = null): self
     {
         if (null === $context && !$this instanceof GlobalContext) {
@@ -258,11 +299,23 @@ abstract class AbstractContext
         return $this;
     }
 
+    /**
+     * Get child context if it exists
+     *
+     * @return AbstractContext|null
+     */
     public function getChildContext()
     {
         return $this->childContext;
     }
 
+    /**
+     * Save link to child Context when it is created
+     *
+     * @param AbstractContext $context
+     * @return AbstractContext
+     * @throws \Exception
+     */
     public function setChildContext(AbstractContext $context): self
     {
         $this->childContext = $context;
@@ -271,6 +324,11 @@ abstract class AbstractContext
         return $this;
     }
 
+    /**
+     * Get lint to global Context
+     *
+     * @return GlobalContext
+     */
     public function getGlobalContext(): GlobalContext
     {
         if ($this instanceof GlobalContext) {
@@ -279,14 +337,44 @@ abstract class AbstractContext
         return $this->globalContext;
     }
 
+    /**
+     * Save link to global Context
+     *
+     * @param GlobalContext|null $context
+     * @return AbstractContext
+     * @throws InternalError
+     */
     public function setGlobalContext(GlobalContext $context = null): self
     {
         if (null === $context && !$this instanceof GlobalContext) {
-            throw new \Exception('Non-global context requires global context');
+            throw new InternalError('Non-global context requires global context');
         }
 
         $this->globalContext = $context;
         return $this;
     }
 
+    /**
+     * @return VariablesRepository
+     */
+    public function getVariables(): VariablesRepository
+    {
+        return $this->variables;
+    }
+
+    /**
+     * @param VariablesRepository $variables
+     * @return AbstractContext
+     */
+    public function setVariables(VariablesRepository $variables): AbstractContext
+    {
+        $this->variables = $variables;
+        return $this;
+    }
+
+    public function importVariableValues(AbstractContext $context): AbstractContext
+    {
+        $this->variables->importValues($context->getVariables());
+        return $this;
+    }
 }

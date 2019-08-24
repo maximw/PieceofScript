@@ -12,9 +12,7 @@ use GuzzleHttp\RequestOptions;
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Endpoints\Endpoint;
-use PieceofScript\Services\Endpoints\EndpointCall;
 use PieceofScript\Services\Errors\Endpoints\EndpointCallError;
-use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\ArrayLiteral;
@@ -55,20 +53,16 @@ class HttpClient
         self::AUTH_NTLM,
     ];
 
-    /** @var EndpointCall */
-    protected static $endpointCall;
-
     /** @var Endpoint */
     protected static $endpoint;
 
     /** @var ContextStack */
     protected static $contextStack;
 
-    public static function doRequest(BaseLiteral $request, ContextStack $contextStack, EndpointCall $endpointCall): ArrayLiteral
+    public static function doRequest(BaseLiteral $request, ContextStack $contextStack, Endpoint $endpoint): ArrayLiteral
     {
         static::$contextStack = $contextStack;
-        static::$endpointCall = $endpointCall;
-        static::$endpoint = $endpointCall->getEndpoint();
+        static::$endpoint = $endpoint;
 
         list($requestParams, $options) = self::prepareOptions($request);
 
@@ -155,14 +149,19 @@ class HttpClient
 
         if ($format == Endpoint::FORMAT_JSON) {
             $options[RequestOptions::JSON] = $data;
+        } elseif ($format == Endpoint::FORMAT_RAW) {
+            if (!is_scalar($data)) {
+                throw new EndpointCallError(self::$endpoint, 'Raw body has to be scalar value');
+            }
+            $options[RequestOptions::BODY] = $data;
         } elseif ($format == Endpoint::FORMAT_FROM) {
             if (!is_array($data)) {
-                throw new EndpointCallError(self::$endpoint,'Form data has to be array');
+                throw new EndpointCallError(self::$endpoint, 'Form data has to be array');
             }
             $options[RequestOptions::FORM_PARAMS] = $data;
         } elseif ($format == Endpoint::FORMAT_MULTIPART) {
             if (!is_array($data)) {
-                throw new EndpointCallError(self::$endpoint,'Form data has to be array');
+                throw new EndpointCallError(self::$endpoint, 'Form data has to be array');
             }
             $options[RequestOptions::MULTIPART] = self::prepareMultipartForm($data);
         }

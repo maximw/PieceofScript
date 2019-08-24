@@ -47,6 +47,12 @@ class Token
     const T_AND               = 'T_AND';
     const T_NOT               = 'T_NOT';
 
+    const T_CALL_ARGUMENT_BRACKET_OPEN = 'T_CALL_ARGUMENT_BRACKET_OPEN';
+    const T_CALL_ARGUMENT_BRACKET_CLOSE = 'T_CALL_ARGUMENT_BRACKET_CLOSE';
+    const T_CALL_ARGUMENT_DOUBLE_BRACKET_OPEN = 'T_CALL_ARGUMENT_DOUBLE_BRACKET_OPEN';
+    const T_CALL_ARGUMENT_DOUBLE_BRACKET_CLOSE = 'T_CALL_ARGUMENT_DOUBLE_BRACKET_CLOSE';
+    const T_CALL_WORD = 'T_CALL_WORD';
+
     const TYPE_VALUE = 'val';
     const TYPE_VARIABLE = 'var';
     const TYPE_FUNCTION = 'fun';
@@ -62,6 +68,7 @@ class Token
     const TYPE_SUB_AST = 'sub';
     const TYPE_IGNORED = 'ignore';
     const TYPE_SEMICOLON = ';';
+    const TYPE_CALL_SYNTAX = 'call';
 
     const PRIORITIES = [
         self::T_GENERATOR_NAME => Token::MAX_PRIORITY,
@@ -147,6 +154,12 @@ class Token
         self::T_OR                => self::TYPE_OPERATION,
         self::T_AND               => self::TYPE_OPERATION,
         self::T_NOT               => self::TYPE_OPERATION,
+
+        self::T_CALL_ARGUMENT_BRACKET_OPEN => self::TYPE_CALL_SYNTAX,
+        self::T_CALL_ARGUMENT_BRACKET_CLOSE => self::TYPE_CALL_SYNTAX,
+        self::T_CALL_ARGUMENT_DOUBLE_BRACKET_OPEN => self::TYPE_CALL_SYNTAX,
+        self::T_CALL_ARGUMENT_DOUBLE_BRACKET_CLOSE => self::TYPE_CALL_SYNTAX,
+        self::T_CALL_WORD => self::TYPE_CALL_SYNTAX,
     ];
 
     const ARGUMENTS_COUNT = [
@@ -217,8 +230,8 @@ class Token
         $this->setValue($value);
         $this->setType(self::TYPES[$name]);
         $this->setOffset($offset);
-        $this->setPriority(self::PRIORITIES[$name]);
-        $this->setArgumentsCount(self::ARGUMENTS_COUNT[$name]);
+        $this->setPriority(self::PRIORITIES[$name] ?? 0);
+        $this->setArgumentsCount(self::ARGUMENTS_COUNT[$name] ?? 0);
     }
 
 
