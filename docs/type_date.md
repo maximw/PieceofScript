@@ -38,8 +38,8 @@ operation\type | String | Number | Boolean | Array | Null | Date
 \*|Error |Error |Error |Error |Error |Error
 / |Error |Error |Error |Error |Error |Error 
 ^ |Error |Error |Error |Error |Error |Error 
-== |Error |Error |Error |Error |Error |-
-!= |Error |Error |Error |Error |Error |-
+== |Error |Error |Error |Error |False |-
+!= |Error |Error |Error |Error |True |-
 \> |Error |Error |Error |Error |Error |-
 \< |Error |Error |Error |Error |Error |-
 \>= |Error |Error |Error |Error |Error |-

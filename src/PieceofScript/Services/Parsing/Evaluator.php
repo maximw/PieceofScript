@@ -93,18 +93,22 @@ class Evaluator
         if (is_string($value)) {
             $tokens = $this->expressionLexer->tokenize($value);
             $ast =  $this->buildAST($tokens);
-            return $this->extractLiteral($this->executeAST($ast, $context), $context);
         } elseif ($value instanceof TokensQueue) {
             $ast = $this->buildAST($value);
-            return $this->extractLiteral($this->executeAST($ast, $context), $context);
         } elseif ($value instanceof TokensStack) {
-            return $this->extractLiteral($this->executeAST($value, $context), $context);
+            $ast = $value;
         } elseif (is_array($value)) {
             foreach ($value as $key => $val) {
                 $value[$key] = $this->extractLiteral($this->evaluate($val, $context), $context);
             }
+            return Utils::wrapValueContainer($value);
         }
-        return Utils::wrapValueContainer($value);
+
+        if ($ast->isEmpty()) {
+            return new NullLiteral();
+        }
+
+        return $this->extractLiteral($this->executeAST($ast, $context), $context);
     }
 
     /**
@@ -181,7 +185,6 @@ class Evaluator
             $expression = $this->expressionLexer->tokenize($expression);
         }
         $ast = $this->buildAST($expression);
-        //$ast->debug();
         if ($ast->isEmpty()) {
             //$value = $expression;
             throw new \Exception('Error parsing expression ' . $expression);
@@ -238,11 +241,15 @@ class Evaluator
             return $this->skipAST($ast);
 
         }
-
     }
 
-
-
+    /**
+     * Build abstract syntax tree
+     *
+     * @param TokensQueue $tokens
+     * @return TokensStack
+     * @throws \Exception
+     */
     protected function buildAST(TokensQueue $tokens): TokensStack
     {
         $ast = new TokensStack();
@@ -514,11 +521,7 @@ class Evaluator
             throw new \Exception('Cannot assign value to value, did you mean == instead of = ?');
         }
 
-        if ($context->isGlobalWritable) {
-            $context->setVariableOrGlobal($variable, $value);
-        } else {
-            $context->setVariable($variable, $value);
-        }
+        $context->setVariable($variable, $value);
 
         return $value;
     }
@@ -539,26 +542,10 @@ class Evaluator
 
         if ($operand instanceof VariableName) {
             if ($operand->mode === VariableName::MODE_VALUE ) {
-
                 return $context->getVariable($operand);
-
             } elseif ($operand->mode === VariableName::MODE_TYPE) {
-
-                if ($context->hasVariable($operand)) {
-                    if ($context->hasVariable($operand, true)) {
-                        $value = $context->getVariable($operand);
-                        return new StringLiteral($value::TYPE_NAME);
-                    }
-                    return new NullLiteral();
-                }
-                if ($context->getGlobalContext()->hasVariable($operand, true)) {
-                    $value = $context->getGlobalContext()->getVariable($operand);
-                    return new StringLiteral($value::TYPE_NAME);
-                }
-                return new NullLiteral();
-
+                return $context->getVariableType($operand);
             }
-
             throw new \Exception('Error variable name');
         }
 

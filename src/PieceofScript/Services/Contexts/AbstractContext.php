@@ -5,6 +5,8 @@ namespace PieceofScript\Services\Contexts;
 use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
+use PieceofScript\Services\Values\NullLiteral;
+use PieceofScript\Services\Values\StringLiteral;
 use PieceofScript\Services\Values\VariableName;
 use PieceofScript\Services\Values\VariableReference;
 use PieceofScript\Services\Variables\VariablesRepository;
@@ -14,9 +16,9 @@ abstract class AbstractContext
     const ALLOWED_OPERATORS = [];
     const DISALLOWED_OPERATORS = [];
 
-    const ASSIGNMENT_MODE_OFF = 'off';
-    const ASSIGNMENT_MODE_CONST = 'const';
-    const ASSIGNMENT_MODE_VARIABLE = 'var';
+    const ASSIGNMENT_MODE_OFF = 'off';      // Assignment operator causes error
+    const ASSIGNMENT_MODE_CONST = 'const';  // Assignment operator tries to create new constant
+    const ASSIGNMENT_MODE_VARIABLE = 'var'; // Assignment operator tries to create new variable
 
     /**
      * Printable name of object holding Context
@@ -65,7 +67,7 @@ abstract class AbstractContext
     protected $globalContext;
 
     /**
-     * Can assignment operator be used now
+     * How assignment operator works now
      *
      * @var bool
      */
@@ -98,7 +100,13 @@ abstract class AbstractContext
         $this->variables = new VariablesRepository();
     }
 
-
+    /**
+     * Get value of variable from this or global contexts
+     *
+     * @param VariableName $variableName
+     * @return BaseLiteral
+     * @throws VariableError
+     */
     public function getVariable(VariableName $variableName): BaseLiteral
     {
         if ($this->variables->existsWithoutPath($variableName)) {
@@ -112,13 +120,43 @@ abstract class AbstractContext
         throw new VariableError($variableName,'variable not found.');
     }
 
+    /**
+     * Get type of variable from this or global contexts
+     *
+     * @param VariableName $variableName
+     * @return BaseLiteral
+     * @throws VariableError
+     */
+    public function getVariableType(VariableName $variableName): BaseLiteral
+    {
+        if ($this->hasVariable($variableName)) {
+            if ($this->hasVariable($variableName, true)) {
+                $value = $this->getVariable($variableName);
+                return new StringLiteral($value::TYPE_NAME);
+            }
+            return new NullLiteral();
+        }
+        if ($this->isGlobalReadable && $this->getGlobalContext()->hasVariable($variableName, true)) {
+            $value = $this->getGlobalContext()->getVariable($variableName);
+            return new StringLiteral($value::TYPE_NAME);
+        }
+        return new NullLiteral();
+    }
+
+    /**
+     * Get reference to variable from this or global contexts
+     *
+     * @param VariableName $variableName
+     * @return VariableReference
+     * @throws VariableError
+     */
     public function getReference(VariableName $variableName): VariableReference
     {
         if ($this->variables->existsWithoutPath($variableName)) {
             return $this->variables->getReference($variableName);
         }
 
-        if (!$this instanceof GlobalContext) {
+        if ($this->isGlobalReadable && !($this instanceof GlobalContext)) {
             return $this->getGlobalContext()->getReference($variableName);
         }
 
@@ -127,39 +165,31 @@ abstract class AbstractContext
 
     /**
      * Set or add variable to current context
+     *
      * @param VariableName $variableName
      * @param BaseLiteral $value
      * @param string|null $assignmentMode
+     * @throws VariableError
      */
     public function setVariable(VariableName $variableName, BaseLiteral $value, string $assignmentMode = null)
     {
         if (null === $assignmentMode) { //Do not use current $assignmentMode if it is given (for Global Context)
             $assignmentMode = $this->assignmentMode;
         }
-        $this->variables->set($variableName, $value, $assignmentMode);
-    }
 
-    /**
-     * Set or add variable to current or global context
-     * @param VariableName $variableName
-     * @param BaseLiteral $value
-     * @param string|null $assignmentMode
-     */
-    public function setVariableOrGlobal(VariableName $variableName, BaseLiteral $value, string $assignmentMode = null)
-    {
-        if (null === $assignmentMode) { //Do not use current $assignmentMode if it is given (for Global Context)
-            $assignmentMode = $this->assignmentMode;
-        }
-
-        if ($this->variables->exists($variableName, false)) {
-            $this->variables->set($variableName, $value, $assignmentMode);
+        if ($this->isGlobalWritable && !($this instanceof GlobalContext)) {
+            if ($this->variables->exists($variableName, false)) {
+                $this->variables->set($variableName, $value, $assignmentMode);
+            } else {
+                $this->getGlobalContext()->setVariable($variableName, $value, $assignmentMode);
+            }
         } else {
-            $this->getGlobalContext()->setVariable($variableName, $value, $assignmentMode);
+            $this->variables->set($variableName, $value, $assignmentMode);
         }
     }
 
     /**
-     * Add named reference to context variables
+     * Add named reference to Context variables
      *
      * @param VariableName $varName
      * @param VariableReference $reference
@@ -171,11 +201,12 @@ abstract class AbstractContext
     }
 
     /**
-     * Check if context has variable
+     * Check if this Context has variable
      *
      * @param VariableName $variableName
      * @param bool $checkPath
      * @return bool
+     * @throws VariableError
      */
     public function hasVariable(VariableName $variableName, $checkPath = false): bool
     {
@@ -185,13 +216,14 @@ abstract class AbstractContext
     /**
      * Makes snapshot of all available variables in Context
      *
+     * @param bool $onlyCurrentContext
      * @return VariablesRepository
-     * @throws VariableError
+     * @throws \PieceofScript\Services\Errors\RuntimeError
      */
-    public function dumpVariables(): VariablesRepository
+    public function dumpVariables($onlyCurrentContext = false): VariablesRepository
     {
         $local = $this->variables->getDump();
-        if (!$this instanceof GlobalContext) {
+        if (!$onlyCurrentContext && $this->isGlobalReadable && !$this instanceof GlobalContext) {
             $global = $this->getGlobalContext()->variables->getDump();
             $local->merge($global);
         }

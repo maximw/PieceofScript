@@ -48,6 +48,9 @@ class BoolLiteral extends BaseLiteral implements IScalarValue
 
     public function oEqual(BaseLiteral $value): BoolLiteral
     {
+        if ($value instanceof NullLiteral) {
+            return new BoolLiteral(false);
+        }
         if ($value instanceof BoolLiteral) {
             return new BoolLiteral($this->getValue() === $value->getValue());
         }

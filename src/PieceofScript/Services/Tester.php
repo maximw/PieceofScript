@@ -4,9 +4,11 @@ namespace PieceofScript\Services;
 
 use PieceofScript\Services\Call\BaseCall;
 use PieceofScript\Services\Contexts\AbstractContext;
+use PieceofScript\Services\Contexts\OptionsContext;
 use PieceofScript\Services\Endpoints\Endpoint;
 use PieceofScript\Services\Errors\ControlFlow\CancelException;
 use PieceofScript\Services\Errors\ControlFlow\MustException;
+use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
 use PieceofScript\Services\Errors\Parser\EmptyExpressionError;
 use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\RuntimeError;
@@ -180,12 +182,23 @@ class Tester
         Out::printDebug('End executing ' . $fileName);
     }
 
+    /**
+     * Execute all given lines
+     *
+     * @param array $lines
+     * @param string $currentFile
+     * @param int $offsetLineNumber
+     * @throws CancelException
+     * @throws Errors\ContextStackEmptyException
+     * @throws Errors\TestcaseExistsException
+     * @throws FileNotFoundError
+     * @throws MustException
+     * @throws RuntimeError
+     * @throws TestcaseNotFoundException
+     * @throws VariableError
+     */
     protected function executeLines(array $lines, string $currentFile, int $offsetLineNumber)
     {
-        $this->contextStack->head()
-            ->setFile($currentFile)
-            ->setLine($offsetLineNumber);
-
         $totalLines = count($lines);
 
         for ($lineNumber = 0; $lineNumber < $totalLines; $lineNumber++) {
@@ -203,7 +216,7 @@ class Tester
 
             list($operator, $expression, $indent) = $this->extractOperator($line);
 
-            Out::printLine($line, $currentCommandLine);
+            Out::printLine($line, $currentCommandLine + $offsetLineNumber);
 
             if (!$this->contextStack->head()->isAllowedOperator($operator)) {
                 throw new RuntimeError('Cannot execute ' . $operator . ' in context');
@@ -244,7 +257,7 @@ class Tester
 
                 $splitTokens = $this->evaluator->tokenizeSplitBy($expression, Token::T_SEMICOLON);
                 if (count($splitTokens) !== 2 && count($splitTokens) !== 3) {
-                    throw new \Exception('Error parsing foreach');
+                    throw new \Exception('Error parsing foreach', $this->contextStack);
                 }
                 $array = $this->evaluator->evaluate($splitTokens[0], $this->contextStack->head());
                 if (!$array instanceof ArrayLiteral) {
@@ -296,6 +309,13 @@ class Tester
         }
     }
 
+    /**
+     * Get line from lines array, considering line breaks
+     *
+     * @param array $lines
+     * @param int $lineNumber
+     * @return string
+     */
     protected function getLine(array $lines, int &$lineNumber): string
     {
         $totalLines = count($lines);
@@ -308,17 +328,20 @@ class Tester
     }
 
     /**
-     * Execute one-line operator
+     * Execute one operator
      *
      * @param string $operator
      * @param string $expression
      * @param int $indent
-     * @param $fileName
+     * @param string $fileName
      * @param int $lineNumber
+     * @throws CancelException
      * @throws Errors\ContextStackEmptyException
-     * @throws Errors\FileNotFoundError
      * @throws Errors\TestcaseExistsException
-     * @throws Errors\TestcaseNotFoundException
+     * @throws FileNotFoundError
+     * @throws MustException
+     * @throws RuntimeError
+     * @throws TestcaseNotFoundException
      */
     protected function executeOperator(string $operator, string $expression, int $indent, string $fileName, int $lineNumber)
     {
@@ -409,6 +432,10 @@ class Tester
     /**
      * Call API endpoint
      * @param $line
+     * @throws Errors\ContextStackEmptyException
+     * @throws Errors\InternalError
+     * @throws RuntimeError
+     * @throws VariableError
      */
     protected function callEndpoint($line)
     {
@@ -419,31 +446,48 @@ class Tester
         }
 
         // Evaluate passed options
-        $outerContext = new EndpointContext(
+        $optionsContext = new OptionsContext(
             $this->contextStack->head()->getName(),
             $this->contextStack->head()->getFile(),
             $this->contextStack->head()->getLine()
         );
-        $outerContext->setGlobalContext($this->contextStack->global());
-        $outerContext->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
-        $outerContext->isGlobalReadable = true;
-        $outerContext->isGlobalWritable = false;
-        $outerContext->setVariables($this->contextStack->head()->dumpVariables());
+        $optionsContext->isGlobalReadable = true;
+        $optionsContext->isGlobalWritable = false;
+        $this->contextStack->push($optionsContext);
         $options = $call->getOptions();
         foreach ($options as $option) {
             $splitTokens = $this->evaluator->queueSplitBy($option->getValue(), Token::T_SEMICOLON);
             foreach ($splitTokens as $tokens) {
-                $this->evaluator->evaluate($tokens, $outerContext);
+                $this->evaluator->evaluate($tokens, $optionsContext);
             }
         }
+        $this->contextStack->pop();
+
+        // Evaluate passed options
+//        $outerContext = new EndpointContext(
+//            $this->contextStack->head()->getName(),
+//            $this->contextStack->head()->getFile(),
+//            $this->contextStack->head()->getLine()
+//        );
+//        $outerContext->setGlobalContext($this->contextStack->global());
+//        $outerContext->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
+//        $outerContext->isGlobalReadable = true;
+//        $outerContext->isGlobalWritable = false;
+//        $outerContext->setVariables($this->contextStack->head()->dumpVariables());
+//        $options = $call->getOptions();
+//        foreach ($options as $option) {
+//            $splitTokens = $this->evaluator->queueSplitBy($option->getValue(), Token::T_SEMICOLON);
+//            foreach ($splitTokens as $tokens) {
+//                $this->evaluator->evaluate($tokens, $outerContext);
+//            }
+//        }
 
         // Endpoint Context
         $context = new EndpointContext(
             $endpoint->getDefinition()->getOriginalString(),
             $endpoint->getFile()
         );
-        $context->setGlobalContext($this->contextStack->global());
-
+        $this->contextStack->push($context);
         // Evaluate default options
         $context->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
         $context->isGlobalReadable = true;
@@ -455,10 +499,9 @@ class Tester
                 $this->evaluator->evaluate($tokens, $context);
             }
         }
-
         // Prepare and push Endpoint Context
-        $context->importVariableValues($outerContext);
-        $this->contextStack->push($context);
+        $context->importVariableValues($optionsContext);
+
 
         // Set all parameters
         $arguments = $endpoint->getDefinition()->getArguments();
@@ -518,6 +561,11 @@ class Tester
         $this->contextStack->pop();
     }
 
+    /**
+     * @param string $expression
+     * @return bool
+     * @throws Errors\ContextStackEmptyException
+     */
     protected function operatorAssert(string $expression)
     {
         $message = '';
@@ -533,6 +581,11 @@ class Tester
         return $success;
     }
 
+    /**
+     * @param string $expression
+     * @throws Errors\ContextStackEmptyException
+     * @throws MustException
+     */
     protected function operatorMust(string $expression)
     {
         $success = $this->operatorAssert($expression);
@@ -559,6 +612,7 @@ class Tester
         $this->contextStack->head()->isGlobalWritable = true;
         $this->contextStack->head()->assignmentMode = AbstractContext::ASSIGNMENT_MODE_OFF;
     }
+
     /**
      * Create and/or set variables values in current context
      *
@@ -600,6 +654,7 @@ class Tester
      *
      * @param string $expression
      * @throws Errors\ContextStackEmptyException
+     * @throws VariableError
      */
     protected function operatorImport(string $expression)
     {
@@ -671,23 +726,23 @@ class Tester
         $this->statistics->endCurrentCall();
 
         // Evaluate passed options
-        $outerContext = new TestcaseContext(
+        $optionsContext = new OptionsContext(
             $this->contextStack->head()->getName(),
             $this->contextStack->head()->getFile(),
             $this->contextStack->head()->getLine()
         );
-        $outerContext->setGlobalContext($this->contextStack->global());
-        $outerContext->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
-        $outerContext->isGlobalReadable = true;
-        $outerContext->isGlobalWritable = false;
-        $outerContext->setVariables($this->contextStack->head()->dumpVariables());
+        $optionsContext->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
+        $optionsContext->isGlobalReadable = true;
+        $optionsContext->isGlobalWritable = false;
+        $this->contextStack->push($optionsContext);
         $options = $call->getOptions();
         foreach ($options as $option) {
             $splitTokens = $this->evaluator->queueSplitBy($option->getValue(), Token::T_SEMICOLON);
             foreach ($splitTokens as $tokens) {
-                $this->evaluator->evaluate($tokens, $outerContext);
+                $this->evaluator->evaluate($tokens, $optionsContext);
             }
         }
+        $this->contextStack->pop();
 
         // Endpoint Context
         $context = new TestcaseContext(
@@ -695,7 +750,7 @@ class Tester
             $testcase->getFile(),
             $testcase->getLineNumber()
         );
-        $context->setGlobalContext($this->contextStack->global());
+        $this->contextStack->push($context);
 
         // Evaluate default options
         $context->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
@@ -710,8 +765,8 @@ class Tester
         }
 
         // Prepare and push Testcase Context
-        $context->importVariableValues($outerContext);
-        $this->contextStack->push($context);
+        $context->importVariableValues($optionsContext);
+        $context->isGlobalReadable = true;
 
         // Set all parameters
         $arguments = $testcase->getDefinition()->getArguments();
@@ -737,6 +792,7 @@ class Tester
         $this->contextStack->head()->setVariable($requestVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         $this->contextStack->head()->setVariable($responseVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
 
+        $context->isGlobalWritable = true;
         $this->executeLines($testcase->getLines(), $testcase->getFile(), $testcase->getLineNumber() + 1);
 
         $this->contextStack->pop();

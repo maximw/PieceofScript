@@ -53,6 +53,9 @@ class NumberLiteral extends BaseLiteral implements IScalarValue, IKeyValue
 
     public function oEqual(BaseLiteral $value): BoolLiteral
     {
+        if ($value instanceof NullLiteral) {
+            return new BoolLiteral(false);
+        }
         if ($value instanceof NumberLiteral) {
             return new BoolLiteral($this->getValue() == $value->getValue());
         }
@@ -80,6 +83,9 @@ class NumberLiteral extends BaseLiteral implements IScalarValue, IKeyValue
 
     public function oNotEqual(BaseLiteral $value): BoolLiteral
     {
+        if ($value instanceof NullLiteral) {
+            return new BoolLiteral(true);
+        }
         if ($value instanceof NumberLiteral) {
             return new BoolLiteral($this->getValue() != $value->getValue());
         }

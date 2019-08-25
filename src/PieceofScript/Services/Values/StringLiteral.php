@@ -59,12 +59,14 @@ class StringLiteral extends BaseLiteral implements IScalarValue, IKeyValue
 
     public function oEqual(BaseLiteral $value): BoolLiteral
     {
+        if ($value instanceof NullLiteral) {
+            return new BoolLiteral(false);
+        }
         if ($value instanceof StringLiteral) {
             return new BoolLiteral($this->getValue() === $value->getValue());
         }
 
         throw new IncompatibleTypesOperationException('==', self::TYPE_NAME, $value::TYPE_NAME);
-
     }
 
     public function oGreater(BaseLiteral $value): BoolLiteral

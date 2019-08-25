@@ -54,6 +54,9 @@ class DateLiteral extends BaseLiteral implements IScalarValue
 
     public function oEqual(BaseLiteral $value): BoolLiteral
     {
+        if ($value instanceof NullLiteral) {
+            return new BoolLiteral(false);
+        }
         if ($value instanceof DateLiteral) {
             return new BoolLiteral($this->getValue() == $value->getValue());
         }
@@ -81,6 +84,9 @@ class DateLiteral extends BaseLiteral implements IScalarValue
 
     public function oNotEqual(BaseLiteral $value): BoolLiteral
     {
+        if ($value instanceof NullLiteral) {
+            return new BoolLiteral(true);
+        }
         if ($value instanceof DateLiteral) {
             return new BoolLiteral($this->getValue() != $value->getValue());
         }

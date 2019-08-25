@@ -28,8 +28,8 @@ Operation \ with |String |Number |Boolean |Array |Null |Date
 \* |Error |Error |Error |Error |Error |Error 
 / |Error |Error |Error |Error |Error |Error
 ^ |Error |Error |Error |Error |Error |Error
-== |True if strings are equal |Error |Error |Error |Error |Error
-!= |Lexicographical compare |Error |Error |Error |Error |Error
+== |True if strings are equal |Error |Error |Error |False |Error
+!= |Lexicographical compare |Error |Error |Error |True |Error
 \> |Lexicographical compare |Error  |Error |Error |Error |Error
 \< |Lexicographical compare |Error |Error |Error |Error |Error
 \>= |Lexicographical compare |Error |Error |Error |Error |Error

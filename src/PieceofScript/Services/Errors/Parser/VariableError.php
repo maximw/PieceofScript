@@ -14,6 +14,4 @@ class VariableError extends RuntimeError
         $message = ((string) $variableName) . ': '. $message;
         parent::__construct($message);
     }
-
-
 }

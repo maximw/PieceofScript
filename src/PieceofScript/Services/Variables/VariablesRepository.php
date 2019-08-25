@@ -21,10 +21,6 @@ class VariablesRepository
     /** @var Variable[] */
     public $variables = [];
 
-    public $assignmentModes = [];
-
-    protected $response;
-
     /**
      * Get variable value
      *
@@ -211,7 +207,7 @@ class VariablesRepository
         if ($this->variables[$varName->name] instanceof VariableReference) {
             return ($this->variables[$varName->name]->exists)($varName->path, $checkPath);
         } else {
-            return $this->existsPath($varName->path, $this->variables[$varName->name], $varName);
+            return $this->existsPath($varName->path, $this->variables[$varName->name]->getValue(), $varName);
         }
 
         return false;
@@ -276,7 +272,8 @@ class VariablesRepository
     {
         foreach ($this->variables as $name => $variable) {
             if ($variablesRepository->exists($variable->getName())) {
-                $this->variables[$name] = deep_copy($variable);
+                $value = deep_copy($variablesRepository->get($variable->getName()));
+                $this->set($variable->getName(), $value);
             }
         }
     }

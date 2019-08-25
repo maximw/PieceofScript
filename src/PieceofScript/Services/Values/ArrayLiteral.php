@@ -52,6 +52,9 @@ class ArrayLiteral extends BaseLiteral implements \Iterator, \ArrayAccess, \Coun
 
     public function oEqual(BaseLiteral $value): BoolLiteral
     {
+        if ($value instanceof NullLiteral) {
+            return new BoolLiteral(false);
+        }
         if (!$value instanceof ArrayLiteral) {
             throw new IncompatibleTypesOperationException('==', self::TYPE_NAME, $value::TYPE_NAME);
         }
@@ -87,6 +90,9 @@ class ArrayLiteral extends BaseLiteral implements \Iterator, \ArrayAccess, \Coun
 
     public function oNotEqual(BaseLiteral $value): BoolLiteral
     {
+        if ($value instanceof NullLiteral) {
+            return new BoolLiteral(true);
+        }
         if (!$value instanceof ArrayLiteral) {
             throw new IncompatibleTypesOperationException('!=', self::TYPE_NAME, $value::TYPE_NAME);
         }
