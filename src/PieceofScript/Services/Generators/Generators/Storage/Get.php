@@ -1,19 +1,19 @@
 <?php
 
 
-namespace PieceofScript\Services\Generators\Generators\LocalStorage;
+namespace PieceofScript\Services\Generators\Generators\Storage;
 
 
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
-use PieceofScript\Services\Generators\Generators\LocalStorage\Services\LocalStorage;
+use PieceofScript\Services\Generators\Generators\Storage\Services\Storage;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NullLiteral;
 use PieceofScript\Services\Values\StringLiteral;
 
-class Get extends BaseLocalStorageGenerator
+class Get extends BaseStorageGenerator
 {
-    const NAME = 'ls\\get';
+    const NAME = 'storage\\get';
 
     public function run(): BaseLiteral
     {
@@ -31,16 +31,16 @@ class Get extends BaseLocalStorageGenerator
             $defaultValue = $this->arguments[1];
         }
 
-        if (!$this->localStorage instanceof LocalStorage) {
+        if (!$this->storage instanceof Storage) {
             return $defaultValue;
         }
 
-        $result = $this->localStorage->get($key);
+        $result = $this->storage->get($key);
 
         if (!$result instanceof BaseLiteral) {
             $result = $defaultValue;
             if (!isset($this->arguments[2]) || $this->arguments[2]->toBool() === true) {
-                $this->localStorage->set($key, $defaultValue);
+                $this->storage->set($key, $defaultValue);
             }
         }
 

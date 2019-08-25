@@ -49,7 +49,7 @@ assert $response.code == 404 // banned user sould get Not Found error instead of
     <li><a href="docs/functions_common.md">Common</a></li>
     <li><a href="docs/functions_faker.md">Faker</a></li>
     <li><a href="docs/functions_jwt.md">JWT</a></li>
-    <li><a href="docs/functions_localstorage.md">Local storage</a></li>
+    <li><a href="docs/functions_storage.md">Local storage</a></li>
     </ul>
  </li>   
  <li><a href="docs/variables.md">Variables and Contexts</a></li> 

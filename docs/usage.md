@@ -71,3 +71,7 @@ Configuration values set in YAML-file that could be passed in command line by `-
 <b>random_seed</b> - integer seed for initiate random functions. Default value selected randomly.
 
 <b>faker_locale</b> - locale for <a href="functions_faker.md">Faker functions</a>. Default is `en_US`.
+
+<b>storage_name</b> - file name for <a href="functions_storage.md">Storage functions</a>. Do not write any file by default.
+
+<b>skip_assertions</b> - Skip or not assertions made outside of some Endpoint call. Default is true.

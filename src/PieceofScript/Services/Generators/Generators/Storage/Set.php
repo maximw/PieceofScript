@@ -1,18 +1,18 @@
 <?php
 
 
-namespace PieceofScript\Services\Generators\Generators\LocalStorage;
+namespace PieceofScript\Services\Generators\Generators\Storage;
 
 
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentsCountError;
 use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
-use PieceofScript\Services\Generators\Generators\LocalStorage\Services\LocalStorage;
+use PieceofScript\Services\Generators\Generators\Storage\Services\Storage;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\StringLiteral;
 
-class Set extends BaseLocalStorageGenerator
+class Set extends BaseStorageGenerator
 {
-    const NAME = 'ls\\set';
+    const NAME = 'storage\\set';
 
     public function run(): BaseLiteral
     {
@@ -23,8 +23,8 @@ class Set extends BaseLocalStorageGenerator
             throw new ArgumentTypeError(self::NAME, $this->arguments[0]::TYPE_NAME, StringLiteral::TYPE_NAME);
         }
 
-        if ($this->localStorage instanceof LocalStorage) {
-            $this->localStorage->set($this->arguments[0]->getValue(), $this->arguments[1]);
+        if ($this->storage instanceof Storage) {
+            $this->storage->set($this->arguments[0]->getValue(), $this->arguments[1]);
         }
 
         return $this->arguments[1];

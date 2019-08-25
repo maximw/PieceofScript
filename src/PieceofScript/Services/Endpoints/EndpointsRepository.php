@@ -113,7 +113,7 @@ class EndpointsRepository
      * @param BaseCall $call
      * @return Endpoint|null
      */
-    public function getByCall(BaseCall $call): ?Endpoint
+    public function getByCall(BaseCall $call)
     {
         foreach ($this->endpoints as $endpoint) {
             if ($endpoint->getDefinition()->isEqual($call)) {

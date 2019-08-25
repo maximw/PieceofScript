@@ -12,7 +12,8 @@ use Symfony\Component\Yaml\Yaml;
 class Config
 {
     const INPUT_OPTIONS_MAP = [
-        'local-storage' => 'local_storage_name',
+        'storage' => 'storage_name',
+        'skip-assertions' => 'skip_assertions'
     ];
 
 
@@ -44,7 +45,9 @@ class Config
 
     protected $faker_locale = 'en_US';
 
-    protected $local_storage_name = null;
+    protected $storage_name = null;
+
+    protected $skip_assertions = true;
 
     protected static $instance;
 
@@ -305,17 +308,33 @@ class Config
     /**
      * @return string
      */
-    public function getLocalStorageName()
+    public function getStorageName()
     {
-        return $this->local_storage_name;
+        return $this->storage_name;
     }
 
     /**
      * @param string $name
      */
-    protected function setLocalStorageName($name)
+    protected function setStorageName($name)
     {
-        $this->local_storage_name = $name;
+        $this->storage_name = $name;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSkipAssertions(): bool
+    {
+        return $this->skip_assertions;
+    }
+
+    /**
+     * @param bool $skip_assertions
+     */
+    public function setSkipAssertions(bool $skip_assertions)
+    {
+        $this->skip_assertions = $skip_assertions;
     }
 
     public static function loadFromFile(string $filename, bool $requireFile)

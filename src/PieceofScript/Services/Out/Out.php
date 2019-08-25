@@ -46,7 +46,7 @@ class Out
         static::writeln('<fg=yellow>Warning:</> ' . $message, $verbosity);
         if (null !== $contextStack) {
             $context = $contextStack->head();
-            static::writeln('in context "' . $context->getName() . '", file "' . $context->getFile() . '" at line ' . ($context->getLine() + 1), $verbosity);
+            static::writeln('in context "' . $context->getName() . '", file "' . $context->getFile() . '" at line ' . ($context->getLine() + 1), $verbosity, 1);
         }
     }
 

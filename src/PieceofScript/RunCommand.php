@@ -26,7 +26,8 @@ class RunCommand extends Command
             ->addArgument('scenario', InputArgument::REQUIRED, 'Start script file')
             ->addOption('junit-report', 'j', InputOption::VALUE_OPTIONAL, 'Reporting file in JUnit format', null)
             ->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Configuration file', null)
-            ->addOption('local-storage', 'l', InputOption::VALUE_OPTIONAL, 'Local storage file', null)
+            ->addOption('storage', 's', InputOption::VALUE_OPTIONAL, 'Storage file', null)
+            ->addOption('skip-assertions', 'a', InputOption::VALUE_OPTIONAL, 'Skip assertions outside Endpoint call', null)
             ->setHelp('Run testing scenario');
     }
 

@@ -93,8 +93,10 @@ class VariablesRepository
             throw new RuntimeError($varName, 'Cannot assign value here. Did you mean == instead of = ?');
         }
 
+        $createdFlag = false;
         if (!$this->existsWithoutPath($varName)) {
             $this->variables[$varName->name] = new Variable($varName, new NullLiteral(), $assignmentMode);
+            $createdFlag = true;
         } else {
             // If variable exists as variable and trying to make constant
             if ($assignmentMode === AbstractContext::ASSIGNMENT_MODE_CONST
@@ -106,7 +108,7 @@ class VariablesRepository
         if ($this->variables[$varName->name]->getValue() instanceof VariableReference) {
             ($this->variables[$varName->name]->getValue()->set)($varName->path, $value);
         } else {
-            if ($this->variables[$varName->name]->getAssignmentMode() === AbstractContext::ASSIGNMENT_MODE_CONST) {
+            if (!$createdFlag && $this->variables[$varName->name]->getAssignmentMode() === AbstractContext::ASSIGNMENT_MODE_CONST) {
                 Out::printWarning('Cannot change constant value ' . (string) $varName);
             } else {
                 $newValue = $this->setVal($varName->path, $this->variables[$varName->name]->getValue(), $value, $varName);
@@ -186,7 +188,7 @@ class VariablesRepository
         if (!$varName->isSimple()) {
             throw new RuntimeError($varName, ' cannot make reference. Did you mean just $' . $varName->name);
         }
-        $this->variables[$varName->name] = $reference;
+        $this->variables[$varName->name] = new Variable($varName, $reference, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
     }
 
 

@@ -16,27 +16,25 @@ var $paramByRef = "original"
 var $paramByVal = "original"
 const $paramConst = "original"
 
-run Context example changes $paramByRef, {$paramByVal} and $paramConst
+run Context example changes $paramByRef, {$paramByVal}, $paramConst
 
 // новая $a была создана в контексте тест-кейса
-print $a // "original"
+assert $a == "original"
 
 //  $b не было в контексте тест-кейса, и let обратился к глобальной $b
-print $b // "changed"
+assert $b == "changed"
 
 // $i была импортирована из глобального контекста
-print $i // "original"
+assert $i == "original"
 
 // константы создаются в каждом контексте свои, аналогично var создает переменные
-print $c // "original"
+assert $c == "original"
 
 // параметры передавался по ссылке
-print $paramByRef // "changed"
+assert $paramByRef == "changed"
 
 // параметры передавался по значению
-print $paramByVal // "original"
+assert $paramByVal == "original"
 
 // константа была передана по значению, но измениться не может
-print $paramConst // "original"
-
-
+assert $paramConst == "original"

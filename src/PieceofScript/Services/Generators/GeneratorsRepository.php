@@ -10,7 +10,7 @@ use PieceofScript\Services\Generators\Generators\FakerProvider;
 use PieceofScript\Services\Generators\Generators\InternalGenerator;
 use PieceofScript\Services\Generators\Generators\InternalProvider;
 use PieceofScript\Services\Generators\Generators\JwtProvider;
-use PieceofScript\Services\Generators\Generators\LocalStorageProvider;
+use PieceofScript\Services\Generators\Generators\StorageProvider;
 use Symfony\Component\Yaml\Yaml;
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Generators\Generators\BaseGenerator;
@@ -46,7 +46,7 @@ class GeneratorsRepository
             new InternalProvider(),
             new FakerProvider(),
             new JwtProvider(),
-            new LocalStorageProvider(),
+            new StorageProvider(),
         ];
 
         $this->initGenerators();

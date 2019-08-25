@@ -1,10 +1,9 @@
 <?php
 
 
-namespace PieceofScript\Services\Generators\Generators\LocalStorage\Services;
+namespace PieceofScript\Services\Generators\Generators\Storage\Services;
 
 
-use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\BoolLiteral;
@@ -15,7 +14,7 @@ use PieceofScript\Services\Values\NumberLiteral;
 use PieceofScript\Services\Values\StringLiteral;
 use Symfony\Component\Yaml\Yaml;
 
-class LocalStorage
+class Storage
 {
     protected $file;
 

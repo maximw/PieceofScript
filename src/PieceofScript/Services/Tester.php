@@ -2,6 +2,7 @@
 
 namespace PieceofScript\Services;
 
+use PieceofScript\Services\Call\BaseCall;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Endpoints\Endpoint;
 use PieceofScript\Services\Errors\ControlFlow\CancelException;
@@ -9,6 +10,7 @@ use PieceofScript\Services\Errors\ControlFlow\MustException;
 use PieceofScript\Services\Errors\Parser\EmptyExpressionError;
 use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\RuntimeError;
+use PieceofScript\Services\Errors\TestcaseNotFoundException;
 use PieceofScript\Services\Out\In;
 use PieceofScript\Services\Out\JunitReport;
 use PieceofScript\Services\Out\Out;
@@ -363,7 +365,11 @@ class Tester
 
         } elseif ($operator === self::OPERATOR_ENDPOINT) {
 
-            $this->callEndpoint($expression);
+            try {
+                $this->callEndpoint($expression);
+            } catch (MustException $exception) {
+                Out::printMustExit($this->contextStack);
+            }
 
         } elseif ($operator === self::OPERATOR_ASSERT) {
 
@@ -373,10 +379,13 @@ class Tester
 
             $this->operatorMust($expression);
 
-
         } elseif ($operator === self::OPERATOR_RUN) {
 
-            $this->operatorRun($expression);
+            try {
+                $this->operatorRun($expression);
+            } catch (MustException $exception) {
+                Out::printMustExit($this->contextStack);
+            }
 
         } elseif ($operator === self::OPERATOR_PRINT) {
 
@@ -447,8 +456,6 @@ class Tester
             }
         }
 
-
-
         // Prepare and push Endpoint Context
         $context->importVariableValues($outerContext);
         $this->contextStack->push($context);
@@ -464,7 +471,8 @@ class Tester
             $argumentVar = $this->evaluator->extractOperand($arguments[$i]->getValue(), $context);
             if ($parameters[$i]->isByReference()) {
                 $parameterVar = $this->evaluator->extractOperand($parameters[$i]->getValue(), $context);
-                $context->setReference($argumentVar, $parameterVar);
+                $reference = $this->contextStack->neck()->getReference($parameterVar);
+                $context->setReference($argumentVar, $reference);
             } else {
                 $parameterVal = $this->evaluator->evaluate($parameters[$i]->getValue(), $context);
                 $context->setVariable($argumentVar, $parameterVal, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
@@ -628,22 +636,23 @@ class Tester
      */
     protected function operatorRun(string $expression)
     {
-        $expression = trim($expression);
-        if ($expression !== '') {
-            $testcaseCall = $this->testcases->getByCall($expression);
-            $this->runTestcase($testcaseCall);
-        } else {
+        $call = $this->callLexer->getCall($expression);
+        if (count($call->getItems()) === 0) {
             $testcases = $this->testcases->getWithoutArguments();
             /** @var Testcase $testcase */
             foreach ($testcases as $testcase) {
-                if (!$testcase->hasArguments()) {
-                    $testcaseCall = new TestcaseCall($testcase);
-                    try {
-                        $this->runTestcase($testcaseCall);
-                    } catch (MustException $exception) {
-                        // Just end current test case
-                    }
+                try {
+                    $this->runTestcase($testcase, $call);
+                } catch (MustException $exception) {
+                    Out::printMustExit($this->contextStack);
                 }
+            }
+        } else {
+            $testcase = $this->testcases->getByCall($call);
+            if ($testcase instanceof Testcase) {
+                $this->runTestcase($testcase, $call);
+            } else {
+                throw new TestcaseNotFoundException($call->getOriginalString());
             }
         }
     }
@@ -651,61 +660,84 @@ class Tester
     /**
      * Run one Testcase
      *
-     * @param TestcaseCall $testcaseCall
+     * @param Testcase $testcase
+     * @param BaseCall $call
      * @throws Errors\ContextStackEmptyException
+     * @throws RuntimeError
+     * @throws VariableError
      */
-    protected function runTestcase(TestcaseCall $testcaseCall)
+    protected function runTestcase(Testcase $testcase, BaseCall $call)
     {
-        $parametersCount = count($testcaseCall->parameters);
-        $argumentsCount = count($testcaseCall->testcase->arguments);
-
-        if ($argumentsCount > $parametersCount) {
-            throw new RuntimeError('Not enough parameters given to ' . $testcaseCall->testcase->name);
-        }
-        if ($argumentsCount < $parametersCount) {
-            Out::printWarning('Too many parameters given to ' . $testcaseCall->testcase->name, $this->contextStack);
-        }
-
         $this->statistics->endCurrentCall();
 
-        // Get all parameters
-        $parameters = [];
-        foreach ($testcaseCall->parameters as $parameter) {
-            $value = $this->evaluator->extractOperand($parameter, $this->contextStack->head());
-            if ($value instanceof VariableName) {
-                $parameters[] = $this->contextStack->head()->getReference($value);
-            } elseif ($value instanceof BaseLiteral) {
-                $parameters[] = $value;
-            } else {
-                throw new RuntimeError('Unknown parameter "' . $parameters . '"');
+        // Evaluate passed options
+        $outerContext = new TestcaseContext(
+            $this->contextStack->head()->getName(),
+            $this->contextStack->head()->getFile(),
+            $this->contextStack->head()->getLine()
+        );
+        $outerContext->setGlobalContext($this->contextStack->global());
+        $outerContext->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
+        $outerContext->isGlobalReadable = true;
+        $outerContext->isGlobalWritable = false;
+        $outerContext->setVariables($this->contextStack->head()->dumpVariables());
+        $options = $call->getOptions();
+        foreach ($options as $option) {
+            $splitTokens = $this->evaluator->queueSplitBy($option->getValue(), Token::T_SEMICOLON);
+            foreach ($splitTokens as $tokens) {
+                $this->evaluator->evaluate($tokens, $outerContext);
             }
         }
-        if ($argumentsCount > count($parameters)) {
-            throw new RuntimeError('Not enough parameters given to ' . $testcaseCall->testcase->name);
+
+        // Endpoint Context
+        $context = new TestcaseContext(
+            $testcase->getDefinition()->getOriginalString(),
+            $testcase->getFile(),
+            $testcase->getLineNumber()
+        );
+        $context->setGlobalContext($this->contextStack->global());
+
+        // Evaluate default options
+        $context->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
+        $context->isGlobalReadable = true;
+        $context->isGlobalWritable = false;
+        $options = $testcase->getDefinition()->getOptions();
+        foreach ($options as $option) {
+            $splitTokens = $this->evaluator->queueSplitBy($option->getValue(), Token::T_SEMICOLON);
+            foreach ($splitTokens as $tokens) {
+                $this->evaluator->evaluate($tokens, $context);
+            }
         }
 
-        // Push Testcase Context
-        $context = new TestcaseContext(
-            $testcaseCall->testcase->originalName,
-            $testcaseCall->testcase->file,
-            $testcaseCall->testcase->lineNumber
-        );
+        // Prepare and push Testcase Context
+        $context->importVariableValues($outerContext);
         $this->contextStack->push($context);
+
+        // Set all parameters
+        $arguments = $testcase->getDefinition()->getArguments();
+        $parameters = $call->getArguments();
+        $argumentsCount = count($arguments);
+        if ($argumentsCount !== count($parameters)) {
+            throw new RuntimeError('Not enough parameters given to ' . $testcase->getDefinition()->getOriginalString());
+        }
+        for ($i = 0; $i < $argumentsCount; $i++) {
+            $argumentVar = $this->evaluator->extractOperand($arguments[$i]->getValue(), $context);
+            if ($parameters[$i]->isByReference()) {
+                $parameterVar = $this->evaluator->extractOperand($parameters[$i]->getValue(), $context);
+                $reference = $this->contextStack->neck()->getReference($parameterVar);
+                $context->setReference($argumentVar, $reference);
+            } else {
+                $parameterVal = $this->evaluator->evaluate($parameters[$i]->getValue(), $context);
+                $context->setVariable($argumentVar, $parameterVal, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+            }
+        }
+
         $requestVarName = new VariableName('$request');
         $responseVarName = new VariableName('$response');
         $this->contextStack->head()->setVariable($requestVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         $this->contextStack->head()->setVariable($responseVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
 
-        // Set all parameters
-        for ($i = 0; $i < $argumentsCount; $i++) {
-            if ($parameters[$i] instanceof VariableReference) {
-                $context->setReference($testcaseCall->testcase->arguments[$i], $parameters[$i]);
-            } else {
-                $context->setVariable($testcaseCall->testcase->arguments[$i], $parameters[$i], AbstractContext::ASSIGNMENT_MODE_VARIABLE);
-            }
-        }
-
-        $this->executeLines($testcaseCall->testcase->lines, $testcaseCall->testcase->file, $testcaseCall->testcase->lineNumber + 1);
+        $this->executeLines($testcase->getLines(), $testcase->getFile(), $testcase->getLineNumber() + 1);
 
         $this->contextStack->pop();
     }
@@ -774,7 +806,7 @@ class Tester
         }
 
         foreach (static::ALL_OPERATORS as $operator) {
-            if (strripos($line, $operator . ' ') === 0 || strtolower($line) === strtolower($operator)) {
+            if (stripos($line, $operator . ' ') === 0 || strtolower($line) === strtolower($operator)) {
                 $expression = trim(substr($line, strlen($operator) + 1));
                 return [$operator, $expression, $indent];
             }

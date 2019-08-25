@@ -4,9 +4,9 @@
 namespace PieceofScript\Services\Statistics;
 
 
+use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Endpoints\Endpoint;
-use PieceofScript\Services\Endpoints\EndpointCall;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Values\ArrayLiteral;
 
@@ -17,6 +17,9 @@ class Statistics
 
     /** @var StatEndpointCall */
     protected $currentEndpointCall;
+
+    /** @var StatAssertion[] */
+    protected $globalAssertions = [];
 
     /** @var int  */
     public $endpointsTotal = 0;
@@ -93,6 +96,17 @@ class Statistics
                 $usedVariables,
                 $message
             );
+        } elseif (!Config::get()->getSkipAssertions()){
+            $assertion = new StatAssertion(
+                $code,
+                $contextStack->head()->getFile(),
+                $contextStack->head()->getLine(),
+                $status,
+                $contextStack->head()->dumpVariables(),
+                $usedVariables,
+                $message
+            );
+            $this->globalAssertions[] = $assertion;
         } else {
             Out::printWarning('Skipped assertion outside of Endpoint call "' . $code . '" ', $contextStack);
         }
@@ -134,6 +148,17 @@ class Statistics
                 $this->endpointsSuccess++;
             } else {
                 $this->endpointsFailed++;
+            }
+        }
+
+        if (!Config::get()->getSkipAssertions()) {
+            foreach ($this->globalAssertions as $assertion) {
+                $this->assertsTotal++;
+                if ($assertion->getStatus()) {
+                    $this->assertsSuccess++;
+                } else {
+                    $this->assertsFailed++;
+                }
             }
         }
     }
