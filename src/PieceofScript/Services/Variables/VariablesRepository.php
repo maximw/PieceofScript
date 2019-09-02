@@ -107,8 +107,9 @@ class VariablesRepository
             if (!$createdFlag && $this->variables[$varName->name]->getAssignmentMode() === AbstractContext::ASSIGNMENT_MODE_CONST) {
                 Out::printWarning('Cannot change constant value ' . (string) $varName);
             } else {
-                $newValue = $this->setVal($varName->path, $this->variables[$varName->name]->getValue(), $value, $varName);
-                $this->variables[$varName->name]->setValue($newValue);
+                $currentValue = $this->variables[$varName->name]->getValue();
+                $this->setVal($varName->path, $currentValue, $value, $varName);
+                $this->variables[$varName->name]->setValue($currentValue);
             }
         }
     }
@@ -120,13 +121,13 @@ class VariablesRepository
      * @param BaseLiteral $currentValue
      * @param BaseLiteral $value
      * @param VariableName $variableName
-     * @return mixed
      * @throws VariableError
      */
-    protected function setVal(array $path, BaseLiteral $currentValue, BaseLiteral $value, VariableName $variableName): BaseLiteral
+    protected function setVal(array $path, BaseLiteral &$currentValue, BaseLiteral $value, VariableName $variableName)
     {
         if (empty($path)) {
-            return $currentValue = deep_copy($value);
+            $currentValue = deep_copy($value);
+            return;
         }
 
         $key = array_shift($path);
@@ -136,10 +137,10 @@ class VariablesRepository
             if (!$currentValue->offsetExists($key)) {
                 $currentValue[$key] = null;
             }
-            return $this->setVal($path, $currentValue->value[$key], $value, $variableName);
+            $this->setVal($path, $currentValue->value[$key], $value, $variableName);
         } else {
             $currentValue = new ArrayLiteral();
-            return $this->setVal($path, $currentValue->value[$key], $value, $variableName);
+            $this->setVal($path, $currentValue->value[$key], $value, $variableName);
         }
     }
 
@@ -204,8 +205,8 @@ class VariablesRepository
             return true;
         }
 
-        if ($this->variables[$varName->name] instanceof VariableReference) {
-            return ($this->variables[$varName->name]->exists)($varName->path, $checkPath);
+        if ($this->variables[$varName->name]->getValue() instanceof VariableReference) {
+            return ($this->variables[$varName->name]->getValue()->exists)($varName->path, $checkPath);
         } else {
             return $this->existsPath($varName->path, $this->variables[$varName->name]->getValue(), $varName);
         }

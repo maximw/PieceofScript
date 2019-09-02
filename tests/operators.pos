@@ -1,0 +1,6 @@
+// Comment
+var $a = 1; $a = 2; $b = 3;;;; // Comment // comment
+
+
+pause 3
+print 2 == $a

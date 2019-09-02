@@ -42,8 +42,8 @@ class Statistics
 
     public function addCall(string $code, Endpoint $endPoint, ContextStack $contextStack, ArrayLiteral $request, ArrayLiteral $response)
     {
-        if (!array_key_exists($endPoint->getName(), $this->statEndpoints)) {
-            $this->statEndpoints[$endPoint->getName()] = new StatEndpoint($endPoint);
+        if (!array_key_exists($endPoint->getDefinition()->getOriginalString(), $this->statEndpoints)) {
+            $this->statEndpoints[$endPoint->getDefinition()->getOriginalString()] = new StatEndpoint($endPoint);
         }
 
         if ($this->currentEndpointCall instanceof StatEndpointCall) {

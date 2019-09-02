@@ -14,7 +14,7 @@ Testcase Context example changes $argument1, $argument2, $argument3 {{$option1="
     assert $option2 == "non original"
     assert $option3 == "changed"
 
-var $a = "original"; ;
+var $a = "original"
 var $b = "original"
 var $i = "original"
 const $c = "original";
@@ -25,7 +25,7 @@ var $option1 = "original"
 var $option2 = "original"
 var $option3 = "original"
 
-run Context example changes $paramByRef, {$paramByVal}, $paramConst {{$option2="non" + $option2; $option1=$a; }}
+run Context example changes $paramByRef, {$paramByVal}, $paramConst {{$option2="non " + $option2; $option1=$a; }}
 
 // новая $a была создана в контексте тест-кейса
 assert $a == "original"

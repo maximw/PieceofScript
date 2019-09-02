@@ -4,6 +4,7 @@
 namespace PieceofScript\Services\Endpoints;
 
 
+use function DeepCopy\deep_copy;
 use PieceofScript\Services\Call\BaseCall;
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\Endpoints\EndpointDefinitionError;
@@ -117,7 +118,7 @@ class EndpointsRepository
     {
         foreach ($this->endpoints as $endpoint) {
             if ($endpoint->getDefinition()->isEqual($call)) {
-                return $endpoint;
+                return deep_copy($endpoint);
             }
         }
 

@@ -4,6 +4,7 @@
 namespace PieceofScript\Services\Testcases;
 
 
+use function DeepCopy\deep_copy;
 use PieceofScript\Services\Call\BaseCall;
 use PieceofScript\Services\Errors\TestcaseExistsException;
 use PieceofScript\Services\Parsing\CallLexer;
@@ -33,7 +34,7 @@ class TestcasesRepository
     {
         foreach ($this->testcases as $testcase) {
             if ($testcase->getDefinition()->isEqual($call)) {
-                return $testcase;
+                return deep_copy($testcase);
             }
         }
 

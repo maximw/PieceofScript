@@ -96,7 +96,7 @@ class HttpClient
             ]);
             $jsonBody = json_decode((string)$httpResponse->getBody(), true, Config::get()->getJsonMaxDepth());
             if (JSON_ERROR_NONE === json_last_error()) {
-                $response['body'] = $jsonBody;
+                $response['body'] = Utils::wrapValueContainer($jsonBody);
             } else {
                 if (static::isJsonResponse($httpResponse)) {
                     Out::printWarning('Error parsing JSON. ' . json_last_error_msg());

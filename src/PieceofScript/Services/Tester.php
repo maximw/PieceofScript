@@ -442,7 +442,7 @@ class Tester
         $call = $this->callLexer->getCall($line);
         $endpoint = $this->endpoints->getByCall($call);
         if (!$endpoint instanceof Endpoint) {
-            throw new RuntimeError('Endpoint not found ' . $line);
+            throw new RuntimeError('Endpoint not found: ' . $line);
         }
 
         // Evaluate passed options
@@ -463,31 +463,13 @@ class Tester
         }
         $this->contextStack->pop();
 
-        // Evaluate passed options
-//        $outerContext = new EndpointContext(
-//            $this->contextStack->head()->getName(),
-//            $this->contextStack->head()->getFile(),
-//            $this->contextStack->head()->getLine()
-//        );
-//        $outerContext->setGlobalContext($this->contextStack->global());
-//        $outerContext->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
-//        $outerContext->isGlobalReadable = true;
-//        $outerContext->isGlobalWritable = false;
-//        $outerContext->setVariables($this->contextStack->head()->dumpVariables());
-//        $options = $call->getOptions();
-//        foreach ($options as $option) {
-//            $splitTokens = $this->evaluator->queueSplitBy($option->getValue(), Token::T_SEMICOLON);
-//            foreach ($splitTokens as $tokens) {
-//                $this->evaluator->evaluate($tokens, $outerContext);
-//            }
-//        }
-
         // Endpoint Context
         $context = new EndpointContext(
             $endpoint->getDefinition()->getOriginalString(),
             $endpoint->getFile()
         );
         $this->contextStack->push($context);
+
         // Evaluate default options
         $context->assignmentMode = AbstractContext::ASSIGNMENT_MODE_VARIABLE;
         $context->isGlobalReadable = true;
@@ -501,7 +483,7 @@ class Tester
         }
         // Prepare and push Endpoint Context
         $context->importVariableValues($optionsContext);
-
+        $context->isGlobalReadable = true;
 
         // Set all parameters
         $arguments = $endpoint->getDefinition()->getArguments();
@@ -676,7 +658,9 @@ class Tester
 
             if ($this->contextStack->global()->hasVariable($variableName)) {
                 $value = $this->contextStack->global()->getVariable($variableName);
+                $this->contextStack->head()->isGlobalWritable = false;
                 $this->contextStack->head()->setVariable($variableName, $value, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
+                $this->contextStack->head()->isGlobalWritable = true;
             } else {
                 throw new \Exception('Cannot import variable ' . (string) $variableName . ', it does not exist');
             }
@@ -744,7 +728,7 @@ class Tester
         }
         $this->contextStack->pop();
 
-        // Endpoint Context
+        // Testcase Context
         $context = new TestcaseContext(
             $testcase->getDefinition()->getOriginalString(),
             $testcase->getFile(),
@@ -834,13 +818,12 @@ class Tester
      */
     protected function operatorPause(string $expression)
     {
-        try {
-            $value = $this->evaluator->evaluate($expression, $this->contextStack->head());
-        } catch (EmptyExpressionError $e) {
+        $value = $this->evaluator->evaluate($expression, $this->contextStack->head());
+        if ($value instanceof NullLiteral) {
             $value = new NumberLiteral(0);
         }
         if (!$value instanceof NumberLiteral) {
-            throw new RuntimeError('Pause required Number of seconds. But ' . $value::TYPE_NAME . ' given');
+            throw new RuntimeError('Pause requires Number of seconds. But ' . $value::TYPE_NAME . ' given');
         }
         In::pressEnter($value->getValue());
     }

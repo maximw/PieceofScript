@@ -90,6 +90,7 @@ class Evaluator
      */
     public function evaluate($value, AbstractContext $context): BaseLiteral
     {
+        $ast = null;
         if (is_string($value)) {
             $tokens = $this->expressionLexer->tokenize($value);
             $ast =  $this->buildAST($tokens);
@@ -102,6 +103,8 @@ class Evaluator
                 $value[$key] = $this->extractLiteral($this->evaluate($val, $context), $context);
             }
             return Utils::wrapValueContainer($value);
+        } elseif ($value instanceof BaseLiteral) {
+            return $value;
         }
 
         if ($ast->isEmpty()) {
