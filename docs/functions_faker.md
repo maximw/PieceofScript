@@ -69,9 +69,9 @@ There are 2 related config settings:
 
 `Faker\integer(number $min = 0, number $max = PHP_INT_MAX)` <i>number</i> - returns random integer between $min and $max inclusive
 
-`Faker\ipv4(number $min = 0, number $max = PHP_INT_MAX)` <i>string</i> - returns random IP v4 string
+`Faker\ipv4()` <i>string</i> - returns random IP v4
 
-`Faker\ipv6(number $min = 0, number $max = PHP_INT_MAX)` <i>string</i> - returns random IP v6 string
+`Faker\ipv6()` <i>string</i> - returns random IP v6
 
 `Faker\languageCode()` <i>string</i> - returns random language code, i.e. "en"
 
