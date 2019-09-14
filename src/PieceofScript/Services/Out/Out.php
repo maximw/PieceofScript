@@ -98,7 +98,7 @@ class Out
         static::writeln('', $verbosity);
     }
 
-    public static function printLine(string $line, string $lineNumber)
+    public static function printLine(string $line, int $lineNumber)
     {
         $line = trim($line, PHP_EOL);
         $verbosity = OutputInterface::VERBOSITY_DEBUG;

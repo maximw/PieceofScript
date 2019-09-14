@@ -24,7 +24,8 @@ class RunCommand extends Command
             ->setDescription('Run testing scenario')
             ->setHelp('This command runs testing scenario')
             ->addArgument('scenario', InputArgument::REQUIRED, 'Start script file')
-            ->addOption('junit-report', 'j', InputOption::VALUE_OPTIONAL, 'Reporting file in JUnit format', null)
+            ->addOption('junit', 'j', InputOption::VALUE_OPTIONAL, 'Reporting file in JUnit format', null)
+            ->addOption('html', 'h', InputOption::VALUE_OPTIONAL, 'Reporting file in HTML format', null)
             ->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Configuration file', null)
             ->addOption('storage', 's', InputOption::VALUE_OPTIONAL, 'Storage file', null)
             ->addOption('skip-assertions', 'a', InputOption::VALUE_OPTIONAL, 'Skip assertions outside Endpoint call', null)
@@ -33,12 +34,6 @@ class RunCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $lexer = new CallLexer();
-        $call1 = $lexer->getCall('Hi there; {$x+5} $x1.2.gfhg.0 {{$page=$page;$test=$test}} // 23123213');
-        $call2 = $lexer->getCall('  Hi {{$page=$page;$test\'}}\'}}there; $t {5}');
-
-        $t = $call1->isEqual($call2);
-
         try {
             Out::setOutput($output);
             In::init($input, $output, $this->getHelper('question'));

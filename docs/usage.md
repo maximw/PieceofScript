@@ -1,11 +1,10 @@
 ## PieceofScript installation and run
 
 <a name="install"></a>
-### Downloading phar-archive
 
-Download from repository <a href=https://github.com/maximw/PieceofScript/raw/master/bin/pos.phar>https://github.com/maximw/PieceofScript/raw/master/bin/pos.phar</a>
+You can download phar-file from repository <a href=https://github.com/maximw/PieceofScript/raw/master/bin/pos.phar>https://github.com/maximw/PieceofScript/raw/master/bin/pos.phar</a>
 
-### Building phar-archive
+or build it from sources:
 
 1. Install <a href="https://github.com/humbug/box/blob/master/doc/installation.md#installation">Box phar manager</a>
 
@@ -29,22 +28,35 @@ Download from repository <a href=https://github.com/maximw/PieceofScript/raw/mas
 
 Running testing scenario `startFile.pos`: 
 
-    ```
-    php pos.phar run ./startFile.pos --junit=result_in_junit_format.xml -vvv --config=config.yaml
-    ```
+```
+pos.phar run ./startFile.pos --junit=result_in_junit_format.xml -vvv --config=config.yaml
+```
 
-Directory containing startFile.pos set as current working dir during testing. All relative paths count from it. 
+Directory containing startFile.pos set as current working dir during testing. All relative paths start from it. 
+
+Command line options:
+
+`--junit` - JUnit report file
+
+`--html` - HTML report file
+
+`--config` - configuration file
+
+`--storage` - storage file
+
+`--skip-assertions` - skip assertions outside Endpoint call
+
 
 Get list of all available commands: 
 
-    ```
-    php pos.phar list
-    ```
+```
+php pos.phar list
+```
 
 <a name="config"></a>    
 ### Configuration
 
-Configuration values set in YAML-file that could be passed in command line by `--config` option or it will be read from `./config.yaml` from current directory. If config file was not set, default configuration values will be used.
+Configuration values set in YAML-file that could be passed in command line by `--config` option or it could be read from `./config.yaml` from current directory. If config file was not set, default configuration values will be used.
 
 <b>endpoints_file</b> - file to read API Endpoints definitions from. Default is `./endpoints.yaml`.
 
@@ -74,4 +86,4 @@ Configuration values set in YAML-file that could be passed in command line by `-
 
 <b>storage_name</b> - file name for <a href="functions_storage.md">Storage functions</a>. Do not write any file by default.
 
-<b>skip_assertions</b> - Skip or not assertions made outside of some Endpoint call. Default is true.
+<b>skip_assertions</b> - skip or not assertions made outside of some Endpoint call. Default is true.
