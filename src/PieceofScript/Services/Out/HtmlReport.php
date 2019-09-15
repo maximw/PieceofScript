@@ -10,8 +10,7 @@ use PieceofScript\Services\Statistics\StatAssertion;
 use PieceofScript\Services\Statistics\StatEndpoint;
 use PieceofScript\Services\Statistics\StatEndpointCall;
 use PieceofScript\Services\Statistics\Statistics;
-use Twig\Environment;
-use Twig\TemplateWrapper;
+
 
 class HtmlReport
 {
@@ -25,8 +24,6 @@ class HtmlReport
     /** @var string */
     protected $startFile;
 
-    protected $templating;
-
     public function __construct(
         string $reportFile,
         Statistics $statistics,
@@ -36,20 +33,43 @@ class HtmlReport
         $this->reportFile = $reportFile;
         $this->statistics = $statistics;
         $this->startFile = $startFile;
-        $this->templating = Environment::load('');
     }
 
+    /**
+     * @throws InternalError
+     */
     public function generate()
     {
         Out::printDebug('Start generating HTML report.');
 
-        $this->templating
-        if (false === file_put_contents($this->reportFile, $report->asXML())) {
+        $report = $this->render('htmlReport.html', [
+            'pieEndpoints' => $this->pieEndpoints(),
+            'pieAssertions' => $this->pieAssertions(),
+        ]);
+        if (false === file_put_contents($this->reportFile, $report)) {
             throw new InternalError('Cannot write report file "' . $this->reportFile . '"');
         }
         Out::printDebug('HTML report has been generated.');
     }
 
+    protected function pieEndpoints(): string
+    {
+        return $this->render('pieEndpoints.html', [
+            'total' => $this->statistics->endpointsTotal,
+            'success' => $this->statistics->endpointsSuccess,
+            'failed' => $this->statistics->endpointsFailed,
+            'not_tested' => $this->statistics->endpointsTotal - $this->statistics->endpointsSuccess - $this->statistics->endpointsFailed,
+        ]);
+    }
+
+    protected function pieAssertions(): string
+    {
+        return $this->render('pieAssertions.html', [
+            'total' => $this->statistics->assertsTotal,
+            'success' => $this->statistics->assertsSuccess,
+            'failed' => $this->statistics->assertsFailed,
+        ]);
+    }
 
     protected function addProperties(\SimpleXMLElement $testsuite)
     {
@@ -181,8 +201,19 @@ class HtmlReport
         return $result;
     }
 
-    protected function xmlEscape($string): string
+
+
+
+    protected function render(string $fileName, array $values): string
     {
-        return htmlspecialchars($string, ENT_XML1 | ENT_COMPAT, 'UTF-8');
+        $fileName = __DIR__ . DIRECTORY_SEPARATOR . 'HtmlTemplates' . DIRECTORY_SEPARATOR . $fileName;
+        if (!is_readable($fileName)) {
+            throw new InternalError('Template ' . $fileName . ' not found');
+        }
+        $template = file_get_contents($fileName);
+        foreach ($values as $key => $value) {
+            $template = str_replace('{'.$key.'}', $value, $template);
+        }
+        return $template;
     }
 }

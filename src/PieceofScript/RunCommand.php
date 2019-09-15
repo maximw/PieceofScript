@@ -25,7 +25,7 @@ class RunCommand extends Command
             ->setHelp('This command runs testing scenario')
             ->addArgument('scenario', InputArgument::REQUIRED, 'Start script file')
             ->addOption('junit', 'j', InputOption::VALUE_OPTIONAL, 'Reporting file in JUnit format', null)
-            ->addOption('html', 'h', InputOption::VALUE_OPTIONAL, 'Reporting file in HTML format', null)
+            ->addOption('html', 'r', InputOption::VALUE_OPTIONAL, 'Reporting file in HTML format', null)
             ->addOption('config', 'c', InputOption::VALUE_OPTIONAL, 'Configuration file', null)
             ->addOption('storage', 's', InputOption::VALUE_OPTIONAL, 'Storage file', null)
             ->addOption('skip-assertions', 'a', InputOption::VALUE_OPTIONAL, 'Skip assertions outside Endpoint call', null)
@@ -48,7 +48,7 @@ class RunCommand extends Command
                 Config::loadFromFile('./config.yaml', false);
             }
             Config::loadInput($input);
-            $tester = new Tester($startFile, $input->getOption('junit-report'));
+            $tester = new Tester($startFile, $input->getOption('junit'), $input->getOption('html'));
             return $tester->run();
         } catch (InternalError $e) {
             Out::printError($e);

@@ -21,10 +21,6 @@ use PieceofScript\Services\Values\VariableName;
 
 class GeneratorsRepository
 {
-    const DIRECTORY = 'generators';
-
-    const ROOT_FILE = 'generators.yaml';
-
     /** @var IGenerator[] */
     protected $generators = [];
 
@@ -95,7 +91,7 @@ class GeneratorsRepository
         $id = $this->getGeneratorId($matches[1]);
 
         $generatorArguments = [];
-        $matches[2] = trim($matches[2]);
+        $matches[2] = trim($matches[2] ?? '');
         if (!empty($matches[2])) {
             //remove parentheses
             //TODO improve parsing generator arguments

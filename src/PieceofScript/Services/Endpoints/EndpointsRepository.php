@@ -15,9 +15,6 @@ use PieceofScript\Services\Utils\Utils;
 
 class EndpointsRepository
 {
-    const DIRECTORY = 'endpoints';
-    const ROOT_FILE = 'endpoints.yaml';
-
     /** @var Endpoint[] */
     protected $endpoints = [];
 
