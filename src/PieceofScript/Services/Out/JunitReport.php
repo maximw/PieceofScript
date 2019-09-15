@@ -125,6 +125,14 @@ class JunitReport
         $property = $properties->addChild('property');
         $property->addAttribute('name', 'config.faker_locale');
         $property->addAttribute('value', $this->xmlEscape(Config::get()->getFakerLocale()));
+
+        $property = $properties->addChild('property');
+        $property->addAttribute('name', 'config.storage_name');
+        $property->addAttribute('value', $this->xmlEscape(Config::get()->getStorageName()));
+
+        $property = $properties->addChild('property');
+        $property->addAttribute('name', 'config.skip_assertions');
+        $property->addAttribute('value', $this->xmlEscape(Config::get()->getSkipAssertions()));
     }
 
     protected function addSystemProperties(\SimpleXMLElement $properties)

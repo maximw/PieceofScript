@@ -13,6 +13,7 @@ use PieceofScript\Services\Errors\Parser\EmptyExpressionError;
 use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Errors\TestcaseNotFoundException;
+use PieceofScript\Services\Out\HtmlReport;
 use PieceofScript\Services\Out\In;
 use PieceofScript\Services\Out\JunitReport;
 use PieceofScript\Services\Out\Out;
@@ -111,7 +112,20 @@ class Tester
     /** @var JunitReport|null */
     protected $junitReport;
 
-    public function __construct(string $startFile, string $reportFile = null)
+    /** @var HtmlReport|null */
+    protected $htmlReport;
+
+    /**
+     * Tester constructor.
+     * @param string $startFile
+     * @param string|null $junitFile
+     * @param string|null $htmlFile
+     */
+    public function __construct(
+        string $startFile,
+        string $junitFile = null,
+        string $htmlFile = null
+    )
     {
         $this->startFile = $startFile;
 
@@ -125,9 +139,16 @@ class Tester
 
         $this->evaluator = new Evaluator($this->generators, $this->contextStack, new ExpressionLexer());
         $this->statistics = new Statistics($this->endpoints->getCount());
-        if (null !== $reportFile) {
+        if (null !== $junitFile) {
             $this->junitReport = new JunitReport(
-                $reportFile,
+                $junitFile,
+                $this->statistics,
+                $startFile
+            );
+        }
+        if (null !== $htmlFile) {
+            $this->htmlReport = new HtmlReport(
+                $htmlFile,
                 $this->statistics,
                 $startFile
             );
@@ -159,6 +180,9 @@ class Tester
         $this->statistics->printStatistics();
         if ($this->junitReport instanceof JunitReport) {
             $this->junitReport->generate();
+        }
+        if ($this->htmlReport instanceof HtmlReport) {
+            $this->htmlReport->generate();
         }
 
         return $executionResult;
