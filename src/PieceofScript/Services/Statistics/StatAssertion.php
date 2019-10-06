@@ -37,7 +37,7 @@ class StatAssertion
         string $code,
         string $file,
         int $line,
-        bool $status,
+        ?bool $status,
         VariablesRepository $variablesDump,
         array $usedVariables,
         string $message

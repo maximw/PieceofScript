@@ -125,6 +125,7 @@ class Config
 
     /**
      * @param string $dir
+     * @throws InternalError
      */
     protected function setCacheDir($dir = null)
     {
@@ -193,7 +194,7 @@ class Config
     }
 
     /**
-     * @return null
+     * @return int
      */
     public function getCurrentTimestamp(): int
     {
@@ -202,6 +203,7 @@ class Config
 
     /**
      * @param null|int|string $current_timestamp
+     * @throws \Exception
      */
     protected function setCurrentTimestamp($current_timestamp = null)
     {
@@ -212,7 +214,7 @@ class Config
         if (is_numeric($current_timestamp)) {
             $this->current_timestamp = (int) $current_timestamp;
         } else {
-            throw new \Exception('Cannot set current timestamp');
+            throw new InternalError('Cannot set current timestamp');
         }
     }
 
@@ -337,6 +339,19 @@ class Config
         $this->skip_assertions = $skip_assertions;
     }
 
+    /**
+     * @return array
+     */
+    public function export(): array
+    {
+        return get_object_vars($this);
+    }
+
+    /**
+     * @param string $filename
+     * @param bool $requireFile
+     * @throws RuntimeError
+     */
     public static function loadFromFile(string $filename, bool $requireFile)
     {
         if (!file_exists($filename) || !is_readable($filename)) {
@@ -357,6 +372,10 @@ class Config
         }
     }
 
+    /**
+     * @param InputInterface $input
+     * @throws \Exception
+     */
     public static function loadInput(InputInterface $input)
     {
         foreach (static::INPUT_OPTIONS_MAP as $optionName => $fieldName) {
@@ -396,7 +415,7 @@ class Config
         $string_parts = preg_split('/_+/', $str);
 
         if (!is_array($string_parts) || (sizeof($string_parts) < 1)) {
-            throw new \Exception('Unable to read config.yaml value ' . $str);
+            throw new InternalError('Unable to read config.yaml value ' . $str);
         }
         foreach ($string_parts as $key => $string_part) {
             $string_parts[$key] = ucfirst(strtolower($string_part));

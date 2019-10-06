@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>AdminLTE 2 | Starter</title>
+    <title>PieceofScript report</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 	<link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
@@ -39,199 +39,63 @@
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-
     <!-- Google Font -->
-    <!--link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic"-->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 </head>
-<!--
-BODY TAG OPTIONS:
-=================
-Apply one or more of the following classes to get the
-desired effect
-|---------------------------------------------------------|
-| SKINS         | skin-blue                               |
-|               | skin-black                              |
-|               | skin-purple                             |
-|               | skin-yellow                             |
-|               | skin-red                                |
-|               | skin-green                              |
-|---------------------------------------------------------|
-|LAYOUT OPTIONS | fixed                                   |
-|               | layout-boxed                            |
-|               | layout-top-nav                          |
-|               | sidebar-collapse                        |
-|               | sidebar-mini                            |
-|---------------------------------------------------------|
--->
 <body class="hold-transition skin-blue sidebar-mini">
 <div class="wrapper">
-
-    <!-- Main Header -->
     <header class="main-header">
-
-        <!-- Logo -->
-        <span class="logo">
-      <!-- mini logo for sidebar mini 50x50 pixels -->
+    <span class="logo">
       <span class="logo-mini">POS</span>
-            <!-- logo for regular state and mobile devices -->
       <span class="logo-lg">PieceofScrtipt</span>
     </span>
-
-        <!-- Header Navbar -->
-        <nav class="navbar navbar-static-top" role="navigation">
-            <!-- Sidebar toggle button-->
-            <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-                <span class="sr-only">Toggle navigation</span>
-            </a>
-        </nav>
+    <nav class="navbar navbar-static-top">
+    </nav>
     </header>
-    <!-- Left side column. contains the logo and sidebar -->
-    <aside class="main-sidebar">
-
-        <!-- sidebar: style can be found in sidebar.less -->
-        <section class="sidebar">
-
-            <!-- Sidebar Menu -->
-            <ul class="sidebar-menu" data-widget="tree">
-                <!-- Optionally, you can add icons to the links -->
-                <li class="active"><a href="#"><i class="fa fa-link"></i> <span>Link</span></a></li>
-                <li><a href="#"><i class="fa fa-link"></i> <span>Another Link</span></a></li>
-                <li class="treeview">
-                    <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span>
-                        <span class="pull-right-container">
-                <i class="fa fa-angle-left pull-right"></i>
-              </span>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="#">Link in level 2</a></li>
-                        <li><a href="#">Link in level 2</a></li>
-                    </ul>
-                </li>
-            </ul>
-            <!-- /.sidebar-menu -->
-        </section>
-        <!-- /.sidebar -->
-    </aside>
-
-    <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
+    <div class="content-wrapper" style="margin-left: 0px">
         <section class="content-header">
             <h1>
                 Page Header
                 <small>Optional description</small>
             </h1>
         </section>
-
-        <!-- Main content -->
         <section class="content container-fluid">
             <div class="row">
                 <div class="col-md-6">
-                    {pieEndpoints}
+                    <?= $pieEndpoints ?>
                 </div>
                 <div class="col-md-6">
-                    {pieAssertions}
+                    <?= $pieAssertions ?>
                 </div>
             </div>
-            <!-- TABLE: ENDPOINTS -->
-            <div class="box box-info">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Endpoints</h3>
-
-                    <div class="box-tools pull-right">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i
-                                class="fa fa-minus"></i>
-                        </button>
-                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i>
-                        </button>
-                    </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <?= $tableEndpoints ?>
                 </div>
-                <!-- /.box-header -->
-                <div class="box-body">
-                    <div class="table-responsive">
-                        <table class="table no-margin">
-                            <thead>
-                            <tr>
-                                <th>Endpoint</th>
-                                <th>Status</th>
-                                <th>Popularity</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>Get all pastes</td>
-                                <td>Call of Duty IV</td>
-                                <td><span class="label label-success">Ok</span></td>
-                                <td>
-                                    <div class="sparkbar" data-color="#00a65a" data-height="20">90,80,90,-70,61,-83,63
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Get paste $pasteId</td>
-                                <td>Samsung Smart TV</td>
-                                <td><span class="label label-warning">Fail</span></td>
-                            </tr>
-                            <tr>
-                                <td><a href="pages/examples/invoice.html">OR7429</a></td>
-                                <td>iPhone 6 Plus</td>
-                                <td><span class="label label-danger">Fail</span></td>
-                            </tr>
-                            <tr>
-                                <td><a href="pages/examples/invoice.html">OR7429</a></td>
-                                <td>Samsung Smart TV</td>
-                                <td><span class="label label-info">Processing</span></td>
-                            </tr>
-                            <tr>
-                                <td><a href="pages/examples/invoice.html">OR1848</a></td>
-                                <td>Samsung Smart TV</td>
-                                <td><span class="label label-warning">Pending</span></td>
-                                <td>
-                                    <div class="sparkbar" data-color="#f39c12" data-height="20">90,80,-90,70,61,-83,68
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><a href="pages/examples/invoice.html">OR7429</a></td>
-                                <td>iPhone 6 Plus</td>
-                                <td><span class="label label-danger">Delivered</span></td>
-                                <td>
-                                    <div class="sparkbar" data-color="#f56954" data-height="20">90,-80,90,70,-61,83,63
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><a href="pages/examples/invoice.html">OR9842</a></td>
-                                <td>Call of Duty IV</td>
-                                <td><span class="label label-success">Shipped</span></td>
-                                <td>
-                                    <div class="sparkbar" data-color="#00a65a" data-height="20">90,80,90,-70,61,-83,63
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- /.table-responsive -->
-                </div>
-                <!-- /.box-body -->
-                <div class="box-footer clearfix">
-                    <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-left">Place New Order</a>
-                    <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right">View All Orders</a>
-                </div>
-                <!-- /.box-footer -->
             </div>
 
+            <?= $listEndpoints ?>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <?= $configProperties ?>
+                </div>
+                <div class="col-md-6">
+                    <?= $systemProperties ?>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <?= $consoleOutput ?>
+                </div>
+            </div>
         </section>
-        <!-- /.content -->
     </div>
-    <!-- /.content-wrapper -->
+
 </div>
-<!-- ./wrapper -->
-
 <!-- REQUIRED JS SCRIPTS -->
-
 <!-- AdminLTE App -->
 <script>
 /*! AdminLTE app.js
@@ -579,79 +443,6 @@ desired effect
 }(jQuery);
 
 
-/* DirectChat()
- * ===============
- * Toggles the state of the control sidebar
- *
- * @Usage: $('#my-chat-box').directChat()
- *         or add [data-widget="direct-chat"] to the trigger
- */
-+function ($) {
-  'use strict';
-
-  var DataKey = 'lte.directchat';
-
-  var Selector = {
-    data: '[data-widget="chat-pane-toggle"]',
-    box : '.direct-chat'
-  };
-
-  var ClassName = {
-    open: 'direct-chat-contacts-open'
-  };
-
-  // DirectChat Class Definition
-  // ===========================
-  var DirectChat = function (element) {
-    this.element = element;
-  };
-
-  DirectChat.prototype.toggle = function ($trigger) {
-    $trigger.parents(Selector.box).first().toggleClass(ClassName.open);
-  };
-
-  // Plugin Definition
-  // =================
-  function Plugin(option) {
-    return this.each(function () {
-      var $this = $(this);
-      var data  = $this.data(DataKey);
-
-      if (!data) {
-        $this.data(DataKey, (data = new DirectChat($this)));
-      }
-
-      if (typeof option == 'string') data.toggle($this);
-    });
-  }
-
-  var old = $.fn.directChat;
-
-  $.fn.directChat             = Plugin;
-  $.fn.directChat.Constructor = DirectChat;
-
-  // No Conflict Mode
-  // ================
-  $.fn.directChat.noConflict = function () {
-    $.fn.directChat = old;
-    return this;
-  };
-
-  // DirectChat Data API
-  // ===================
-  $(document).on('click', Selector.data, function (event) {
-    if (event) event.preventDefault();
-    Plugin.call($(this), 'toggle');
-  });
-
-}(jQuery);
-
-
-
-
-
-
-
 /* Tree()
  * ======
  * Converts a nested list into a multilevel
@@ -987,9 +778,5 @@ desired effect
 }(jQuery);
 
 </script>
-
-<!-- Optionally, you can add Slimscroll and FastClick plugins.
-     Both of these plugins are recommended to enhance the
-     user experience. -->
 </body>
 </html>

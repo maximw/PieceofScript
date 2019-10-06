@@ -122,6 +122,17 @@ class EndpointsRepository
         return null;
     }
 
+    /**
+     * @return Endpoint[]
+     */
+    public function getAll(): array
+    {
+        return $this->endpoints;
+    }
+
+    /**
+     * @return int
+     */
     public function getCount(): int
     {
         return count($this->endpoints);

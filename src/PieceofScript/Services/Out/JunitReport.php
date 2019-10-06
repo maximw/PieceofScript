@@ -66,6 +66,10 @@ class JunitReport
         $property = $properties->addChild('property');
         $property->addAttribute('name', 'start_file');
         $property->addAttribute('value', $this->xmlEscape($this->startFile));
+
+        $property = $properties->addChild('property');
+        $property->addAttribute('name', 'work_dir');
+        $property->addAttribute('value', $this->xmlEscape(getcwd()));
     }
 
     protected function addConfigProperties(\SimpleXMLElement $properties)

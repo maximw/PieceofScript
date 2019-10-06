@@ -6,7 +6,6 @@ use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Out\In;
 use PieceofScript\Services\Out\Out;
-use PieceofScript\Services\Parsing\CallLexer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,7 +13,11 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use PieceofScript\Services\Tester;
 
-
+/**
+ * Class RunCommand
+ *
+ * @package PieceofScript
+ */
 class RunCommand extends Command
 {
 

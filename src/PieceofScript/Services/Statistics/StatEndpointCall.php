@@ -58,7 +58,7 @@ class StatEndpointCall
         string $code,
         string $file,
         int $line,
-        bool $status,
+        ?bool $status,
         VariablesRepository $variablesDump,
         array $usedVariables,
         $message
@@ -138,4 +138,79 @@ class StatEndpointCall
     {
         $this->response = deep_copy($response);
     }
+
+    public function isSuccess(): bool
+    {
+        foreach ($this->getAssertions() as $assertion) {
+            if (!$assertion->getStatus()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStartDate()
+    {
+        return $this->startDate;
+    }
+
+    /**
+     * @param mixed $startDate
+     */
+    public function setStartDate($startDate): void
+    {
+        $this->startDate = $startDate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getEndDate()
+    {
+        return $this->endDate;
+    }
+
+    /**
+     * @param mixed $endDate
+     */
+    public function setEndDate($endDate): void
+    {
+        $this->endDate = $endDate;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFile(): string
+    {
+        return $this->file;
+    }
+
+    /**
+     * @param string $file
+     */
+    public function setFile(string $file): void
+    {
+        $this->file = $file;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLine(): int
+    {
+        return $this->line;
+    }
+
+    /**
+     * @param int $line
+     */
+    public function setLine(int $line): void
+    {
+        $this->line = $line;
+    }
+
 }

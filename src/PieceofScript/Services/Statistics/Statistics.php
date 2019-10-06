@@ -7,6 +7,7 @@ namespace PieceofScript\Services\Statistics;
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Endpoints\Endpoint;
+use PieceofScript\Services\Endpoints\EndpointsRepository;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Values\ArrayLiteral;
 
@@ -35,16 +36,24 @@ class Statistics
     public $assertsSuccess = 0;
     public $assertsFailed = 0;
 
-    public function __construct(int $totalEndpointsCount = 0)
+    public function __construct(EndpointsRepository $endpointsRepository)
     {
-        $this->endpointsTotal = $totalEndpointsCount;
+        $this->endpointsTotal = $endpointsRepository->getCount();
+        foreach ($endpointsRepository->getAll() as $endpoint) {
+            $this->addEndpoint($endpoint);
+        }
     }
 
-    public function addCall(string $code, Endpoint $endPoint, ContextStack $contextStack, ArrayLiteral $request, ArrayLiteral $response)
+    public function addEndpoint(Endpoint $endPoint)
     {
         if (!array_key_exists($endPoint->getDefinition()->getOriginalString(), $this->statEndpoints)) {
             $this->statEndpoints[$endPoint->getDefinition()->getOriginalString()] = new StatEndpoint($endPoint);
         }
+    }
+
+    public function addCall(string $code, Endpoint $endPoint, ContextStack $contextStack, ArrayLiteral $request, ArrayLiteral $response)
+    {
+        $this->addEndpoint($endPoint);
 
         if ($this->currentEndpointCall instanceof StatEndpointCall) {
             $this->endCurrentCall();
@@ -80,7 +89,7 @@ class Statistics
 
     public function addAssertion(
         string $code,
-        bool $status,
+        ?bool $status,
         ContextStack $contextStack,
         array $usedVariables,
         string $message
@@ -130,9 +139,9 @@ class Statistics
                 foreach ($call->getAssertions() as $assertion) {
                     $successCall = $successCall === null ? true : ($successCall && true);
                     $this->assertsTotal++;
-                    if ($assertion->getStatus()) {
+                    if ($assertion->getStatus() === true) {
                         $this->assertsSuccess++;
-                    } else {
+                    } elseif ($assertion->getStatus() === false) {
                         $this->assertsFailed++;
                         $successEndpoint = false;
                         $successCall = false;

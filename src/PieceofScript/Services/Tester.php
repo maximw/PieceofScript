@@ -138,7 +138,7 @@ class Tester
         $this->testcases = new TestcasesRepository($this->callLexer);
 
         $this->evaluator = new Evaluator($this->generators, $this->contextStack, new ExpressionLexer());
-        $this->statistics = new Statistics($this->endpoints->getCount());
+        $this->statistics = new Statistics($this->endpoints);
         if (null !== $junitFile) {
             $this->junitReport = new JunitReport(
                 $junitFile,
@@ -575,7 +575,7 @@ class Tester
     protected function operatorAssert(string $expression)
     {
         $message = '';
-        $success = false;
+        $success = null;
         try {
             $success = $this->evaluator->evaluate($expression, $this->contextStack->head())->toBool()->getValue();
         } catch (VariableError $e) {

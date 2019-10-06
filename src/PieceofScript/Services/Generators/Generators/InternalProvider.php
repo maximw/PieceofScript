@@ -7,10 +7,14 @@ use PieceofScript\Services\Generators\Generators\Internal\Append;
 use PieceofScript\Services\Generators\Generators\Internal\Choice;
 use PieceofScript\Services\Generators\Generators\Internal\DateFormat;
 use PieceofScript\Services\Generators\Generators\Internal\Explode;
+use PieceofScript\Services\Generators\Generators\Internal\FindString;
 use PieceofScript\Services\Generators\Generators\Internal\IfGenerator;
 use PieceofScript\Services\Generators\Generators\Internal\Implode;
 use PieceofScript\Services\Generators\Generators\Internal\Keys;
 use PieceofScript\Services\Generators\Generators\Internal\Prepend;
+use PieceofScript\Services\Generators\Generators\Internal\ReplaceString;
+use PieceofScript\Services\Generators\Generators\Internal\ToLower;
+use PieceofScript\Services\Generators\Generators\Internal\ToUpper;
 use PieceofScript\Services\Generators\IGeneratorProvider;
 use PieceofScript\Services\Generators\Generators\Internal\ArrayGenerator;
 use PieceofScript\Services\Generators\Generators\Internal\Identical;
@@ -43,6 +47,7 @@ class InternalProvider implements IGeneratorProvider
             new Choice(),
             new DateFormat(),
             new Explode(),
+            new FindString(),
             new Identical(),
             new IfGenerator(),
             new Implode(),
@@ -51,14 +56,17 @@ class InternalProvider implements IGeneratorProvider
             new Min(),
             new Prepend(),
             new Regex(),
+            new ReplaceString(),
             new Round(),
             new Similar(),
             new Size(),
             new Slice(),
             new ToBool(),
             new ToDate(),
+            new ToLower(),
             new ToNumber(),
             new ToString(),
+            new ToUpper(),
             new UrlDecode(),
             new UrlEncode(),
         ];

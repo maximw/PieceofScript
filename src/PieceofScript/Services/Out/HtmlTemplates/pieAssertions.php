@@ -26,9 +26,9 @@
     <!-- /.box-body -->
     <div class="box-footer no-padding">
         <ul class="nav nav-pills nav-stacked">
-            <li>Total <span class="pull-right">{total}</span></li>
-            <li>Failed <span class="pull-right text-red">{failed}</span></li>
-            <li>Success <span class="pull-right text-green">{success}</span></li>
+            <li>Total <span class="pull-right"><?= $total ?></span></li>
+            <li>Failed <span class="pull-right text-red"><?= $failed ?></span></li>
+            <li>Success <span class="pull-right text-green"><?= $success ?></span></li>
         </ul>
     </div>
 </div>
@@ -37,13 +37,13 @@
   var pieChart       = new Chart(pieChartCanvas);
   var PieData        = [
     {
-      value    : {failed},
+      value    : <?= $failed ?>,
       color    : '#f56954',
       highlight: '#f56954',
       label    : 'Failed'
     },
     {
-      value    : {success},
+      value    : <?= $success ?>,
       color    : '#00a65a',
       highlight: '#00a65a',
       label    : 'Success'

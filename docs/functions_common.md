@@ -21,13 +21,9 @@
 
 `identical($var, $sample)` <i>boolean</i> - more strict <i>similar()</i>, with additional backward condition that all string keys in <i>$var</i> have to exists in <i>$sample</i>. In other words, all the elements of <i>$var</i> have pair in <i>$sample</i> with the same type.
 
-
-
  
 ## Numbers related
 `round</b>(number $number, number $precision = 0)` <i>Number</i> - returns the rounded value of $number to specified $precision.
-
-
 
 
 ## Strings related
@@ -38,13 +34,13 @@
 
 <b>regexMatch</b>($string, $regex) <i>Array</i> - вернет массив совпадений с группами регулярки <i>$regex</i>.
 
-**toLower**($string) <i>String</i> - Makes a string lowercase in UTF-8 encoding
+`toLower($something)` <i>string</i> - Makes a string lowercase in UTF-8 encoding
 
-**toUpper**($string) <i>String</i> - Makes a string lowercase in UTF-8 encoding
+`toUpper($something)` <i>string</i> - Makes a string uppercase in UTF-8 encoding
 
-**replaceString**($searchFor, $replaceWith, $inString) <i>String</i> - Replace $searchFor with $replaceWith in $inString
+`replaceString(string $searchFor, string $replaceWith, string $inString)` <i>string</i> - Replace <i>$searchFor</i> with <i>$replaceWith</i> in <i>$inString</i>
 
-**findString**($searchFor, $inString, $offset) <i>Number</i> or _Boolean_ - Find position $searchFor in $inString from $offset position, or false if not found.
+`findString(string $searchFor, string $inString, number $offset = 0)` <i>number</i> or <i>boolean</i> - Find position <i>$searchFor</i> in <i>$inString</i> from $offset position, or <i>false</i> if not found.
 
 `urlEncode(string $string)` <i>string</i> - returns URL-encoded string (<a href="http://php.net/manual/en/function.urlencode.php">details</a>).
 
@@ -72,7 +68,7 @@
 ## Dates related
 `dateFormat(date $date, string $format)` <i>String</i> - format Date (<a href="http://php.net/manual/en/datetime.formats.php">details</a>).
 
-<b>dateModify</b>($date, $relativeFormatString) <i>Date</i> - returns midified $date with given (<a href="http://php.net/manual/en/datetime.formats.relative.php">relative format</a>).
+`dateModify($date, $relativeFormatString)` <i>Date</i> - returns modified $date, use (<a href="http://php.net/manual/en/datetime.formats.relative.php">relative format</a>).
 
 
 
