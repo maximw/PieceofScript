@@ -5,6 +5,7 @@ namespace PieceofScript\Services\Generators\Generators\Storage\Services;
 
 
 use PieceofScript\Services\Errors\InternalError;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\BoolLiteral;
 use PieceofScript\Services\Values\DateLiteral;
@@ -35,11 +36,11 @@ class Storage
     public function get(string $key)
     {
         if (array_key_exists($key, $this->cache)) {
-            return $this->decode($this->cache[$key]);
+            return $this->decode($this->cache[$key], $key);
         }
         $this->load();
         if (array_key_exists($key, $this->cache)) {
-            return $this->decode($this->cache[$key]);
+            return $this->decode($this->cache[$key], $key);
         }
         return false;
     }
@@ -65,19 +66,19 @@ class Storage
         file_put_contents($this->file, Yaml::dump($this->cache, PHP_INT_MAX));
     }
 
-    protected function decode(array $data)
+    protected function decode(array $data, string $key)
     {
         if (!isset($data['type']) || !isset($data['data'])) {
-            throw new \Exception('Broken structure for in local storage');
+            throw new RuntimeError('Broken structure in storage. Key "' . $key . '" has no data');
         }
 
         if ($data['type'] === ArrayLiteral::TYPE_NAME) {
             if (!is_array($data['data'])) {
-                throw new \Exception('Broken structure for in local storage');
+                throw new RuntimeError('Broken structure for in storage. Key "' . $key . '" is not an array');
             }
             $result = [];
             foreach ($data['data'] as $key => $value) {
-                $result[$key] = $this->decode($value);
+                $result[$key] = $this->decode($value, $key);
             }
             return new ArrayLiteral($result);
         }
@@ -102,7 +103,7 @@ class Storage
             return new DateLiteral($data['data']);
         }
 
-        throw new \Exception('Broken structure for in local storage');
+        throw new RuntimeError('Broken structure for in storage. Key "' . $key . '" has unknown type ' . $data['type']);
     }
 
     protected function encode(BaseLiteral $data): array
@@ -143,7 +144,7 @@ class Storage
             return $result;
         }
 
-        throw new \Exception('Broken structure for in local storage');
+        throw new RuntimeError('Broken structure for in storage. Unknown type ' . $data::TYPE_NAME);
     }
 
     protected function trimQuotes($data)

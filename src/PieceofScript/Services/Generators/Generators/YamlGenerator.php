@@ -131,7 +131,7 @@ class YamlGenerator extends BaseGenerator
         foreach ($from as $key => $value) {
             if ($value instanceof ArrayLiteral && $to->value[$key] instanceof ArrayLiteral) {
                 $this->removeFields($to->value[$key], $from[$key]);
-            } else {
+            } elseif ($from[$key]->toBool()->getValue()) {
                 unset($to->value[$key]);
             }
         }

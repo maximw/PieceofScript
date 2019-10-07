@@ -78,14 +78,14 @@ class GeneratorsRepository
      * @param string $generatorDefinition
      * @param $generatorBody
      * @param $fileName
-     * @throws \Exception
+     * @throws InternalError
      */
     protected function createYamlGenerator(string $generatorDefinition, $generatorBody, $fileName)
     {
         $generatorDefinition = trim($generatorDefinition);
         $flag = preg_match('~^([a-z][\\\\a-z0-9_]*)\s*(\([a-z0-9_,\\$\\s]*\))?$~i', $generatorDefinition, $matches);
         if (!$flag) {
-            throw new \Exception('Error parsing generator definition ' . $generatorDefinition .  ' in ' . $fileName);
+            throw new InternalError('Error parsing generator definition ' . $generatorDefinition .  ' in ' . $fileName);
         }
         $generatorName = $matches[1];
         $id = $this->getGeneratorId($matches[1]);
@@ -101,7 +101,7 @@ class GeneratorsRepository
                 $argument = trim($argument);
                 if (!empty($argument)) {
                     if (!preg_match('/^\$[a-z][a-z0-9_]*$/i', $argument)) {
-                        throw new \Exception('Bad argument name in generator definition ' . $generatorDefinition . ' in ' . $fileName);
+                        throw new InternalError('Bad argument name in generator definition ' . $generatorDefinition . ' in ' . $fileName);
                     }
                     $generatorArguments[] = new VariableName($argument);
                 }
@@ -109,7 +109,7 @@ class GeneratorsRepository
 
         }
         if ($this->exists($id)) {
-            throw new \Exception('Duplicate generator name ' . $generatorDefinition);
+            throw new InternalError('Generator ' . $generatorDefinition . ' is already defined in ' . $this->get($id)->getFileName());
         }
 
         $body = $generatorBody['body'] ?? null;
@@ -117,7 +117,7 @@ class GeneratorsRepository
         $remove = $generatorBody['remove'] ?? null;
 
         if (null === $body) {
-            throw new \Exception('Generator ' . $generatorName . ' has empty body');
+            throw new InternalError('Generator ' . $generatorName . ' has empty body');
         }
 
         $generator = new YamlGenerator($generatorName, $generatorArguments, $fileName);

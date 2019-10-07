@@ -6,6 +6,7 @@ namespace PieceofScript\Services\Utils;
 
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\FileNotFoundError;
+use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\BoolLiteral;
@@ -89,7 +90,7 @@ class Utils
             }
             return $value;
         }
-        throw new \Exception('Unhandled value type' . gettype($value));
+        throw new RuntimeError('Unhandled value type' . gettype($value));
     }
 
     public static function unwrapValueContainer(BaseLiteral $value)
@@ -103,7 +104,7 @@ class Utils
             }
             return $array;
         }
-        throw new \Exception('Unhandled value type' . gettype($value));
+        throw new RuntimeError('Unhandled value type' . gettype($value));
     }
 
     public static function getConfigDateTime(): \DateTime

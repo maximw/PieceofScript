@@ -4,6 +4,7 @@ namespace PieceofScript\Services\Contexts;
 
 use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Errors\Parser\VariableError;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NullLiteral;
 use PieceofScript\Services\Values\StringLiteral;
@@ -320,12 +321,12 @@ abstract class AbstractContext
      *
      * @param AbstractContext|null $context
      * @return AbstractContext
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function setParentContext(AbstractContext $context = null): self
     {
         if (null === $context && !$this instanceof GlobalContext) {
-            throw new \Exception('Non-global context requires parent context');
+            throw new RuntimeError('Non-global context requires parent context');
         }
         $this->parentContext = $context;
         return $this;

@@ -6,6 +6,7 @@ namespace PieceofScript\Services\Parsing;
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Errors\Parser\EmptyExpressionError;
+use PieceofScript\Services\Errors\Parser\EvaluationError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Generators\GeneratorsRepository;
 use PieceofScript\Services\Utils\Utils;
@@ -111,7 +112,11 @@ class Evaluator
             return new NullLiteral();
         }
 
-        return $this->extractLiteral($this->executeAST($ast, $context), $context);
+        $value = $this->extractLiteral($this->executeAST($ast, $context), $context);
+        if (!$ast->isEmpty()) {
+            throw new EvaluationError('Syntax error', $ast);
+        }
+        return $value;
     }
 
     /**
@@ -180,7 +185,7 @@ class Evaluator
      * @param string|TokensQueue $expression
      * @param AbstractContext $context
      * @return BaseLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function extractOperand($expression, AbstractContext $context): Operand
     {
@@ -189,8 +194,7 @@ class Evaluator
         }
         $ast = $this->buildAST($expression);
         if ($ast->isEmpty()) {
-            //$value = $expression;
-            throw new \Exception('Error parsing expression ' . $expression);
+            throw new RuntimeError('Error parsing expression ' . $expression);
         }
 
         return $this->executeAST($ast, $context);
@@ -200,12 +204,12 @@ class Evaluator
     /**
      * Do not execute part of AST
      * @param TokensStack $ast
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function skipAST(TokensStack $ast)
     {
         if ($ast->isEmpty()) {
-            throw new \Exception('AST is empty');
+            throw new RuntimeError('AST is empty');
         }
 
         $token = $ast->pop();
@@ -348,7 +352,7 @@ class Evaluator
         } elseif ($token->getType() == Token::TYPE_ARGUMENTS_END) {
             return $this->executeAST($ast, $context);
         }
-        throw new \Exception('Evaluating error');
+        throw new RuntimeError('Evaluating error, unknown token ' . $token->getName());
     }
 
     /**
@@ -383,7 +387,7 @@ class Evaluator
 
         }
 
-        throw new \Exception('Cannot get value of unknown token type');
+        throw new RuntimeError('Cannot get value of unknown token type ' . $token->getName());
     }
 
     /**
@@ -448,7 +452,7 @@ class Evaluator
             return $operand1->oNot();
         }
 
-        throw new \Exception('Unknown operation ' . $operation->getValue());
+        throw new RuntimeError('Unknown operation ' . $operation->getValue());
     }
 
     /**
@@ -494,7 +498,7 @@ class Evaluator
                 $key = $this->extractLiteral($this->executeAST($keyToken->getValue(), $context), $context);
             }
             if (!$key instanceof IKeyValue) {
-                throw new \Exception('Cannot use ' . $key::TYPE_NAME . ' as array key');
+                throw new RuntimeError('Cannot use ' . $key::TYPE_NAME . ' as array key');
             }
             $variableName->addPath($key->toKey());
         }
@@ -514,14 +518,14 @@ class Evaluator
     protected function executeAssignment(Token $operationEquals, TokensStack $ast, AbstractContext $context): BaseLiteral
     {
         if ($context->assignmentMode === AbstractContext::ASSIGNMENT_MODE_OFF) {
-            throw new \Exception('Cannot assign value here, did you mean == instead of = ?');
+            throw new RuntimeError('Cannot assign value here, did you mean == instead of = ?');
         }
 
         $variable = $this->executeAST($ast, $context);
         $value = $this->extractLiteral($this->executeAST($ast, $context), $context);
 
         if (!$variable instanceof VariableName) {
-            throw new \Exception('Cannot assign value to value, did you mean == instead of = ?');
+            throw new RuntimeError('Cannot assign value to value, did you mean == instead of = ?');
         }
 
         $context->setVariable($variable, $value);
@@ -549,10 +553,10 @@ class Evaluator
             } elseif ($operand->mode === VariableName::MODE_TYPE) {
                 return $context->getVariableType($operand);
             }
-            throw new \Exception('Error variable name');
+            throw new RuntimeError('Error parsing variable name');
         }
 
-        throw new \Exception('Unknown operand type ' . get_class($operand));
+        throw new RuntimeError('Unknown operand type ' . get_class($operand));
     }
 
     /**
@@ -569,7 +573,7 @@ class Evaluator
     protected function arrayKeyToLiteral(Token $token): IKeyValue
     {
         if ($token->getName() !== Token::T_ARRAY_KEY) {
-            throw new \Exception('Bad token used as array key');
+            throw new RuntimeError('Bad token used as array key');
         }
 
         $value = $token->getValue();

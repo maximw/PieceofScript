@@ -8,8 +8,6 @@ use PieceofScript\Services\Contexts\OptionsContext;
 use PieceofScript\Services\Endpoints\Endpoint;
 use PieceofScript\Services\Errors\ControlFlow\CancelException;
 use PieceofScript\Services\Errors\ControlFlow\MustException;
-use PieceofScript\Services\Errors\InternalFunctionsErrors\ArgumentTypeError;
-use PieceofScript\Services\Errors\Parser\EmptyExpressionError;
 use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Errors\TestcaseNotFoundException;
@@ -19,7 +17,6 @@ use PieceofScript\Services\Out\JunitReport;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Parsing\CallLexer;
 use PieceofScript\Services\Parsing\ExpressionLexer;
-use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NullLiteral;
 use PieceofScript\Services\Values\NumberLiteral;
 use PieceofScript\Services\Contexts\ContextStack;
@@ -33,12 +30,10 @@ use PieceofScript\Services\Parsing\Evaluator;
 use PieceofScript\Services\Parsing\Token;
 use PieceofScript\Services\Statistics\Statistics;
 use PieceofScript\Services\Testcases\Testcase;
-use PieceofScript\Services\Testcases\TestcaseCall;
 use PieceofScript\Services\Testcases\TestcasesRepository;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\ArrayLiteral;
 use PieceofScript\Services\Values\VariableName;
-use PieceofScript\Services\Values\VariableReference;
 
 class Tester
 {
@@ -281,28 +276,28 @@ class Tester
 
                 $splitTokens = $this->evaluator->tokenizeSplitBy($expression, Token::T_SEMICOLON);
                 if (count($splitTokens) !== 2 && count($splitTokens) !== 3) {
-                    throw new \Exception('Error parsing foreach', $this->contextStack);
+                    throw new RuntimeError('Error parsing foreach');
                 }
                 $array = $this->evaluator->evaluate($splitTokens[0], $this->contextStack->head());
                 if (!$array instanceof ArrayLiteral) {
-                    throw new \Exception('Cannot iterate over ' . $array::TYPE_NAME);
+                    throw new RuntimeError('Cannot iterate over ' . $array::TYPE_NAME);
                 }
                 $withKey = count($splitTokens) === 3;
 
                 $valueName = $this->evaluator->extractOperand($withKey ? $splitTokens[2] : $splitTokens[1], $this->contextStack->head());
                 if (!$valueName instanceof VariableName) {
-                    throw new \Exception('Error parsing foreach');
+                    throw new RuntimeError('Error parsing foreach, variable expected for array element');
                 }
                 if (!$valueName->isSimple() || !$valueName->mode === VariableName::MODE_VALUE) {
-                    throw new \Exception('Error parsing foreach');
+                    throw new RuntimeError('Error parsing foreach, variable expected for array element');
                 }
                 if ($withKey) {
                     $keyName = $this->evaluator->extractOperand($splitTokens[1], $this->contextStack->head());
                     if (!$keyName instanceof VariableName) {
-                        throw new \Exception('Error parsing foreach');
+                        throw new RuntimeError('Error parsing foreach, variable expected for array key');
                     }
                     if (!$keyName->isSimple() || !$keyName->mode === VariableName::MODE_VALUE) {
-                        throw new \Exception('Error parsing foreach');
+                        throw new RuntimeError('Error parsing foreach, variable expected for array key');
                     }
                 }
 
@@ -661,11 +656,12 @@ class Tester
      * @param string $expression
      * @throws Errors\ContextStackEmptyException
      * @throws VariableError
+     * @throws RuntimeError
      */
     protected function operatorImport(string $expression)
     {
         if ($this->contextStack->head() instanceof GlobalContext) {
-            throw new \Exception('Cannot import to global context');
+            throw new RuntimeError('Cannot import to global context');
         }
 
         $expression = trim($expression);
@@ -674,10 +670,10 @@ class Tester
         foreach ($splitTokens as $tokens) {
             $variableName = $this->evaluator->extractOperand($tokens, $this->contextStack->head());
             if (!$variableName instanceof VariableName) {
-                throw new \Exception('Error parsing import variable');
+                throw new RuntimeError('Error parsing import variable');
             }
             if (!$variableName->isSimple()) {
-                throw new \Exception('Cannot import array element, only whole array');
+                throw new RuntimeError('Cannot import array element, only whole array');
             }
 
             if ($this->contextStack->global()->hasVariable($variableName)) {
@@ -686,7 +682,7 @@ class Tester
                 $this->contextStack->head()->setVariable($variableName, $value, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
                 $this->contextStack->head()->isGlobalWritable = true;
             } else {
-                throw new \Exception('Cannot import variable ' . (string) $variableName . ', it does not exist');
+                throw new RuntimeError('Cannot import variable ' . (string) $variableName . ', it does not exist');
             }
         }
     }

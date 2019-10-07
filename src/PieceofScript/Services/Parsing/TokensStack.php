@@ -4,6 +4,9 @@
 namespace PieceofScript\Services\Parsing;
 
 
+use PieceofScript\Services\Errors\Parser\EvaluationError;
+use PieceofScript\Services\Errors\RuntimeError;
+
 class TokensStack
 {
     /** @var Token[]  */
@@ -29,7 +32,7 @@ class TokensStack
     {
         $token = end($this->stack);
         if (!$token instanceof Token) {
-            throw new \Exception('Something went wrong. Token stack is empty.');
+            throw new RuntimeError('Something went wrong. Token stack is empty.');
         }
         return $token;
     }
@@ -45,11 +48,15 @@ class TokensStack
         return prev($this->stack);
     }
 
+    /**
+     * @return Token
+     * @throws \Exception
+     */
     public function pop(): Token
     {
         $token = array_pop($this->stack);
         if (!$token instanceof Token) {
-            throw new \Exception('Something went wrong. Token stack is empty.');
+            throw new EvaluationError('Something went wrong. Token stack is empty.');
         }
         return $token;
     }
@@ -64,20 +71,4 @@ class TokensStack
         return empty($this->stack);
     }
 
-    public function debug()
-    {
-        echo PHP_EOL;
-        foreach ($this->stack as $item) {
-            if ($item->getName() === Evaluator::T_ARRAY_SUB_AST) {
-                echo ' [ ';
-                $item->getValue()->debug();
-                echo ' ] ';
-            } elseif ($item->getName() === Evaluator::T_ARRAY_KEY) {
-                echo '.' . $item->getValue() . ' ';
-            } else {
-                echo $item->getValue() . ' ';
-            }
-        }
-        echo PHP_EOL;
-    }
 }

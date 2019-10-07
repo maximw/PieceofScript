@@ -4,6 +4,7 @@ namespace PieceofScript\Services\Contexts;
 
 
 use PieceofScript\Services\Errors\Parser\VariableError;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
 use PieceofScript\Services\Values\NullLiteral;
 use PieceofScript\Services\Values\StringLiteral;
@@ -70,7 +71,7 @@ class OptionsContext extends AbstractContext
 
     public function getReference(VariableName $variableName): VariableReference
     {
-        throw new \Exception('Cannot get reference in OptionsContext');
+        throw new RuntimeError('Cannot get reference in OptionsContext');
     }
 
     /**
@@ -94,7 +95,7 @@ class OptionsContext extends AbstractContext
      */
     public function setReference(VariableName $varName, VariableReference $reference)
     {
-        throw new \Exception('Cannot set reference in OptionsContext');
+        throw new RuntimeError('Cannot set reference in OptionsContext');
     }
 
 }

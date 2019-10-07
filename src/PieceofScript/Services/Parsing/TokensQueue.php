@@ -4,6 +4,8 @@
 namespace PieceofScript\Services\Parsing;
 
 
+use PieceofScript\Services\Errors\RuntimeError;
+
 class TokensQueue
 {
     /** @var Token[]  */
@@ -28,7 +30,7 @@ class TokensQueue
     {
         $token = reset($this->queue);
         if (!$token instanceof Token) {
-            throw new \Exception('Something went wrong. Token stack is empty.');
+            throw new RuntimeError('Something went wrong. Token stack is empty.');
         }
         return $token;
     }
@@ -43,7 +45,7 @@ class TokensQueue
     {
         $token = array_pop($this->queue);
         if (!$token instanceof Token) {
-            throw new \Exception('Something went wrong. Token stack is empty.');
+            throw new RuntimeError('Something went wrong. Token stack is empty.');
         }
         return $token;
     }
@@ -58,7 +60,7 @@ class TokensQueue
     {
         $token = array_shift($this->queue);
         if (!$token instanceof Token) {
-            throw new \Exception('Something went wrong. Token stack is empty.');
+            throw new RuntimeError('Something went wrong. Token stack is empty.');
         }
         return $token;
     }
@@ -73,11 +75,4 @@ class TokensQueue
         return empty($this->queue);
     }
 
-    public function debug()
-    {
-        foreach ($this->queue as $item) {
-            echo $item->getValue() . ' ';
-        }
-        echo PHP_EOL;
-    }
 }

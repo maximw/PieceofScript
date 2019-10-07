@@ -13,6 +13,7 @@ use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Contexts\ContextStack;
 use PieceofScript\Services\Endpoints\Endpoint;
 use PieceofScript\Services\Errors\Endpoints\EndpointCallError;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Out\Out;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\ArrayLiteral;
@@ -174,7 +175,7 @@ class HttpClient
         if (!isset($request['method'])
             || !($request['method'] instanceof StringLiteral)
             || !in_array(strtolower($request['method']->getValue()), self::METHODS)) {
-            throw new \Exception('Cannot call endpoint. Bad $request.method = "' . $request['method']->getValue() . '"');
+            throw new EndpointCallError(self::$endpoint,'Bad $request.method = "' . $request['method']->getValue() . '"');
         }
         return Utils::unwrapValueContainer($request['method']);
     }
@@ -184,7 +185,7 @@ class HttpClient
     {
         if (!isset($request['url'])
             || !($request['url'] instanceof StringLiteral)) {
-            throw new \Exception('Cannot call endpoint. $request.url is required');
+            throw new EndpointCallError(self::$endpoint,'$request.url is required');
         }
         return Utils::unwrapValueContainer($request['url']);
     }
@@ -193,7 +194,7 @@ class HttpClient
     {
         if (isset($request['headers'])
             && !($request['headers'] instanceof ArrayLiteral)) {
-            throw new \Exception('Cannot call endpoint. $request.headers is invalid');
+            throw new EndpointCallError(self::$endpoint, '$request.headers is not array');
         }
         return Utils::unwrapValueContainer($request['headers'] ?? []);
     }
@@ -224,7 +225,7 @@ class HttpClient
     {
         if (isset($request['query'])
             && !($request['query'] instanceof ArrayLiteral || $request['query'] instanceof StringLiteral)) {
-            throw new \Exception('Cannot call endpoint. $request.query is invalid');
+            throw new EndpointCallError(self::$endpoint, '$request.query must be array or string');
         }
         return Utils::unwrapValueContainer($request['query'] ?? []);
     }
@@ -233,7 +234,7 @@ class HttpClient
     {
         if (isset($request['format'])) {
             if (!($request['format'] instanceof StringLiteral) || !in_array($request['format']->getValue(), Endpoint::FORMATS)) {
-                throw new \Exception('Cannot call endpoint. $request.format is invalid');
+                throw new EndpointCallError(self::$endpoint,'$request.format is invalid');
             }
         }
         return Utils::unwrapValueContainer($request['format'] ?? Endpoint::FORMAT_NONE);
@@ -250,13 +251,13 @@ class HttpClient
         foreach ($data as $field => $value) {
             $multipartItem = [];
             if (empty($field) || !is_string($field)) {
-                throw new \Exception('Multipart form item must have name');
+                throw new EndpointCallError(self::$endpoint, 'Multipart form item must have name');
             }
             if (empty($value['value']) && empty($value['file'])) {
-                throw new \Exception('Multipart form item must have value');
+                throw new EndpointCallError(self::$endpoint, 'Multipart form item must have value');
             }
             if (!empty($value['value']) && !empty($value['file'])) {
-                throw new \Exception('Multipart form item must have only one of fields "value" or "file"');
+                throw new EndpointCallError(self::$endpoint, 'Multipart form item must have only one of fields "value" or "file"');
             }
 
             $multipartItem['name'] = $field;
@@ -264,10 +265,10 @@ class HttpClient
                 $multipartItem['contents'] = (string) $value['value'];
             } else {
                 if (!is_file($value['file'])) {
-                    throw new \Exception('Multipart form item is not a file');
+                    throw new EndpointCallError(self::$endpoint, 'Multipart form item is not a file');
                 }
                 if (!is_readable($value['file'])) {
-                    throw new \Exception('Multipart form item file is not readable');
+                    throw new EndpointCallError(self::$endpoint, 'Multipart form item file is not readable');
                 }
                 $multipartItem['contents'] = fopen($value['file'], 'r');
             }
@@ -275,14 +276,14 @@ class HttpClient
             if (!empty($value['headers'])) {
                 $headers = [];
                 if (!is_array($value['headers'])) {
-                    throw new \Exception('Multipart form item file  is directory');
+                    throw new EndpointCallError(self::$endpoint, 'Multipart form item file  is directory');
                 }
                 foreach ($value['headers'] as $headerName => $headerValue) {
                     if (!is_string($headerName)) {
-                        throw new \Exception('Multipart form item header name is not string');
+                        throw new EndpointCallError(self::$endpoint, 'Multipart form item header name is not string');
                     }
                     if (!is_scalar($headerValue)) {
-                        throw new \Exception('Multipart form item header value is not string');
+                        throw new EndpointCallError(self::$endpoint, 'Multipart form item header value is not string');
                     }
                     $headers[$headerName] = $headerValue;
                 }
