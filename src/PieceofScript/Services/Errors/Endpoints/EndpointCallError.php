@@ -11,7 +11,7 @@ class EndpointCallError extends RuntimeError
 {
     public function __construct(Endpoint $endpoint, string $message)
     {
-        $message = $message . 'Cannot call endpoint "' . $endpoint->getOriginalName() . '": ' . $message;
+        $message = $message . 'Cannot call endpoint "' . $endpoint->getDefinition()->getOriginalString() . '": ' . $message;
         parent::__construct($message);
     }
 }

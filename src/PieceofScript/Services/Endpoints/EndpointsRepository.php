@@ -4,6 +4,7 @@
 namespace PieceofScript\Services\Endpoints;
 
 
+use PieceofScript\Services\Errors\InternalError;
 use function DeepCopy\deep_copy;
 use PieceofScript\Services\Call\BaseCall;
 use PieceofScript\Services\Config\Config;
@@ -39,9 +40,12 @@ class EndpointsRepository
     {
         foreach ($this->files as $file) {
             $yaml = Yaml::parseFile($file);
-
-            foreach ($yaml as $endpointName => $endpointBody) {
-                $this->createEndpoint($endpointName, $endpointBody, $file);
+            if (is_array($yaml)) {
+                foreach ($yaml as $endpointName => $endpointBody) {
+                    $this->createEndpoint($endpointName, $endpointBody, $file);
+                }
+            } elseif ($yaml !== null) {
+                throw new InternalError('Error parsing endpoints file ' . $file);
             }
         }
     }

@@ -51,7 +51,13 @@ class Statistics
         }
     }
 
-    public function addCall(string $code, Endpoint $endPoint, ContextStack $contextStack, ArrayLiteral $request, ArrayLiteral $response)
+    public function addCall(
+        string $code,
+        Endpoint $endPoint,
+        ContextStack $contextStack,
+        ArrayLiteral $request,
+        ArrayLiteral $response
+    )
     {
         $this->addEndpoint($endPoint);
 
@@ -59,7 +65,13 @@ class Statistics
             $this->endCurrentCall();
         }
 
-        $newCall = new StatEndpointCall($code, $contextStack->neck()->getFile(), $contextStack->neck()->getLine(), $request, $response);
+        $newCall = new StatEndpointCall(
+            $code,
+            $contextStack->neck()->getFile(),
+            $contextStack->neck()->getLine(),
+            $request,
+            $response
+        );
 
         $this->statEndpoints[$endPoint->getDefinition()->getOriginalString()]->addCall($newCall);
         $this->currentEndpointCall = $newCall;

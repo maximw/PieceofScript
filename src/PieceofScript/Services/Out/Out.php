@@ -152,8 +152,12 @@ class Out
 
         if (!empty($request['headers'])) {
             static::writeln('Headers:', $verbosity, 1);
-            foreach ($request['headers'] as $name => $value) {
-                static::writeln($name . ': ' . $value, $verbosity, 2);
+            if (is_array($request['headers'])) {
+                foreach ($request['headers'] as $name => $value) {
+                    static::writeln($name . ': ' . $value, $verbosity, 2);
+                }
+            } elseif (is_string($request['headers'])) {
+                static::writeln($request['headers'], $verbosity, 2);
             }
         }
         if (!empty($request['cookies'])) {
@@ -224,9 +228,23 @@ class Out
     {
         if (is_array($formData)) {
             foreach ($formData as $key => $value) {
-                static::write($key, $verbosity, $indent);
+                static::writeln($key . ':' , $verbosity, $indent);
                 if (is_array($value)) {
-
+                    if (!empty($value['headers'])) {
+                        static::writeln('Headers:', $verbosity, $indent + 1);
+                        foreach ($value['headers'] as $name => $value) {
+                            static::writeln($name . ': ' . $value, $verbosity, $indent + 2);
+                        }
+                    }
+                    if (isset($value['value'])) {
+                        static::writeln('Value: ' . $value['value'], $verbosity, $indent + 1);
+                    }
+                    if (isset($value['file'])) {
+                        static::writeln('File: ' . $value['file'], $verbosity, $indent + 1);
+                    }
+                    if (isset($value['filename'])) {
+                        static::writeln('Filename: ' . $value['filename'], $verbosity, $indent + 1);
+                    }
                 } else {
                     static::write(': ', $verbosity, $indent);
                     static::write((string) $value, $verbosity, $indent);

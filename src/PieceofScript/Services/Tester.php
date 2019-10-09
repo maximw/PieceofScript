@@ -541,19 +541,16 @@ class Tester
         $this->contextStack->neck()->setVariable($requestVarName, $request, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         $this->contextStack->neck()->setVariable($responseVarName, new NullLiteral(), AbstractContext::ASSIGNMENT_MODE_VARIABLE);
 
-        $this->statistics->addCall($line, $endpoint, $this->contextStack, $request, new ArrayLiteral());
-
         // Execute "before" section
         $this->executeLines($endpoint->getBefore(), $endpoint->getFile(), 0);
-
+        // $request could be changed in "before" section
         $request = $this->contextStack->head()->getVariable($requestVarName);
 
-        $this->statistics->setRequest($request);
         Out::printRequest($request);
         $response = HttpClient::doRequest($request, $this->contextStack, $endpoint);
         $this->contextStack->head()->setVariable($responseVarName, $response, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
         $this->contextStack->neck()->setVariable($responseVarName, $response, AbstractContext::ASSIGNMENT_MODE_VARIABLE);
-        $this->statistics->setResponse($response);
+        $this->statistics->addCall($line, $endpoint, $this->contextStack, $request, $response);
         Out::printResponse($response);
 
         // Execute "after" section
