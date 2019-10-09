@@ -4,6 +4,7 @@
 namespace PieceofScript\Services\Values\Hierarchy;
 
 
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Values\BoolLiteral;
 use PieceofScript\Services\Values\DateLiteral;
 use PieceofScript\Services\Values\NumberLiteral;
@@ -41,210 +42,210 @@ abstract class BaseLiteral extends Operand
     /**
      * Convert value to Boolean
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function toBool(): BoolLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Convert value to Number
      * @return NumberLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function toNumber(): NumberLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Convert value to String
      * @return StringLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function toString(): StringLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Convert value to Date
      * @return DateLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function toDate(): DateLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Get printable representation of value
      * @return string
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function toPrint(): string
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation ==
      * @param BaseLiteral $value
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oEqual(BaseLiteral $value): BoolLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation >
      * @param BaseLiteral $value
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oGreater(BaseLiteral $value): BoolLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation <
      * @param BaseLiteral $value
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oLower(BaseLiteral $value): BoolLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation !=
      * @param BaseLiteral $value
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oNotEqual(BaseLiteral $value): BoolLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation >=
      * @param BaseLiteral $value
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oGreaterEqual(BaseLiteral $value): BoolLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation <=
      * @param BaseLiteral $value
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oLowerEqual(BaseLiteral $value): BoolLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation +
      * @param BaseLiteral $value
      * @return BaseLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oPlus(BaseLiteral $value): BaseLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation -
      * @param BaseLiteral $value
      * @return BaseLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oMinus(BaseLiteral $value): BaseLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation *
      * @param BaseLiteral $value
      * @return BaseLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oMultiply(BaseLiteral $value): BaseLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation + unary
      * @return BaseLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oPositive(): BaseLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation - unary
      * @return BaseLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oNegative(): BaseLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation /
      * @param BaseLiteral $value
      * @return BaseLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oDivide(BaseLiteral $value): BaseLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation %
      * @param BaseLiteral $value
      * @return BaseLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oDivideMod(BaseLiteral $value): BaseLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation ^
      * @param BaseLiteral $value
      * @return BaseLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oPower(BaseLiteral $value): BaseLiteral
     {
-        throw new \Exception(get_class($this) . ' have to implement ' . __METHOD__);
+        throw new RuntimeError(get_class($this) . ' have to implement ' . __METHOD__);
     }
 
     /**
      * Operation ||
      * @param BaseLiteral $value
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oOr(BaseLiteral $value): BoolLiteral
     {
@@ -255,7 +256,7 @@ abstract class BaseLiteral extends Operand
      * Operation &&
      * @param BaseLiteral $value
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oAnd(BaseLiteral $value): BoolLiteral
     {
@@ -265,7 +266,7 @@ abstract class BaseLiteral extends Operand
     /**
      * Operation !
      * @return BoolLiteral
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function oNot(): BoolLiteral
     {

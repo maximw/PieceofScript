@@ -6,10 +6,13 @@ namespace PieceofScript\Services\Out;
 
 use PieceofScript\Services\Config\Config;
 use PieceofScript\Services\Errors\InternalError;
+use PieceofScript\Services\Errors\Parser\VariableError;
+use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Statistics\StatAssertion;
 use PieceofScript\Services\Statistics\StatEndpoint;
 use PieceofScript\Services\Statistics\StatEndpointCall;
 use PieceofScript\Services\Statistics\Statistics;
+use SimpleXMLElement;
 
 class JunitReport
 {
@@ -34,10 +37,15 @@ class JunitReport
         $this->startFile = $startFile;
     }
 
+    /**
+     * @throws InternalError
+     * @throws RuntimeError
+     * @throws VariableError
+     */
     public function generate()
     {
         Out::printDebug('Start generating report.');
-        $report = new \SimpleXMLElement('<testsuites></testsuites>');
+        $report = new SimpleXMLElement('<testsuites></testsuites>');
         $report->addAttribute('name', $this->xmlEscape($this->startFile));
         $report->addAttribute('tests', $this->statistics->endpointsTested);
         $report->addAttribute('failures', $this->statistics->endpointsFailed);
@@ -56,7 +64,7 @@ class JunitReport
     }
 
 
-    protected function addProperties(\SimpleXMLElement $testsuite)
+    protected function addProperties(SimpleXMLElement $testsuite)
     {
         $properties = $testsuite->addChild('properties');
 
@@ -72,7 +80,7 @@ class JunitReport
         $property->addAttribute('value', $this->xmlEscape(getcwd()));
     }
 
-    protected function addConfigProperties(\SimpleXMLElement $properties)
+    protected function addConfigProperties(SimpleXMLElement $properties)
     {
         $property = $properties->addChild('property');
         $property->addAttribute('name', 'config.endpoints_file');
@@ -139,7 +147,7 @@ class JunitReport
         $property->addAttribute('value', $this->xmlEscape(Config::get()->getSkipAssertions()));
     }
 
-    protected function addSystemProperties(\SimpleXMLElement $properties)
+    protected function addSystemProperties(SimpleXMLElement $properties)
     {
         $property = $properties->addChild('property');
         $property->addAttribute('name', 'user.name');
@@ -150,7 +158,12 @@ class JunitReport
         $property->addAttribute('value', $this->xmlEscape($_SERVER['HOME'] ?? (($_SERVER['HOMEDRIVE'] ?? '') . ($_SERVER['HOMEPATH'] ?? ''))));
     }
 
-    protected function addTestcases(\SimpleXMLElement $testsuite)
+    /**
+     * @param SimpleXMLElement $testsuite
+     * @throws VariableError
+     * @throws RuntimeError
+     */
+    protected function addTestcases(SimpleXMLElement $testsuite)
     {
         /** @var StatEndpoint $statEndpoint */
         foreach ($this->statistics->getStatistics() as $statEndpoint) {
@@ -158,13 +171,13 @@ class JunitReport
             foreach ($statEndpoint->getCalls() as $statEndpointCall) {
                 $testcase = $testsuite->addChild('testcase');
                 $testcase->addAttribute('name', $this->xmlEscape($statEndpointCall->getCode()));
-                $testcase->addAttribute('classname', $this->xmlEscape($statEndpoint->getEndpoint()->getOriginalName()));
+                $testcase->addAttribute('classname', $this->xmlEscape($statEndpoint->getEndpoint()->getDefinition()->getOriginalString()));
                 $testcase->addAttribute('assertions', $statEndpointCall->countAssertions());
 
                 if (!$statEndpointCall->getStatus()) {
                     foreach ($statEndpointCall->getFailedAssertions() as $assertion) {
                         if (!$assertion->getStatus()) {
-                            $failure = $testcase->addChild('failure', $this->xmlEscape($this->assertionToString($assertion)));
+                            $testcase->addChild('failure', $this->xmlEscape($this->assertionToString($assertion)));
                         }
                     }
                 }
@@ -175,6 +188,11 @@ class JunitReport
         }
     }
 
+    /**
+     * @param StatAssertion $assertion
+     * @return string
+     * @throws VariableError
+     */
     protected function assertionToString(StatAssertion $assertion): string
     {
         $result = '';
