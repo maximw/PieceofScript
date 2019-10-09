@@ -130,7 +130,6 @@ class Statistics
     public function prepareStatistics()
     {
         foreach ($this->statEndpoints as $endpointName => $endpointCalls) {
-            $this->endpointsTested++;
             $successEndpoint = null;
             foreach ($endpointCalls->getCalls() as $call) {
                 $successEndpoint = $successEndpoint === null ? true : ($successEndpoint && true);
@@ -153,10 +152,12 @@ class Statistics
                     $this->callsFailed++;
                 }
             }
-            if ($successEndpoint) {
+            if ($successEndpoint === true) {
                 $this->endpointsSuccess++;
-            } else {
+                $this->endpointsTested++;
+            } elseif ($successEndpoint === false) {
                 $this->endpointsFailed++;
+                $this->endpointsTested++;
             }
         }
 

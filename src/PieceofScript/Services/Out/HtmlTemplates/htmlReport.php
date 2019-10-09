@@ -56,8 +56,8 @@
     <div class="content-wrapper" style="margin-left: 0px">
         <section class="content-header">
             <h1>
-                Page Header
-                <small>Optional description</small>
+                Report <?= date('d.m.y H:i')?>
+                <small></small>
             </h1>
         </section>
         <section class="content container-fluid">

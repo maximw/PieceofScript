@@ -5,6 +5,7 @@ namespace PieceofScript\Services\Parsing;
 
 use PieceofScript\Services\Contexts\AbstractContext;
 use PieceofScript\Services\Contexts\ContextStack;
+use PieceofScript\Services\Errors\ContextStackEmptyException;
 use PieceofScript\Services\Errors\Parser\EmptyExpressionError;
 use PieceofScript\Services\Errors\Parser\EvaluationError;
 use PieceofScript\Services\Errors\RuntimeError;
@@ -88,6 +89,8 @@ class Evaluator
      * @param string|array|TokensQueue|TokensStack|BaseLiteral $value
      * @param AbstractContext $context
      * @return BaseLiteral
+     * @throws EmptyExpressionError
+     * @throws RuntimeError
      */
     public function evaluate($value, AbstractContext $context): BaseLiteral
     {
@@ -113,9 +116,6 @@ class Evaluator
         }
 
         $value = $this->extractLiteral($this->executeAST($ast, $context), $context);
-        if (!$ast->isEmpty()) {
-            throw new EvaluationError('Syntax error', $ast);
-        }
         return $value;
     }
 
@@ -332,7 +332,14 @@ class Evaluator
         return $ast;
     }
 
-
+    /**
+     * @param TokensStack $ast
+     * @param AbstractContext $context
+     * @return Operand
+     * @throws EmptyExpressionError
+     * @throws RuntimeError
+     * @throws ContextStackEmptyException
+     */
     protected function executeAST(TokensStack $ast, AbstractContext $context): Operand
     {
         if ($ast->isEmpty()) {
@@ -461,7 +468,7 @@ class Evaluator
      * @param AbstractContext $context
      * @return BaseLiteral
      * @throws RuntimeError
-     * @throws \PieceofScript\Services\Errors\ContextStackEmptyException
+     * @throws ContextStackEmptyException
      */
     protected function executeGenerator(Token $token, TokensStack $ast, AbstractContext $context): BaseLiteral
     {
@@ -513,7 +520,7 @@ class Evaluator
      * @param TokensStack $ast
      * @param AbstractContext $context
      * @return BaseLiteral
-     * @throws \PieceofScript\Services\Errors\ContextStackEmptyException
+     * @throws ContextStackEmptyException
      */
     protected function executeAssignment(Token $operationEquals, TokensStack $ast, AbstractContext $context): BaseLiteral
     {

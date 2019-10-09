@@ -4,7 +4,7 @@
 namespace PieceofScript\Services\Errors;
 
 
-class ContextStackEmptyException extends InternalError
+class ContextStackEmptyException extends RuntimeError
 {
     public function __construct()
     {
