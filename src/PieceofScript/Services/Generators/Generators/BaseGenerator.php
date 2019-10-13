@@ -71,7 +71,7 @@ abstract class BaseGenerator implements IGenerator
 
     protected function getNextArgument(): BaseLiteral
     {
-        return $this->evaluator->evaluate($this->ast, $this->context);
+        return $this->evaluator->evaluateInternal($this->ast, $this->context);
     }
 
     protected function skipNextArgument()

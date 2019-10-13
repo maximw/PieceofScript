@@ -133,15 +133,13 @@ class VariablesRepository
         $key = array_shift($path);
         $key = $this->keyToScalar($key, $variableName);
 
-        if ($currentValue instanceof ArrayLiteral) {
-            if (!$currentValue->offsetExists($key)) {
-                $currentValue[$key] = null;
-            }
-            $this->setVal($path, $currentValue->value[$key], $value, $variableName);
-        } else {
+        if (!$currentValue instanceof ArrayLiteral) {
             $currentValue = new ArrayLiteral();
-            $this->setVal($path, $currentValue->value[$key], $value, $variableName);
         }
+        if (!$currentValue->offsetExists($key)) {
+            $currentValue[$key] = new NullLiteral();
+        }
+        $this->setVal($path, $currentValue->value[$key], $value, $variableName);
     }
 
     /**

@@ -94,6 +94,23 @@ class Evaluator
      */
     public function evaluate($value, AbstractContext $context): BaseLiteral
     {
+        return $this->evaluateInternal($value, $context, false);
+    }
+
+    /**
+     * Evaluate string or array. Entry point of Evaluator
+     *
+     * @param string|array|TokensQueue|TokensStack|BaseLiteral $value
+     * @param AbstractContext $context
+     * @param bool $isInternal
+     *
+     * @return BaseLiteral
+     * @throws ContextStackEmptyException
+     * @throws EmptyExpressionError
+     * @throws RuntimeError
+     */
+    public function evaluateInternal($value, AbstractContext $context, bool $isInternal = true): BaseLiteral
+    {
         $ast = null;
         if (is_string($value)) {
             $tokens = $this->expressionLexer->tokenize($value);
@@ -104,7 +121,7 @@ class Evaluator
             $ast = $value;
         } elseif (is_array($value)) {
             foreach ($value as $key => $val) {
-                $value[$key] = $this->extractLiteral($this->evaluate($val, $context), $context);
+                $value[$key] = $this->extractLiteral($this->evaluateInternal($val, $context), $context);
             }
             return Utils::wrapValueContainer($value);
         } elseif ($value instanceof BaseLiteral) {
@@ -116,6 +133,10 @@ class Evaluator
         }
 
         $value = $this->extractLiteral($this->executeAST($ast, $context), $context);
+        if (!$isInternal && !$ast->isEmpty()) {
+            throw new EvaluationError('Syntax error', $ast);
+        }
+
         return $value;
     }
 
@@ -139,7 +160,7 @@ class Evaluator
      * @param TokensQueue $tokens
      * @param string $splitTokenName
      * @return TokensQueue[]
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function queueSplitBy(TokensQueue $tokens, string $splitTokenName = Token::T_SEMICOLON): array
     {
@@ -165,6 +186,7 @@ class Evaluator
      *
      * @param string $expression
      * @return VariableName[]
+     * @throws RuntimeError
      */
     public function getUsedVariables(string $expression): array
     {

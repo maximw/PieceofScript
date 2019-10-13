@@ -6,7 +6,9 @@ namespace PieceofScript\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
 use PieceofScript\Services\Config\Config;
@@ -44,37 +46,39 @@ class HttpClient
         self::METHOD_TRACE,
     ];
 
-    const AUTH_BASIC = 'basic';
-    const AUTH_DIGEST = 'digest';
-    const AUTH_NTLM = 'ntlm';
-
-    const AUTH_TYPES = [
-        self::AUTH_BASIC,
-        self::AUTH_DIGEST,
-        self::AUTH_NTLM,
-    ];
-
     /** @var Endpoint */
     protected static $endpoint;
 
     /** @var ContextStack */
     protected static $contextStack;
 
+    /**
+     * @param BaseLiteral $request
+     * @param ContextStack $contextStack
+     * @param Endpoint $endpoint
+     * @return ArrayLiteral
+     * @throws EndpointCallError
+     * @throws RuntimeError
+     * @throws GuzzleException
+     */
     public static function doRequest(BaseLiteral $request, ContextStack $contextStack, Endpoint $endpoint): ArrayLiteral
     {
         static::$contextStack = $contextStack;
         static::$endpoint = $endpoint;
 
-        list($requestParams, $options) = self::prepareOptions($request);
+        [$requestParams, $options] = self::prepareOptions($request);
 
         $httpClient = new Client();
 
         $httpResponse = null;
         $start = microtime(true);
         try {
-            $httpResponse = $httpClient->request(
+            $httpRequest = new Request(
                 $requestParams['method'],
-                $requestParams['url'],
+                $requestParams['url']
+            );
+            $httpResponse = $httpClient->send(
+                $httpRequest,
                 $options
             );
         } catch (RequestException $e) {
@@ -92,10 +96,10 @@ class HttpClient
                 'status' => $httpResponse->getStatusCode() . ' ' . $httpResponse->getReasonPhrase(),
                 'headers' => self::responseHeaders($httpResponse->getHeaders()),
                 'cookies' => self::responseCookies($requestParams['cookie']->toArray()),
-                'raw' => (string)$httpResponse->getBody()->getContents(),
+                'raw' => (string) $httpResponse->getBody()->getContents(),
                 'duration' => $duration,
             ]);
-            $jsonBody = json_decode((string)$httpResponse->getBody(), true, Config::get()->getJsonMaxDepth());
+            $jsonBody = json_decode((string) $httpResponse->getBody(), true, Config::get()->getJsonMaxDepth());
             if (JSON_ERROR_NONE === json_last_error()) {
                 $response['body'] = Utils::wrapValueContainer($jsonBody);
             } else {
@@ -117,7 +121,12 @@ class HttpClient
         return $response;
     }
 
-
+    /**
+     * @param BaseLiteral $request
+     * @return array
+     * @throws EndpointCallError
+     * @throws RuntimeError
+     */
     protected static function prepareOptions(BaseLiteral $request): array
     {
         if (!$request instanceof ArrayLiteral) {
@@ -170,6 +179,12 @@ class HttpClient
         return [$requestParams, $options];
     }
 
+    /**
+     * @param ArrayLiteral $request
+     * @return string
+     * @throws EndpointCallError
+     * @throws RuntimeError
+     */
     protected static function extractMethod(ArrayLiteral $request): string
     {
         if (!isset($request['method'])
@@ -180,7 +195,12 @@ class HttpClient
         return Utils::unwrapValueContainer($request['method']);
     }
 
-
+    /**
+     * @param ArrayLiteral $request
+     * @return string
+     * @throws EndpointCallError
+     * @throws RuntimeError
+     */
     protected static function extractUrl(ArrayLiteral $request): string
     {
         if (!isset($request['url'])
@@ -190,6 +210,12 @@ class HttpClient
         return Utils::unwrapValueContainer($request['url']);
     }
 
+    /**
+     * @param ArrayLiteral $request
+     * @return array
+     * @throws EndpointCallError
+     * @throws RuntimeError
+     */
     protected static function extractHeaders(ArrayLiteral $request): array
     {
         if (isset($request['headers'])
@@ -199,6 +225,13 @@ class HttpClient
         return Utils::unwrapValueContainer($request['headers'] ?? []);
     }
 
+    /**
+     * @param ArrayLiteral $request
+     * @param string $url
+     * @return CookieJar
+     * @throws EndpointCallError
+     * @throws RuntimeError
+     */
     protected static function extractCookies(ArrayLiteral $request, string $url): CookieJar
     {
         if (isset($request['cookies'])
@@ -211,6 +244,12 @@ class HttpClient
         return $cookieJar;
     }
 
+    /**
+     * @param ArrayLiteral $request
+     * @return array|mixed
+     * @throws EndpointCallError
+     * @throws RuntimeError
+     */
     protected static function extractAuth(ArrayLiteral $request)
     {
         if (isset($request['auth'])) {
@@ -221,6 +260,12 @@ class HttpClient
         return Utils::unwrapValueContainer($request['auth'] ?? null);
     }
 
+    /**
+     * @param ArrayLiteral $request
+     * @return array|mixed
+     * @throws EndpointCallError
+     * @throws RuntimeError
+     */
     protected static function extractQuery(ArrayLiteral $request)
     {
         if (isset($request['query'])
@@ -230,6 +275,12 @@ class HttpClient
         return Utils::unwrapValueContainer($request['query'] ?? []);
     }
 
+    /**
+     * @param ArrayLiteral $request
+     * @return string
+     * @throws EndpointCallError
+     * @throws RuntimeError
+     */
     protected static function extractFormat(ArrayLiteral $request): string
     {
         if (isset($request['format'])) {
@@ -240,11 +291,56 @@ class HttpClient
         return Utils::unwrapValueContainer($request['format'] ?? Endpoint::FORMAT_NONE);
     }
 
+    /**
+     * @param ArrayLiteral $request
+     * @return array|mixed
+     * @throws RuntimeError
+     */
     protected static function extractData(ArrayLiteral $request)
     {
         return Utils::unwrapValueContainer($request['data'] ?? []);
     }
 
+    /**
+     * @param array $data
+     * @return array
+     * @throws EndpointCallError
+     */
+    protected static function prepareUrlencodedForm(array $data): array
+    {
+        $formItems = [];
+        foreach ($data as $field => $value) {
+            if (empty($field) || !is_string($field)) {
+                throw new EndpointCallError(self::$endpoint, 'Form item must have name');
+            }
+            if (empty($value['value']) && empty($value['file'])) {
+                throw new EndpointCallError(self::$endpoint, 'Form item must have value');
+            }
+            if (!empty($value['value']) && !empty($value['file'])) {
+                throw new EndpointCallError(self::$endpoint, 'Form item must have only one of fields "value" or "file"');
+            }
+
+             if (!empty($value['value'])) {
+                $formItems[$field] = (string) $value['value'];
+            } else {
+                if (!is_file($value['file'])) {
+                    throw new EndpointCallError(self::$endpoint, 'Form item is not a file');
+                }
+                if (!is_readable($value['file'])) {
+                    throw new EndpointCallError(self::$endpoint, 'Form item file is not readable');
+                }
+                $formItems[$field] = '@' . ($value['file']);
+            }
+        }
+
+        return $formItems;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     * @throws EndpointCallError
+     */
     protected static function prepareMultipartForm(array $data): array
     {
         $multipartItems = [];

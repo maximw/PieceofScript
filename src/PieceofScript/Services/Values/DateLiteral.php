@@ -5,6 +5,7 @@ namespace PieceofScript\Services\Values;
 
 
 use PieceofScript\Services\Config\Config;
+use PieceofScript\Services\Errors\Parser\EvaluationError;
 use PieceofScript\Services\Errors\TypeErrors\IncompatibleTypesOperationException;
 use PieceofScript\Services\Utils\Utils;
 use PieceofScript\Services\Values\Hierarchy\BaseLiteral;
@@ -21,9 +22,11 @@ class DateLiteral extends BaseLiteral implements IScalarValue
     {
         try {
             $now = Utils::getRelativeDateTime();
+            set_error_handler(function() {throw new \Exception(); });
             $this->value = $now->modify((string) $value);
+            restore_error_handler();
         } catch (\Exception $e) {
-            throw new \Exception('Cannot parse ' . $value . ' to Date');
+            throw new EvaluationError('Cannot parse ' . $value . ' to Date');
         }
     }
 

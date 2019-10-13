@@ -122,7 +122,7 @@ class Out
             static::endFormatting($verbosity);
         } else {
             $verbosity = OutputInterface::VERBOSITY_NORMAL;
-            static::startFormatting('<fg=magenta>', $verbosity);
+            static::startFormatting('<fg=red>', $verbosity);
             static::writeln('Assert: "' . trim($code) . '" failed' . $message, $verbosity);
             static::endFormatting($verbosity);
         }

@@ -24,7 +24,7 @@ class TokensQueue
      * Return the first element
      *
      * @return Token
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function head(): Token
     {
@@ -39,7 +39,7 @@ class TokensQueue
      * Retrieve Token from queue
      *
      * @return Token
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function pop(): Token
     {
@@ -54,7 +54,7 @@ class TokensQueue
      * Retrieve Token from queue
      *
      * @return Token
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function get(): Token
     {

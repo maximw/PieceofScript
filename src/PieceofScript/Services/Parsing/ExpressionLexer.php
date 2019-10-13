@@ -53,7 +53,7 @@ class ExpressionLexer
      *
      * @param string $expression
      * @return TokensQueue
-     * @throws \Exception
+     * @throws RuntimeError
      */
     public function tokenize(string $expression): TokensQueue
     {

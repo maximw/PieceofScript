@@ -187,6 +187,8 @@ class Statistics
 
     public function printStatistics()
     {
+        $endpointsNotTested = $this->endpointsTotal - $this->endpointsSuccess - $this->endpointsFailed;
+
         Out::printStatistics('Statistics:');
 
         Out::printStatistics('Endpoints: ', 1);
@@ -194,6 +196,7 @@ class Statistics
         Out::printStatistics('tested: '. $this->endpointsTested . $this->formatPercent($this->endpointsTested, $this->endpointsTotal), 2);
         Out::printStatistics('success: '. $this->endpointsSuccess . $this->formatPercent($this->endpointsSuccess, $this->endpointsTotal), 2);
         Out::printStatistics('fail: '. $this->endpointsFailed . $this->formatPercent($this->endpointsFailed, $this->endpointsTotal), 2);
+        Out::printStatistics('not tested: '. $endpointsNotTested . $this->formatPercent($endpointsNotTested, $this->endpointsTotal), 2);
 
         Out::printStatistics('Endpoint calls: ', 1);
         Out::printStatistics('total: '. $this->callsTotal, 2);

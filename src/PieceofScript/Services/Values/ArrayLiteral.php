@@ -4,6 +4,8 @@ namespace PieceofScript\Services\Values;
 
 
 use PieceofScript\Services\Config\Config;
+use PieceofScript\Services\Errors\Parser\EvaluationError;
+use PieceofScript\Services\Errors\Parser\VariableError;
 use PieceofScript\Services\Errors\TypeErrors\ConversionException;
 use PieceofScript\Services\Errors\TypeErrors\IncompatibleTypesOperationException;
 use PieceofScript\Services\Utils\Utils;

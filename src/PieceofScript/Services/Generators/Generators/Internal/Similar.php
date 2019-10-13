@@ -39,6 +39,9 @@ class Similar extends ParametrizedGenerator
          * @var BaseLiteral $value
          */
         foreach ($param2 as $key => $value) {
+            if (!array_key_exists($key, $param1)) {
+                return false;
+            }
             if (($param1[$key])::TYPE_NAME !== ($param2[$key])::TYPE_NAME) {
                 return false;
             }

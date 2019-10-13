@@ -12,6 +12,7 @@ class Endpoint
     const FORMAT_JSON = 'json'; // Json body
     const FORMAT_RAW = 'raw';   // Raw string
     const FORMAT_FROM = 'form'; // application/x-www-form-urlencoded
+    const FORMAT_EXT_FORM = '';  // application/x-www-form-urlencoded with uploading files
     const FORMAT_MULTIPART = 'multipart'; // multipart/form-data
 
     const FORMATS = [
