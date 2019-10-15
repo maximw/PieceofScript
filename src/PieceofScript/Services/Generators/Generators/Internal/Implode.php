@@ -23,14 +23,14 @@ class Implode extends ParametrizedGenerator
         }
 
         if (!$this->arguments[0] instanceof ArrayLiteral) {
-            throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0], ArrayLiteral::TYPE_NAME);
+            throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0]::TYPE_NAME, ArrayLiteral::TYPE_NAME);
         }
         $array = Utils::unwrapValueContainer($this->arguments[0]);
 
         $separator = '';
         if (isset($this->arguments[1])) {
             if (!$this->arguments[1] instanceof StringLiteral) {
-                throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0], StringLiteral::TYPE_NAME);
+                throw new ArgumentTypeError(self::NAME, 1, $this->arguments[1]::TYPE_NAME, StringLiteral::TYPE_NAME);
             }
 
             $separator = $this->arguments[1]->getValue();

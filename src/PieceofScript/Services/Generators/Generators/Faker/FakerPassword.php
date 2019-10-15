@@ -22,7 +22,7 @@ class FakerPassword extends FakerGenerator
 
         if (isset($this->arguments[0])) {
             if (!$this->arguments[0] instanceof NumberLiteral && !$this->arguments[0] instanceof NullLiteral) {
-                throw new ArgumentTypeError(self::NAME, 0, NumberLiteral::TYPE_NAME, $this->arguments[0]::TYPE_NAME);
+                throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0]::TYPE_NAME, NumberLiteral::TYPE_NAME);
             }
             if ($this->arguments[0] instanceof NumberLiteral) {
                 $min = $this->arguments[0]->getValue();
@@ -31,7 +31,7 @@ class FakerPassword extends FakerGenerator
 
         if (isset($this->arguments[1])) {
             if (!$this->arguments[1] instanceof NumberLiteral && !$this->arguments[1] instanceof NullLiteral) {
-                throw new ArgumentTypeError(self::NAME, 1, NumberLiteral::TYPE_NAME, $this->arguments[1]::TYPE_NAME);
+                throw new ArgumentTypeError(self::NAME, 1, $this->arguments[1]::TYPE_NAME, NumberLiteral::TYPE_NAME);
             }
             if ($this->arguments[1] instanceof NumberLiteral) {
                 $max = $this->arguments[1]->getValue();

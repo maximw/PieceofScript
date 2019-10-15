@@ -21,7 +21,7 @@ class FakerArrayElement extends FakerGenerator
         }
 
         if (!$this->arguments[0] instanceof ArrayLiteral) {
-            throw new ArgumentTypeError(self::NAME, 0, ArrayLiteral::TYPE_NAME, $this->arguments[0]::TYPE_NAME);
+            throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0]::TYPE_NAME, ArrayLiteral::TYPE_NAME);
         }
 
         $count = 1;

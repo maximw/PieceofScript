@@ -22,7 +22,7 @@ class FakerFile extends FakerGenerator
             throw new ArgumentsCountError(self::NAME, 0, 1);
         }
         if (!$this->arguments[0] instanceof StringLiteral) {
-            throw new ArgumentTypeError(self::NAME, 0, StringLiteral::TYPE_NAME, $this->arguments[0]::TYPE_NAME);
+            throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0]::TYPE_NAME, StringLiteral::TYPE_NAME);
         }
 
         if (!is_dir($this->arguments[0]) || !is_readable($this->arguments[0])) {

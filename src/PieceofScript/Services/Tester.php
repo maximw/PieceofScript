@@ -567,7 +567,7 @@ class Tester
     protected function operatorAssert(string $expression)
     {
         $message = '';
-        $success = null;
+        $success = false;
         try {
             $success = $this->evaluator->evaluate($expression, $this->contextStack->head())->toBool()->getValue();
         } catch (VariableError $e) {

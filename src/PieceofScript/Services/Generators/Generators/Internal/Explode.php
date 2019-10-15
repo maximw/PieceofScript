@@ -28,7 +28,7 @@ class Explode extends ParametrizedGenerator
         $separator = '';
         if (isset($this->arguments[1])) {
             if (!$this->arguments[1] instanceof StringLiteral) {
-                throw new ArgumentTypeError(self::NAME, 0, $this->arguments[0], StringLiteral::TYPE_NAME);
+                throw new ArgumentTypeError(self::NAME, 1, $this->arguments[1], StringLiteral::TYPE_NAME);
             }
 
             $separator = $this->arguments[1]->getValue();

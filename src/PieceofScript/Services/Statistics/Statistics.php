@@ -101,7 +101,7 @@ class Statistics
 
     public function addAssertion(
         string $code,
-        ?bool $status,
+        bool $status,
         ContextStack $contextStack,
         array $usedVariables,
         string $message

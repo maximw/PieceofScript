@@ -30,7 +30,7 @@ class FindString extends ParametrizedGenerator
         }
         if (isset($this->arguments[2])) {
             if (!$this->arguments[2] instanceof NumberLiteral) {
-                throw new ArgumentTypeError(self::NAME, 2, $this->arguments[2], NumberLiteral::TYPE_NAME);
+                throw new ArgumentTypeError(self::NAME, 2, $this->arguments[2]::TYPE_NAME, NumberLiteral::TYPE_NAME);
             }
 
             $offset = $this->arguments[2]->getValue();
