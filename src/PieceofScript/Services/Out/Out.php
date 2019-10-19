@@ -215,8 +215,8 @@ class Out
                     static::printFormData($value, $verbosity, $indent + 1);
                     static::writeln(']', $verbosity, $indent);
                 } else {
-                    static::write(': ', $verbosity, $indent);
-                    static::write((string) $value, $verbosity, $indent);
+                    static::write(': ', $verbosity);
+                    static::writeln((string) $value, $verbosity);
                 }
             }
         } else {

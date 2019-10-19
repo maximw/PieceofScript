@@ -24,44 +24,49 @@ class Identical extends ParametrizedGenerator
             throw new ArgumentsCountError(self::NAME, count($this->arguments), 2);
         }
 
-        return new BoolLiteral($this->isSimilar($this->arguments[0], $this->arguments[1]));
+        $checkTypes = true;
+        if (isset($this->arguments[2])) {
+            $checkTypes = $this->arguments[2]->toBool()->getValue();
+        }
+
+        return new BoolLiteral($this->isIdentical($this->arguments[0], $this->arguments[1], $checkTypes));
     }
 
-    protected function isSimilar(BaseLiteral $param1, BaseLiteral $param2): bool
+    protected function isIdentical(BaseLiteral $variable, BaseLiteral $template, bool $checkTypes): bool
     {
-        if ($param1 instanceof IScalarValue || $param2 instanceof IScalarValue) {
-            return $param1::TYPE_NAME === $param2::TYPE_NAME;
+        if ($variable instanceof IScalarValue || $template instanceof IScalarValue) {
+            return !$checkTypes || $variable::TYPE_NAME === $template::TYPE_NAME;
         }
 
         /**
-         * @var ArrayLiteral $param1
-         * @var ArrayLiteral $param2
+         * @var ArrayLiteral $variable
+         * @var ArrayLiteral $template
          * @var BaseLiteral $value
          */
-        foreach ($param2 as $key => $value) {
-            if (!array_key_exists($key, $param1->getValue())) {
+        foreach ($template as $key => $value) {
+            if (!array_key_exists($key, $variable->getValue())) {
                 return false;
             }
-            if (($param1[$key])::TYPE_NAME !== ($param2[$key])::TYPE_NAME) {
+            if ($checkTypes && ($variable[$key])::TYPE_NAME !== ($template[$key])::TYPE_NAME) {
                 return false;
             }
-            if ($param1[$key] instanceof ArrayLiteral) {
+            if ($variable[$key] instanceof ArrayLiteral) {
                 if ((string) (int) $key !== (string) $key) {
-                    return $this->isSimilar($param1[$key], $param2[$key]);
+                    return $this->isIdentical($variable[$key], $template[$key], $checkTypes);
                 }
             }
         }
 
-        foreach ($param1 as $key => $value) {
-            if (!array_key_exists($key, $param2->getValue())) {
+        foreach ($variable as $key => $value) {
+            if (!array_key_exists($key, $template->getValue())) {
                 return false;
             }
-            if (($param1[$key])::TYPE_NAME !== ($param2[$key])::TYPE_NAME) {
+            if ($checkTypes && ($variable[$key])::TYPE_NAME !== ($template[$key])::TYPE_NAME) {
                 return false;
             }
-            if ($param1[$key] instanceof ArrayLiteral) {
+            if ($variable[$key] instanceof ArrayLiteral) {
                 if ((string) (int) $key !== (string) $key) {
-                    return $this->isSimilar($param1[$key], $param2[$key]);
+                    return $this->isIdentical($variable[$key], $template[$key], $checkTypes);
                 }
             }
         }

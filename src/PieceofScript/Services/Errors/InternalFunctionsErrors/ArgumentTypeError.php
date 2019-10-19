@@ -2,7 +2,9 @@
 
 namespace PieceofScript\Services\Errors\InternalFunctionsErrors;
 
-class ArgumentTypeError extends \Exception
+use PieceofScript\Services\Errors\RuntimeError;
+
+class ArgumentTypeError extends RuntimeError
 {
     public function __construct(string $name, int $argumentNumber, string $typeGiven, $typeRequired = null)
     {
