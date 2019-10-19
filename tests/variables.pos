@@ -1,3 +1,11 @@
 var $a = array(1, 2, 3)
 var $a.1 = 5
-print $a
+assert @a == "Array" && $a.1 == 5
+
+let $a.test[-(-7 + 2) + +7].bar[22] = -3
+assert @a.test.12 == "Array"
+assert @a.test.12.bar == "Array"
+assert $a.test.12.bar.22 == -3
+
+assert !true == false
+assert !!true

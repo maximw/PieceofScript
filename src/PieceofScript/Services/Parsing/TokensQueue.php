@@ -36,6 +36,21 @@ class TokensQueue
     }
 
     /**
+     * Return the last element
+     *
+     * @return Token
+     * @throws RuntimeError
+     */
+    public function tail(): Token
+    {
+        $token = end($this->queue);
+        if (!$token instanceof Token) {
+            throw new RuntimeError('Something went wrong. Token stack is empty.');
+        }
+        return $token;
+    }
+
+    /**
      * Retrieve Token from queue
      *
      * @return Token

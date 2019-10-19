@@ -79,11 +79,11 @@ class ExpressionLexer
 
                         // Unary positive and negative
                         if ($tokens->isEmpty()
-                            || $tokens->head()->getName() === Token::T_OPEN_PARENTHESIS
-                            || $tokens->head()->getName() === Token::T_OPEN_BRACKETS
-                            || $tokens->head()->getName() === Token::T_COMMA
-                            || $tokens->head()->getType() === Token::TYPE_OPERATION
-                            || $tokens->head()->getType() === Token::TYPE_ASSIGNMENT
+                            || $tokens->tail()->getName() === Token::T_OPEN_PARENTHESIS
+                            || $tokens->tail()->getName() === Token::T_OPEN_BRACKETS
+                            || $tokens->tail()->getName() === Token::T_COMMA
+                            || $tokens->tail()->getType() === Token::TYPE_OPERATION
+                            || $tokens->tail()->getType() === Token::TYPE_ASSIGNMENT
                         ) {
                             if ($lexemeName === Token::T_MINUS) {
                                 $lexemeName = Token::T_NEGATIVE;
