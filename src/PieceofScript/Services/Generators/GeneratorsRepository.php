@@ -7,6 +7,7 @@ namespace PieceofScript\Services\Generators;
 use PieceofScript\Services\Errors\InternalError;
 use PieceofScript\Services\Errors\RuntimeError;
 use PieceofScript\Services\Generators\Generators\FakerProvider;
+use PieceofScript\Services\Generators\Generators\FsProvider;
 use PieceofScript\Services\Generators\Generators\InternalGenerator;
 use PieceofScript\Services\Generators\Generators\InternalProvider;
 use PieceofScript\Services\Generators\Generators\JwtProvider;
@@ -43,6 +44,7 @@ class GeneratorsRepository
             new FakerProvider(),
             new JwtProvider(),
             new StorageProvider(),
+            new FsProvider(),
         ];
 
         $this->initGenerators();

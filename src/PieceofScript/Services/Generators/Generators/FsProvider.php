@@ -3,6 +3,7 @@
 namespace PieceofScript\Services\Generators\Generators;
 
 
+use PieceofScript\Services\Generators\Generators\Fs\Read;
 use PieceofScript\Services\Generators\Generators\Internal\Append;
 use PieceofScript\Services\Generators\Generators\Internal\Choice;
 use PieceofScript\Services\Generators\Generators\Internal\DateFormat;
@@ -33,7 +34,7 @@ use PieceofScript\Services\Generators\Generators\Internal\ToString;
 use PieceofScript\Services\Generators\Generators\Internal\UrlDecode;
 use PieceofScript\Services\Generators\Generators\Internal\UrlEncode;
 
-class InternalProvider implements IGeneratorProvider
+class FsProvider implements IGeneratorProvider
 {
 
     public function __construct()
@@ -43,34 +44,7 @@ class InternalProvider implements IGeneratorProvider
     public function getGenerators(): array
     {
         return [
-            new Append(),
-            new ArrayGenerator(),
-            new Choice(),
-            new DateFormat(),
-            new DateModify(),
-            new Explode(),
-            new FindString(),
-            new Identical(),
-            new IfGenerator(),
-            new Implode(),
-            new Keys(),
-            new Max(),
-            new Min(),
-            new Prepend(),
-            new Regex(),
-            new ReplaceString(),
-            new Round(),
-            new Similar(),
-            new Size(),
-            new Slice(),
-            new ToBool(),
-            new ToDate(),
-            new ToLower(),
-            new ToNumber(),
-            new ToString(),
-            new ToUpper(),
-            new UrlDecode(),
-            new UrlEncode(),
+            new Read(),
         ];
     }
 }

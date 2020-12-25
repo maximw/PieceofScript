@@ -23,46 +23,6 @@ use PieceofScript\Services\Values\VariableName;
 
 class Evaluator
 {
-
-    protected $lexemes = [
-        '~^([a-z][a-z0-9\\\\_]*)(?=\s*\()~iu' => Token::T_GENERATOR_NAME,
-        '~^\\$[a-z][a-z0-9_]*~iu' => Token::T_VARIABLE,
-        '~^\\@[a-z][a-z0-9_]*~iu' => Token::T_VARIABLE_TYPE,
-        '~^\.(([a-z][a-z0-9_]*)|([0-9]+))~iu' => Token::T_ARRAY_KEY,
-
-        '~^"(?:[^"\\\\]|\\\\.)*"~u' => Token::T_STRING_DOUBLE,
-        "~^'(?:[^'\\\\]|\\\\.)*'~u" => Token::T_STRING,
-        '~^(?:[0-9]+(?:[\.][0-9]+)*)(?:e[+-]?[0-9]+)?~u' => Token::T_NUMBER,
-        '~^(true|false)~iu' => Token::T_BOOL,
-        '~^null~iu' => Token::T_NULL,
-
-        '~^\\(~u' => Token::T_OPEN_PARENTHESIS,
-        '~^\\)~u' => Token::T_CLOSE_PARENTHESIS,
-        '~^\\[~u' => Token::T_OPEN_BRACKETS,
-        '~^\\]~u' => Token::T_CLOSE_BRACKETS,
-        '~^\\,~u' => Token::T_COMMA,
-        '~^\\s+~u' => Token::T_SPACE,
-        '~^//.*$~u' => Token::T_COMMENT,
-        '~^=(?!\=)~u' => Token::T_ASSIGNMENT,
-        '~^;~u' => Token::T_SEMICOLON,
-
-        '~^==~u' => Token::T_EQUALS,
-        '~^>(?!\=)~u' => Token::T_GREATER_THAN,
-        '~^<(?!\=)~u' => Token::T_LOWER_THAN,
-        '~^!=~u' => Token::T_NOT_EQUALS,
-        '~^>=~u' => Token::T_GREATER_EQUAL,
-        '~^<=~u' => Token::T_LOWER_EQUAL,
-        '~^\\+~u' => Token::T_PLUS,
-        '~^\\-~u' => Token::T_MINUS,
-        '~^\\*~u' => Token::T_MULTIPLY,
-        '~^\\/~u' => Token::T_DIVIDE,
-        '~^\\%~u' => Token::T_DIVIDE_MOD,
-        '~^\\^~u' => Token::T_POWER,
-        '~^\\|\\|~u' => Token::T_OR,
-        '~^&&~u' => Token::T_AND,
-        '~^!(?!\=)~u' => Token::T_NOT,
-    ];
-
     /** @var GeneratorsRepository */
     protected $generators;
 
@@ -114,7 +74,7 @@ class Evaluator
         $ast = null;
         if (is_string($value)) {
             $tokens = $this->expressionLexer->tokenize($value);
-            $ast =  $this->buildAST($tokens);
+            $ast = $this->buildAST($tokens);
         } elseif ($value instanceof TokensQueue) {
             $ast = $this->buildAST($value);
         } elseif ($value instanceof TokensStack) {
@@ -126,6 +86,9 @@ class Evaluator
             return Utils::wrapValueContainer($value);
         } elseif ($value instanceof BaseLiteral) {
             return $value;
+        } else {
+            var_dump($value);
+            throw new RuntimeError('Empty expression');
         }
 
         if ($ast->isEmpty()) {

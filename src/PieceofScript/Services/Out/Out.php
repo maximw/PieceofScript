@@ -268,9 +268,7 @@ class Out
         static::writeln('Response: ' . $response['status'], $verbosity);
         if (!empty($response['headers'])) {
             static::writeln('Headers:', $verbosity, 1);
-            foreach ($response['headers'] as $name => $value) {
-                static::writeln($name . ': ' . $value, $verbosity, 2);
-            }
+            static::writeRecursive($response['headers'], $verbosity, 2);
         }
         if (!empty($response['cookies'])) {
             static::writeln('Cookies:', $verbosity, 1);
@@ -290,7 +288,7 @@ class Out
         static::writeln('', $verbosity);
     }
 
-    protected static function writeln($text, int $verbosity, int $indent = 0)
+    protected static function writeln(string $text, int $verbosity, int $indent = 0)
     {
         $parts = explode("\n", $text);
         foreach ($parts as $part) {
@@ -298,9 +296,25 @@ class Out
         }
     }
 
-    protected static function write($text, int $verbosity, int $indent = 0)
+    protected static function write(string $text, int $verbosity, int $indent = 0)
     {
         static::$output->write(str_repeat(' ', $indent * self::INDENT) . $text, false, $verbosity);
+    }
+
+    protected static function writeRecursive($array, int $verbosity, int $indent = 0)
+    {
+        if (is_array($array)) {
+            foreach ($array as $key => $value) {
+                if (is_array($value)) {
+                    static::write($key . ': ', $verbosity, $indent);
+                    static::writeRecursive($value, $verbosity, $indent + 1);
+                } else {
+                    static::writeln($key . ': ' . $value, $verbosity, $indent);
+                }
+            }
+        } else {
+            static::writeln($array, $verbosity, $indent);
+        }
     }
 
     protected static function startFormatting($formatting, $verbosity)
